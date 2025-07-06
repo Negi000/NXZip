@@ -18,8 +18,11 @@ pub fn apply_spe_transform(data: &[u8]) -> Result<Vec<u8>> {
     // 1. XORマスク適用
     apply_xor_mask(&mut transformed);
     
-    // 2. ブロックシャッフル適用（小さいデータはスキップ）
-    if original_size >= 128 {
+    // 2. 構造保持パディング適用
+    apply_structure_padding(&mut transformed)?;
+    
+    // 3. ブロックシャッフル適用（十分大きなデータのみ）
+    if original_size >= 64 {
         let block_size = calculate_optimal_block_size(original_size);
         apply_block_shuffle(&mut transformed, block_size);
     }
@@ -30,17 +33,22 @@ pub fn apply_spe_transform(data: &[u8]) -> Result<Vec<u8>> {
 /// SPE逆変換を適用（元の構造に復元）
 pub fn reverse_spe_transform(data: &[u8]) -> Result<Vec<u8>> {
     let mut restored = data.to_vec();
-    let original_size = data.len(); // XORマスク適用前と後でサイズは変わらない
     
     // 逆順で変換を戻す
     
-    // 1. ブロックシャッフル逆変換（小さいデータはスキップ）
-    if original_size >= 128 {
+    // 1. パディング情報から元のサイズを取得
+    let original_size = get_original_size_from_padded(&restored)?;
+    
+    // 2. ブロックシャッフル逆変換（十分大きなデータのみ）
+    if original_size >= 64 {
         let block_size = calculate_optimal_block_size(original_size);
         reverse_block_shuffle(&mut restored, block_size);
     }
     
-    // 2. XORマスク除去
+    // 3. 構造保持パディング除去
+    remove_structure_padding(&mut restored)?;
+    
+    // 4. XORマスク除去
     remove_xor_mask(&mut restored);
     
     Ok(restored)
@@ -260,7 +268,6 @@ mod tests {
     }
     
     #[test]
-    #[ignore] // 現在の実装では構造パディングを使用していない
     fn test_structure_padding_reversible() {
         let original_data = b"Test data for padding verification".to_vec();
         let mut test_data = original_data.clone();

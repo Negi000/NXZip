@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
+use chrono::{DateTime, Utc};
 use crate::engine::CompressionAlgorithm;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -57,5 +58,10 @@ impl NxzMetadata {
     
     pub fn from_bytes(bytes: &[u8]) -> anyhow::Result<Self> {
         bincode::deserialize(bytes).map_err(Into::into)
+    }
+
+    pub fn created_at(&self) -> DateTime<Utc> {
+        DateTime::from_timestamp(self.created_at as i64, 0)
+            .unwrap_or_else(|| Utc::now())
     }
 }

@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 use tokio::fs;
 use crate::engine::CompressionAlgorithm;
+use crate::crypto::EncryptionAlgorithm;
 use crate::utils::metadata::NxzMetadata;
 
 /// NXZファイル形式のヘッダ構造
@@ -14,7 +15,7 @@ pub struct NxzHeader {
     pub version: u16,
     /// ヘッダサイズ
     pub header_size: u32,
-    /// 圧縮ブロックサイズ
+    /// ブロックサイズ
     pub block_size: u32,
     /// 元ファイルサイズ
     pub original_size: u64,
@@ -22,8 +23,10 @@ pub struct NxzHeader {
     pub compression_algorithm: u8,
     /// 暗号化フラグ
     pub encryption_flag: u8,
+    /// 暗号化アルゴリズム
+    pub encryption_algorithm: u8,
     /// 予約領域
-    pub reserved: [u8; 16],
+    pub reserved: [u8; 15],
     /// メタデータサイズ
     pub metadata_size: u32,
 }
@@ -37,12 +40,22 @@ impl NxzHeader {
         original_size: u64,
         compression_algorithm: CompressionAlgorithm,
         is_encrypted: bool,
+        encryption_algorithm: Option<EncryptionAlgorithm>,
         metadata_size: u32,
     ) -> Self {
         let compression_algo_byte = match compression_algorithm {
             CompressionAlgorithm::Zstd => 0,
             CompressionAlgorithm::Lzma2 => 1,
             CompressionAlgorithm::Auto => 2,
+        };
+        
+        let encryption_algo_byte = if let Some(algo) = encryption_algorithm {
+            match algo {
+                EncryptionAlgorithm::AesGcm => 0,
+                EncryptionAlgorithm::XChaCha20Poly1305 => 1,
+            }
+        } else {
+            0
         };
         
         Self {
@@ -53,7 +66,8 @@ impl NxzHeader {
             original_size,
             compression_algorithm: compression_algo_byte,
             encryption_flag: if is_encrypted { 1 } else { 0 },
-            reserved: [0; 16],
+            encryption_algorithm: encryption_algo_byte,
+            reserved: [0; 15],
             metadata_size,
         }
     }
@@ -69,6 +83,7 @@ impl NxzHeader {
         bytes.extend_from_slice(&self.original_size.to_le_bytes());
         bytes.push(self.compression_algorithm);
         bytes.push(self.encryption_flag);
+        bytes.push(self.encryption_algorithm);
         bytes.extend_from_slice(&self.reserved);
         bytes.extend_from_slice(&self.metadata_size.to_le_bytes());
         
@@ -97,7 +112,8 @@ impl NxzHeader {
         let original_size = u64::from_le_bytes(bytes[14..22].try_into()?);
         let compression_algorithm = bytes[22];
         let encryption_flag = bytes[23];
-        let reserved: [u8; 16] = bytes[24..40].try_into()?;
+        let encryption_algorithm = bytes[24];
+        let reserved: [u8; 15] = bytes[25..40].try_into()?;
         let metadata_size = u32::from_le_bytes(bytes[40..44].try_into()?);
         
         Ok(Self {
@@ -108,6 +124,7 @@ impl NxzHeader {
             original_size,
             compression_algorithm,
             encryption_flag,
+            encryption_algorithm,
             reserved,
             metadata_size,
         })
@@ -118,6 +135,18 @@ impl NxzHeader {
             0 => CompressionAlgorithm::Zstd,
             1 => CompressionAlgorithm::Lzma2,
             _ => CompressionAlgorithm::Auto,
+        }
+    }
+    
+    pub fn get_encryption_algorithm(&self) -> Option<EncryptionAlgorithm> {
+        if self.is_encrypted() {
+            match self.encryption_algorithm {
+                0 => Some(EncryptionAlgorithm::AesGcm),
+                1 => Some(EncryptionAlgorithm::XChaCha20Poly1305),
+                _ => Some(EncryptionAlgorithm::AesGcm), // デフォルト
+            }
+        } else {
+            None
         }
     }
     
@@ -139,6 +168,7 @@ impl NxzFile {
         original_size: u64,
         compression_algorithm: CompressionAlgorithm,
         is_encrypted: bool,
+        encryption_algorithm: Option<EncryptionAlgorithm>,
         compression_level: u8,
     ) -> Result<Self> {
         let metadata = NxzMetadata::new(
@@ -154,6 +184,7 @@ impl NxzFile {
             original_size,
             compression_algorithm,
             is_encrypted,
+            encryption_algorithm,
             metadata_bytes.len() as u32,
         );
         
@@ -165,29 +196,36 @@ impl NxzFile {
     }
     
     pub async fn write_to_file(&self, path: &str) -> Result<()> {
+        let file_data = self.to_bytes()?;
+        fs::write(path, file_data).await?;
+        Ok(())
+    }
+    
+    pub fn to_bytes(&self) -> Result<Vec<u8>> {
         let header_bytes = self.header.to_bytes()?;
         let metadata_bytes = self.metadata.to_bytes()?;
         
-        // ファイル構造:
-        // [ヘッダ] + [メタデータ] + [データ]
+        // ファイル構造: [ヘッダ] + [メタデータ] + [データ部]
         let mut file_data = Vec::new();
         file_data.extend_from_slice(&header_bytes);
         file_data.extend_from_slice(&metadata_bytes);
         file_data.extend_from_slice(&self.data);
         
-        fs::write(path, file_data).await?;
-        Ok(())
+        Ok(file_data)
     }
     
     pub async fn read_from_file(path: &str) -> Result<Self> {
         let file_data = fs::read(path).await?;
-        
+        Self::from_bytes(&file_data)
+    }
+    
+    pub fn from_bytes(file_data: &[u8]) -> Result<Self> {
         if file_data.len() < NxzHeader::HEADER_SIZE as usize {
             anyhow::bail!("ファイルサイズが小さすぎます");
         }
         
         // ヘッダ読み込み
-        let header = NxzHeader::from_bytes(&file_data)?;
+        let header = NxzHeader::from_bytes(file_data)?;
         
         // メタデータ読み込み
         let metadata_start = NxzHeader::HEADER_SIZE as usize;
@@ -214,11 +252,19 @@ impl NxzFile {
         self.header.is_encrypted()
     }
     
+    pub fn encryption_algorithm(&self) -> Option<EncryptionAlgorithm> {
+        self.header.get_encryption_algorithm()
+    }
+    
     pub fn compression_algorithm(&self) -> CompressionAlgorithm {
         self.header.get_compression_algorithm()
     }
     
     pub fn data(&self) -> &[u8] {
+        &self.data
+    }
+    
+    pub fn compressed_data(&self) -> &[u8] {
         &self.data
     }
     
@@ -228,6 +274,10 @@ impl NxzFile {
     
     pub fn metadata(&self) -> &NxzMetadata {
         &self.metadata
+    }
+    
+    pub fn version(&self) -> u16 {
+        self.header.version
     }
 }
 
@@ -244,6 +294,7 @@ mod tests {
             test_data.len() as u64,
             CompressionAlgorithm::Zstd,
             false,
+            None,
             6,
         ).unwrap();
         

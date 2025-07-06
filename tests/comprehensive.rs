@@ -1,7 +1,6 @@
 use std::process::Command;
-use tempfile::{tempdir, NamedTempFile};
+use tempfile::tempdir;
 use std::fs;
-use std::path::Path;
 
 /// テストヘルパー関数: NXZipバイナリを実行
 fn run_nxzip(args: &[&str]) -> std::process::Output {

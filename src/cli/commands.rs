@@ -536,7 +536,7 @@ pub async fn mt_compress_command(
     let stats = compressor.compress_file(input_path, Path::new(output)).await?;
     
     // ハッシュ値計算と結果表示
-    let mut hasher = FileHasher::new();
+    let hasher = FileHasher::new();
     let original_data = fs::read(input).await?;
     let original_hash = hasher.hash_data(&original_data)?;
     let compressed_hash = hasher.hash_file(output).await?;

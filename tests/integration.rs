@@ -1,5 +1,5 @@
 use std::process::Command;
-use tempfile::{tempdir, NamedTempFile};
+use tempfile::tempdir;
 use std::fs;
 
 #[test]

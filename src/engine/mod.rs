@@ -5,4 +5,4 @@ pub mod multithread;
 
 pub use compressor::{Compressor, CompressionAlgorithm};
 pub use decompressor::Decompressor;
-pub use multithread::{MultiThreadCompressor, MultiThreadConfig, CompressionStats};
+pub use multithread::{MultiThreadCompressor, MultiThreadConfig};

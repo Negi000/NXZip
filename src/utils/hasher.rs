@@ -1,6 +1,7 @@
 use anyhow::Result;
 use blake3::Hasher as Blake3Hasher;
 use sha2::{Sha256, Digest};
+use hex;
 
 pub struct FileHasher {
     algorithm: HashAlgorithm,
@@ -41,5 +42,17 @@ impl FileHasher {
     pub fn verify_hash(&self, data: &[u8], expected_hash: &[u8]) -> Result<bool> {
         let calculated_hash = self.calculate_hash(data)?;
         Ok(calculated_hash == expected_hash)
+    }
+    
+    /// データのハッシュ値を計算して16進数文字列で返す
+    pub fn hash_data(&self, data: &[u8]) -> Result<String> {
+        let hash = self.calculate_hash(data)?;
+        Ok(hex::encode(hash))
+    }
+    
+    /// ファイルのハッシュ値を計算して16進数文字列で返す
+    pub async fn hash_file(&self, file_path: &str) -> Result<String> {
+        let data = tokio::fs::read(file_path).await?;
+        self.hash_data(&data)
     }
 }

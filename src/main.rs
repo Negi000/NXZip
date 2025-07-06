@@ -7,7 +7,7 @@ mod crypto;
 mod utils;
 mod formats;
 
-use cli::commands::{compress_command, extract_command, info_command, sec_compress_command, sec_extract_command};
+use cli::commands::{compress_command, extract_command, info_command, sec_compress_command, sec_extract_command, mt_compress_command};
 
 #[derive(Parser)]
 #[command(name = "nxzip")]
@@ -49,6 +49,45 @@ enum Commands {
         /// 圧縮レベル (1-9)
         #[arg(long, default_value = "6")]
         level: u8,
+    },
+    
+    /// マルチスレッド高速圧縮（大容量ファイル向け）
+    MtCompress {
+        /// 入力ファイル
+        #[arg(short, long)]
+        input: String,
+        
+        /// 出力ファイル (.nxz)
+        #[arg(short, long)]
+        output: String,
+        
+        /// 暗号化を有効にする
+        #[arg(long)]
+        encrypt: bool,
+        
+        /// 暗号化パスワード
+        #[arg(long)]
+        password: Option<String>,
+        
+        /// 暗号化アルゴリズム (aes-gcm, xchacha20)
+        #[arg(long, default_value = "aes-gcm")]
+        encryption: String,
+        
+        /// 圧縮アルゴリズム (zstd, lzma2, auto)
+        #[arg(long, default_value = "auto")]
+        algorithm: String,
+        
+        /// 圧縮レベル (1-9)
+        #[arg(long, default_value = "6")]
+        level: u8,
+        
+        /// 並列スレッド数 (0=自動検出)
+        #[arg(long, default_value = "0")]
+        threads: usize,
+        
+        /// チャンクサイズ (MB)
+        #[arg(long, default_value = "4")]
+        chunk_size: usize,
     },
     
     /// セキュリティ強化型(.nxz.sec)でファイルを圧縮
@@ -141,6 +180,20 @@ async fn main() -> Result<()> {
             level,
         } => {
             compress_command(&input, &output, encrypt, password, &encryption, &algorithm, level).await?;
+        }
+        
+        Commands::MtCompress {
+            input,
+            output,
+            encrypt,
+            password,
+            encryption,
+            algorithm,
+            level,
+            threads,
+            chunk_size,
+        } => {
+            mt_compress_command(&input, &output, encrypt, password, &encryption, &algorithm, level, threads, chunk_size * 1024 * 1024).await?;
         }
         
         Commands::SecCompress {

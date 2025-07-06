@@ -40,14 +40,20 @@ indicatif = "0.17"
 anyhow = "1.0"
 thiserror = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
+num_cpus = "1.16"
 
 [dev-dependencies]
 tempfile = "3.8"
 criterion = "0.5"
+tokio-test = "0.4"
 
 [[bin]]
 name = "nxzip"
 path = "src/main.rs"
+
+[lib]
+name = "nxzip"
+path = "src/lib.rs"
 
 [profile.release]
 opt-level = 3

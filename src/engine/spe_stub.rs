@@ -15,17 +15,17 @@ pub fn apply_spe_transform(data: &[u8]) -> Result<Vec<u8>> {
     // 段階的変換のため元のサイズを記録
     let original_size = data.len();
     
-    // 1. XORマスク適用
-    apply_xor_mask(&mut transformed);
-    
-    // 2. 構造保持パディング適用
+    // 1. 構造保持パディング適用
     apply_structure_padding(&mut transformed)?;
     
-    // 3. ブロックシャッフル適用（十分大きなデータのみ）
+    // 2. ブロックシャッフル適用（十分大きなデータのみ）
     if original_size >= 64 {
         let block_size = calculate_optimal_block_size(original_size);
         apply_block_shuffle(&mut transformed, block_size);
     }
+    
+    // 3. XORマスク適用（最後に実行）
+    apply_xor_mask(&mut transformed);
     
     Ok(transformed)
 }
@@ -36,20 +36,25 @@ pub fn reverse_spe_transform(data: &[u8]) -> Result<Vec<u8>> {
     
     // 逆順で変換を戻す
     
-    // 1. パディング情報から元のサイズを取得
-    let original_size = get_original_size_from_padded(&restored)?;
+    // 1. XORマスク除去（最後に適用されたものを最初に除去）
+    remove_xor_mask(&mut restored);
     
-    // 2. ブロックシャッフル逆変換（十分大きなデータのみ）
-    if original_size >= 64 {
-        let block_size = calculate_optimal_block_size(original_size);
-        reverse_block_shuffle(&mut restored, block_size);
+    // 2. ブロックシャッフル逆変換（XORマスク除去後にパディング情報を読み取り）
+    // パディング情報から元のサイズを取得
+    let padded_len = restored.len();
+    if padded_len >= 8 {
+        let len_start = padded_len - 8;
+        let len_bytes: [u8; 8] = restored[len_start..].try_into()?;
+        let original_len = usize::from_le_bytes(len_bytes);
+        
+        if original_len >= 64 && original_len <= len_start {
+            let block_size = calculate_optimal_block_size(original_len);
+            reverse_block_shuffle(&mut restored, block_size);
+        }
     }
     
     // 3. 構造保持パディング除去
     remove_structure_padding(&mut restored)?;
-    
-    // 4. XORマスク除去
-    remove_xor_mask(&mut restored);
     
     Ok(restored)
 }
@@ -162,41 +167,27 @@ fn remove_xor_mask(data: &mut [u8]) {
     apply_xor_mask(data);
 }
 
-fn get_original_size_from_padded(data: &[u8]) -> Result<usize> {
-    if data.len() < 8 {
-        anyhow::bail!("データが小さすぎて元サイズを取得できません");
-    }
-    
-    // 末尾から長さ情報を読み取り
-    let len_start = data.len() - 8;
-    let len_bytes: [u8; 8] = data[len_start..].try_into()?;
-    let original_len = usize::from_le_bytes(len_bytes);
-    
-    if original_len > len_start {
-        anyhow::bail!("不正なパディング長さ情報: {} > {}", original_len, len_start);
-    }
-    
-    Ok(original_len)
-}
-
 fn apply_structure_padding(data: &mut Vec<u8>) -> Result<()> {
     // 圧縮効率を上げるための構造保持パディング
     let original_len = data.len();
     
-    // 長さ情報を末尾に追加
-    data.extend_from_slice(&original_len.to_le_bytes());
+    // アライメント調整 (16バイト境界) - 長さ情報8バイト分も考慮
+    let target_len = ((data.len() + 8 + 15) / 16) * 16; // 8バイトの長さ情報 + アライメント
     
-    // アライメント調整 (16バイト境界)
-    while data.len() % 16 != 0 {
+    // パディングを追加
+    while data.len() < target_len - 8 {
         data.push(0x00);
     }
+    
+    // 長さ情報を末尾に追加（必ず最後の8バイトに配置）
+    data.extend_from_slice(&original_len.to_le_bytes());
     
     Ok(())
 }
 
 fn remove_structure_padding(data: &mut Vec<u8>) -> Result<()> {
     if data.len() < 8 {
-        anyhow::bail!("データが小さすぎてパディング除去できません");
+        anyhow::bail!("データが小さすぎてパディング除去できません: データ長={}", data.len());
     }
     
     // 末尾から長さ情報を読み取り

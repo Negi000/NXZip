@@ -3,7 +3,7 @@ use std::path::Path;
 use tokio::fs;
 use indicatif::{ProgressBar, ProgressStyle};
 
-use crate::engine::{Compressor, Decompressor, CompressionAlgorithm};
+use crate::engine::{Compressor, Decompressor, CompressionAlgorithm, MultiThreadCompressor, MultiThreadConfig};
 use crate::crypto::{Encryptor, Decryptor, EncryptionAlgorithm};
 use crate::formats::nxz::NxzFile;
 use crate::formats::nxz_sec::{NxzSecFile, KdfType};
@@ -138,20 +138,22 @@ pub async fn extract_command(
         anyhow::bail!("入力ファイルが存在しません: {}", input);
     }
     
-    // 暗号化アルゴリズムの選択
-    let encryption_algorithm = match encryption_algo {
-        "aes-gcm" => EncryptionAlgorithm::AesGcm,
-        "xchacha20" => EncryptionAlgorithm::XChaCha20Poly1305,
-        _ => {
-            println!("⚠️  不明な暗号化アルゴリズム '{}', AES-GCMを使用します", encryption_algo);
-            EncryptionAlgorithm::AesGcm
-        }
-    };
-    
     // NXZファイル読み込みとプログレスバー設定
     let pb = ProgressBar::new_spinner();
     pb.set_message("NXZファイル解析中...");
     let nxz_file = NxzFile::read_from_file(input).await?;
+    
+    // ファイルから暗号化アルゴリズムを取得（ファイルに保存されている情報を使用）
+    let encryption_algorithm = if nxz_file.is_encrypted() {
+        nxz_file.encryption_algorithm().unwrap_or(EncryptionAlgorithm::AesGcm)
+    } else {
+        // コマンドライン引数をフォールバックとして使用
+        match encryption_algo {
+            "aes-gcm" => EncryptionAlgorithm::AesGcm,
+            "xchacha20" => EncryptionAlgorithm::XChaCha20Poly1305,
+            _ => EncryptionAlgorithm::AesGcm,
+        }
+    };
     
     // セキュリティ強化暗号化の復号 (必要な場合)
     pb.set_message("復号処理中...");
@@ -462,6 +464,98 @@ pub async fn sec_extract_command(
     } else {
         println!("✅ 整合性検証: 正常");
     }
+    
+    Ok(())
+}
+
+/// マルチスレッド圧縮コマンドの実行
+pub async fn mt_compress_command(
+    input: &str,
+    output: &str,
+    encrypt: bool,
+    password: Option<String>,
+    encryption_algo: &str,
+    compression_algo: &str,
+    level: u8,
+    threads: usize,
+    chunk_size: usize,
+) -> Result<()> {
+    println!("🚀 NXZipマルチスレッド圧縮を開始します...");
+    println!("入力: {}", input);
+    println!("出力: {}", output);
+    println!("スレッド数: {}", threads);
+    println!("チャンクサイズ: {} MB", chunk_size / (1024 * 1024));
+    
+    // 入力ファイルの検証
+    let input_path = Path::new(input);
+    if !input_path.exists() {
+        anyhow::bail!("入力ファイルが存在しません: {}", input);
+    }
+    
+    // 圧縮アルゴリズムの選択
+    let compression_algo = match compression_algo {
+        "zstd" => CompressionAlgorithm::Zstd,
+        "lzma2" => CompressionAlgorithm::Lzma2,
+        "auto" => CompressionAlgorithm::Auto,
+        _ => {
+            println!("⚠️  不明な圧縮アルゴリズム '{}', 自動選択を使用します", compression_algo);
+            CompressionAlgorithm::Auto
+        }
+    };
+    
+    // 暗号化アルゴリズムの選択
+    let encryption_algorithm = if encrypt {
+        Some(match encryption_algo {
+            "aes-gcm" => EncryptionAlgorithm::AesGcm,
+            "xchacha20" => EncryptionAlgorithm::XChaCha20Poly1305,
+            _ => {
+                println!("⚠️  不明な暗号化アルゴリズム '{}', AES-GCMを使用します", encryption_algo);
+                EncryptionAlgorithm::AesGcm
+            }
+        })
+    } else {
+        None
+    };
+    
+    // マルチスレッド圧縮設定
+    let config = MultiThreadConfig {
+        thread_count: threads,
+        chunk_size,
+        show_progress: true,
+    };
+    
+    // マルチスレッド圧縮器の作成
+    let mut compressor = MultiThreadCompressor::new(config, compression_algo, level);
+    
+    // 暗号化設定（必要な場合）
+    if let (Some(algo), Some(pass)) = (encryption_algorithm, password.as_ref()) {
+        compressor.set_encryption(algo, pass.clone());
+    }
+    
+    // マルチスレッド圧縮の実行
+    let stats = compressor.compress_file(input_path, Path::new(output)).await?;
+    
+    // ハッシュ値計算と結果表示
+    let mut hasher = FileHasher::new();
+    let original_data = fs::read(input).await?;
+    let original_hash = hasher.hash_data(&original_data)?;
+    let compressed_hash = hasher.hash_file(output).await?;
+    
+    println!();
+    println!("📊 マルチスレッド圧縮結果:");
+    println!("  元サイズ: {} bytes", stats.original_size);
+    println!("  圧縮後: {} bytes", stats.compressed_size);
+    println!("  圧縮率: {:.2}%", 100.0 - stats.compression_ratio);
+    println!("  アルゴリズム: {:?}", compression_algo);
+    println!("  スレッド数: {}", stats.thread_count);
+    println!("  処理チャンク数: {}", stats.chunks_processed);
+    println!("  暗号化: {}", if encryption_algorithm.is_some() { 
+        format!("{:?}", encryption_algorithm.unwrap()) 
+    } else { 
+        "なし".to_string() 
+    });
+    println!("  元ファイルハッシュ: {}", original_hash);
+    println!("  圧縮ファイルハッシュ: {}", compressed_hash);
     
     Ok(())
 }

@@ -12,10 +12,19 @@ NXZipは、**SPE (Structure-Preserving Encryption)** × **高効率可逆圧縮*
 
 ## 📦 ファイル形式
 
-| 拡張子 | 特徴 | 用途 |
-|--------|------|------|
-| `.nxz` | 標準圧縮（SPE + 圧縮） | 一般的な用途 |
-| `.nxz.sec` | セキュリティ強化版 | 機密データ保護 |
+| 拡張子 | 特徴 | 暗号化 | 用途 |
+|--------|------|--------|------|
+| `.nxz` | 標準圧縮（SPE + 圧縮 + オプション暗号化） | AES-GCM/XChaCha20 | 一般的な用途 |
+| `.nxz.sec` | セキュリティ強化版（多層暗号化） | AES-GCM/XChaCha20 + PBKDF2/Argon2 | 機密データ保護 |
+
+### 実装済み機能
+
+- ✅ **SPE変換**: XOR・ブロックシャッフル・構造パディング
+- ✅ **圧縮アルゴリズム**: Zstd/LZMA2/自動選択
+- ✅ **暗号化**: AES-256-GCM/XChaCha20-Poly1305
+- ✅ **鍵導出**: PBKDF2-SHA256/Argon2id
+- ✅ **CLIコマンド**: compress/extract/info/sec-compress/sec-extract
+- ✅ **動的情報表示**: 暗号化アルゴリズム自動検出
 
 ## 🛠 インストール
 
@@ -38,41 +47,47 @@ cargo build --release
 
 ```bash
 # ファイル圧縮
-nxzip compress -i input.txt -o output.nxz
+nxzip compress --input input.txt --output output.nxz
 
-# ディレクトリ圧縮
-nxzip compress -i ./assets -o assets.nxz
-```
+# 暗号化付き圧縮
+nxzip compress --input secret.txt --output secret.nxz --encrypt --password "your_password"
 
-### セキュリティ強化版
-
-```bash
-# パスワード付き暗号化圧縮
-nxzip compress -i secret.doc -o secret.nxz.sec --encrypt --password "your_password"
-
-# 復号展開
-nxzip extract -i secret.nxz.sec --password "your_password"
-```
-
-### 圧縮オプション
-
-```bash
 # アルゴリズム指定
-nxzip compress -i data.bin -o data.nxz --algorithm zstd --level 9
-
-# 利用可能なアルゴリズム: zstd, lzma2, auto (デフォルト)
-# 圧縮レベル: 1-9 (デフォルト: 6)
+nxzip compress --input data.bin --output data.nxz --algorithm zstd --level 9
 ```
 
-### 展開
+### セキュリティ強化版（.nxz.sec）
+
+```bash
+# セキュリティ強化型圧縮
+nxzip sec-compress --input secret.doc --output secret.nxz.sec --password "secure_password"
+
+# 高級暗号化オプション
+nxzip sec-compress --input data.bin --output data.nxz.sec --password "secure_key" --encryption xchacha20 --kdf argon2
+
+# セキュリティ強化型展開
+nxzip sec-extract --input secret.nxz.sec --output decrypted.doc --password "secure_password"
+```
+
+### 展開とファイル情報
 
 ```bash
 # 通常展開
-nxzip extract -i archive.nxz -o extracted/
+nxzip extract --input archive.nxz --output extracted_file.txt
 
-# ファイル情報表示
-nxzip info -i archive.nxz
+# パスワード付き展開
+nxzip extract --input encrypted.nxz --output decrypted.txt --password "your_password"
+
+# ファイル情報表示（暗号化アルゴリズム自動検出）
+nxzip info --input archive.nxz
 ```
+
+### 利用可能なオプション
+
+- **圧縮アルゴリズム**: `zstd` (高速), `lzma2` (高圧縮), `auto` (自動選択)
+- **暗号化アルゴリズム**: `aes-gcm` (AES-256-GCM), `xchacha20` (XChaCha20-Poly1305)
+- **鍵導出方式**: `pbkdf2` (PBKDF2-SHA256), `argon2` (Argon2id)
+- **圧縮レベル**: 1-9 (1=高速, 9=高圧縮)
 
 ## 🏗 アーキテクチャ
 
@@ -105,15 +120,27 @@ nxzip info -i archive.nxz
 ## 🧪 テスト
 
 ```bash
-# ユニットテスト
+# ライブラリのユニットテスト
+cargo test --lib
+
+# 統合テスト（実際のCLI動作）
+cargo test --test comprehensive
+
+# 全テスト実行
 cargo test
 
-# 統合テスト
-cargo test --test integration
-
-# ベンチマーク (開発中)
+# ベンチマーク実行
 cargo bench
 ```
+
+### テスト対象
+
+- ✅ **SPE変換**: XOR・ブロックシャッフル・構造パディングの可逆性
+- ✅ **圧縮アルゴリズム**: Zstd/LZMA2の圧縮・展開
+- ✅ **暗号化**: AES-GCM/XChaCha20の暗号化・復号化
+- ✅ **ファイル形式**: .nxz/.nxz.sec形式の読み書き
+- ✅ **CLI動作**: compress/extract/info/sec-compress/sec-extract
+- ✅ **エラーハンドリング**: 不正パスワード・ファイル不存在の処理
 
 ## 📊 パフォーマンス
 
@@ -134,9 +161,17 @@ cargo bench
 
 ### 多層暗号化
 
-- AES-256-GCM: 業界標準の強固な暗号化
-- XChaCha20-Poly1305: 高速かつ安全
-- PBKDF2: パスワードベース鍵導出
+- **AES-256-GCM**: 業界標準の強固な暗号化（認証付き）
+- **XChaCha20-Poly1305**: 高速かつ安全な次世代暗号化
+- **PBKDF2-SHA256**: 標準的なパスワードベース鍵導出
+- **Argon2id**: 最新の耐ブルートフォース鍵導出
+
+### .nxz.sec セキュリティ強化型
+
+- **二重暗号化**: 内部NXZ + 外部セキュリティ層
+- **ソルト・ナンス**: ランダム生成による辞書攻撃対策
+- **動的KDF**: PBKDF2/Argon2選択可能
+- **暗号化パラメータ保存**: アルゴリズム情報を安全に格納
 
 ## 🎮 ゲーム開発者向け
 
@@ -183,11 +218,30 @@ cargo doc --open
 
 ## 🔮 ロードマップ
 
-- [ ] GUI実装 (Electron + Tauri)
+### 実装済み ✅
+- [x] SPE (Structure-Preserving Encryption) 変換
+- [x] 高効率圧縮 (Zstd/LZMA2/自動選択)
+- [x] 多層暗号化 (AES-GCM/XChaCha20-Poly1305)
+- [x] 鍵導出方式 (PBKDF2/Argon2)
+- [x] .nxz/.nxz.sec ファイル形式
+- [x] CLI インターフェース (全コマンド)
+- [x] 動的情報表示 (暗号化アルゴリズム検出)
+- [x] 包括的テストスイート
+- [x] ベンチマークシステム
+- [x] ライブラリ API
+
+### 開発中 🚧
+- [ ] GUI実装 (Tauri + React)
+- [ ] マルチスレッド圧縮 (大容量ファイル対応)
+- [ ] ストリーミング圧縮 (メモリ効率化)
+- [ ] バッチ処理 (複数ファイル・ディレクトリ)
+
+### 計画中 📋
 - [ ] PQ暗号対応 (耐量子暗号)
 - [ ] 仮想マウント機能
-- [ ] 複数ファイル統合
-- [ ] クラウド連携
+- [ ] クラウド連携 (AWS S3/Azure Blob)
+- [ ] プラグインシステム
+- [ ] Unity/Unreal Engine プラグイン
 
 ## 📞 サポート
 

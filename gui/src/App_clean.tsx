@@ -360,6 +360,7 @@ const App: React.FC = () => {
 
     try {
       const inputPath = selectedFiles[0]
+      const fileName = inputPath.split('\\').pop()?.split('.')[0] || 'extracted'
       const outputPath = `${inputPath.replace(/\.[^/.]+$/, '')}_extracted.txt`
 
       const extractResult = await extractFile(inputPath, outputPath, extractOptions.password)

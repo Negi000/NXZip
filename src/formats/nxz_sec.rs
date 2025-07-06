@@ -2,7 +2,6 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use tokio::fs;
 use crate::crypto::EncryptionAlgorithm;
-use crate::engine::CompressionAlgorithm;
 use super::nxz::NxzFile;
 
 /// .nxz.secファイル形式の暗号化パラメータ

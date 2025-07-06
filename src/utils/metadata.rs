@@ -64,4 +64,8 @@ impl NxzMetadata {
         DateTime::from_timestamp(self.created_at as i64, 0)
             .unwrap_or_else(|| Utc::now())
     }
+    
+    pub fn filename(&self) -> Option<String> {
+        self.original_filename.clone()
+    }
 }

@@ -15,9 +15,16 @@ import {
   Cpu,
   HardDrive,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  History
 } from 'lucide-react'
 import { useNXZip } from './hooks/useNXZip'
+import { useDragAndDrop } from './hooks/useDragAndDrop'
+import { useSettings } from './hooks/useSettings'
+import { useRecentFiles } from './hooks/useRecentFiles'
+import { FileInfoPanel } from './components/FileInfoPanel'
+import { RecentFilesPanel } from './components/RecentFilesPanel'
+import { ProgressPanel, useProgress } from './components/ProgressPanel'
 
 // Particle component for background animation
 const Particle: React.FC<{ delay: number }> = ({ delay }) => {
@@ -99,47 +106,81 @@ const Tab: React.FC<TabProps> = ({ title, icon, isActive, onClick }) => (
 
 // Compression Tab Component
 const CompressionTab: React.FC = () => {
-  const { compressFile, selectMultipleFiles, isLoading, error } = useNXZip()
+  const { compressFile, selectMultipleFiles, isLoading, error, getFileInfo } = useNXZip()
+  const { settings } = useSettings()
+  const { addRecentFile } = useRecentFiles()
+  const { progressState, startProgress, updateProgress, finishProgress, cancelProgress } = useProgress()
+  
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
-  const [progress, setProgress] = useState(0)
-  const [isCompressing, setIsCompressing] = useState(false)
   const [compressionOptions, setCompressionOptions] = useState({
-    algorithm: 'auto',
-    level: 6,
-    encryption: '',
+    algorithm: settings.compression.defaultAlgorithm,
+    level: settings.compression.defaultLevel,
+    encryption: settings.compression.defaultEncryption,
     password: '',
-    kdf: 'argon2',
+    kdf: settings.compression.defaultKdf,
     outputPath: ''
   })
   const [result, setResult] = useState<any>(null)
+  const [fileInfo, setFileInfo] = useState<any>(null)
+  const [loadingFileInfo, setLoadingFileInfo] = useState(false)
+
+  // Update defaults when settings change
+  useEffect(() => {
+    setCompressionOptions(prev => ({
+      ...prev,
+      algorithm: settings.compression.defaultAlgorithm,
+      level: settings.compression.defaultLevel,
+      encryption: settings.compression.defaultEncryption,
+      kdf: settings.compression.defaultKdf,
+    }))
+  }, [settings])
+
+  // Drag and drop functionality
+  const { isDragging, dragProps } = useDragAndDrop({
+    onFilesDropped: (files) => {
+      setSelectedFiles(files)
+      if (files.length > 0) {
+        loadFileInfo(files[0])
+      }
+    },
+    multiple: true,
+  })
+
+  const loadFileInfo = async (filePath: string) => {
+    if (!filePath) return
+    setLoadingFileInfo(true)
+    try {
+      const info = await getFileInfo(filePath)
+      setFileInfo(info)
+    } catch (err) {
+      console.warn('Failed to load file info:', err)
+    } finally {
+      setLoadingFileInfo(false)
+    }
+  }
 
   const handleFileSelect = async () => {
     const files = await selectMultipleFiles()
     if (files) {
       setSelectedFiles(files)
+      if (files.length > 0) {
+        loadFileInfo(files[0])
+      }
     }
   }
 
   const handleCompress = async () => {
     if (selectedFiles.length === 0) return
 
-    setIsCompressing(true)
-    setProgress(0)
+    startProgress('ファイルを圧縮中...', {
+      canCancel: true,
+      canPause: false,
+      stage: '初期化中...'
+    })
     setResult(null)
 
     try {
-      // プログレスのシミュレーション
-      const progressInterval = setInterval(() => {
-        setProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval)
-            return 90
-          }
-          return prev + Math.random() * 15
-        })
-      }, 200)
-
-      const inputPath = selectedFiles[0] // 最初のファイルを使用
+      const inputPath = selectedFiles[0]
       const outputPath = compressionOptions.outputPath || `${inputPath}.nxz`
 
       const options = {
@@ -150,16 +191,38 @@ const CompressionTab: React.FC = () => {
         kdf: compressionOptions.kdf,
       }
 
+      // Simulate progress updates
+      updateProgress(20, { stage: 'ファイル読み込み中...' })
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      updateProgress(40, { stage: '圧縮処理中...' })
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      updateProgress(70, { stage: '暗号化中...' })
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      updateProgress(90, { stage: 'ファイル保存中...' })
       const compressResult = await compressFile(inputPath, outputPath, options)
       
-      clearInterval(progressInterval)
-      setProgress(100)
+      updateProgress(100, { stage: '完了' })
       setResult(compressResult)
+
+      // Add to recent files
+      if (compressResult?.success) {
+        addRecentFile({
+          fileName: inputPath.split('\\').pop() || inputPath.split('/').pop() || 'unknown',
+          filePath: outputPath,
+          operation: 'compress',
+          success: true,
+          fileSize: compressResult.originalSize,
+          compressionRatio: compressResult.compressionRatio,
+        })
+      }
+      
+      finishProgress()
     } catch (err) {
       console.error('Compression error:', err)
-    } finally {
-      setIsCompressing(false)
-      setTimeout(() => setProgress(0), 2000)
+      cancelProgress()
     }
   }
 
@@ -204,11 +267,23 @@ const CompressionTab: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Enhanced File Selection Area */}
+      {/* Progress Panel */}
+      <ProgressPanel
+        progressState={progressState}
+        onCancel={cancelProgress}
+        className={progressState.isActive ? '' : 'hidden'}
+      />
+
+      {/* Enhanced File Selection Area with Drag & Drop */}
       <motion.div
-        className="relative p-12 border-3 border-dashed rounded-2xl transition-all duration-300 border-blue-400/50 glass cursor-pointer hover:border-blue-400 hover:bg-blue-500/10 hover:shadow-lg hover:shadow-blue-500/20"
+        {...dragProps}
+        className={`relative p-12 border-3 border-dashed rounded-2xl transition-all duration-300 cursor-pointer ${
+          isDragging 
+            ? 'border-blue-400 bg-blue-500/20 shadow-lg shadow-blue-500/30 scale-105' 
+            : 'border-blue-400/50 glass hover:border-blue-400 hover:bg-blue-500/10 hover:shadow-lg hover:shadow-blue-500/20'
+        }`}
         onClick={handleFileSelect}
-        whileHover={{ scale: 1.02 }}
+        whileHover={{ scale: isDragging ? 1.05 : 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
         <div className="text-center">
@@ -222,7 +297,9 @@ const CompressionTab: React.FC = () => {
           >
             <Upload size={36} className="text-blue-300" />
           </motion.div>
-          <h3 className="text-2xl font-bold mb-2 text-blue-200">ファイルをここにドロップ</h3>
+          <h3 className="text-2xl font-bold mb-2 text-blue-200">
+            {isDragging ? 'ファイルをドロップ' : 'ファイルをここにドロップ'}
+          </h3>
           <p className="text-blue-200/80 mb-4 text-lg">または、クリックしてファイルを選択</p>
           <motion.div 
             className="btn-primary inline-flex items-center bg-blue-600 hover:bg-blue-500 border-blue-400"
@@ -232,31 +309,43 @@ const CompressionTab: React.FC = () => {
             ファイル選択
           </motion.div>
         </div>
-        {/* Visual Enhancement Lines */}
-        <div className="absolute inset-4 border border-blue-400/20 rounded-xl pointer-events-none"></div>
-        <div className="absolute inset-8 border border-blue-400/10 rounded-lg pointer-events-none"></div>
+        {/* Enhanced Visual Feedback */}
+        <div className={`absolute inset-4 border rounded-xl pointer-events-none transition-all ${
+          isDragging ? 'border-blue-400/60' : 'border-blue-400/20'
+        }`}></div>
+        <div className={`absolute inset-8 border rounded-lg pointer-events-none transition-all ${
+          isDragging ? 'border-blue-400/40' : 'border-blue-400/10'
+        }`}></div>
       </motion.div>
 
-      {/* Selected Files */}
+      {/* Selected Files with File Info */}
       {selectedFiles.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="glass rounded-xl p-4"
-        >
-          <h4 className="font-semibold mb-3 flex items-center">
-            <FileText size={18} className="mr-2" />
-            選択されたファイル ({selectedFiles.length})
-          </h4>
-          <div className="space-y-2 max-h-32 overflow-y-auto">
-            {selectedFiles.map((file, index) => (
-              <div key={index} className="flex items-center justify-between bg-white/10 rounded-lg p-2">
-                <span className="truncate">{file.split('\\').pop() || file.split('/').pop()}</span>
-                <span className="text-sm text-white/70">{file}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="glass rounded-xl p-4"
+          >
+            <h4 className="font-semibold mb-3 flex items-center">
+              <FileText size={18} className="mr-2" />
+              選択されたファイル ({selectedFiles.length})
+            </h4>
+            <div className="space-y-2 max-h-32 overflow-y-auto">
+              {selectedFiles.map((file, index) => (
+                <div key={index} className="flex items-center justify-between bg-white/10 rounded-lg p-2">
+                  <span className="truncate">{file.split('\\').pop() || file.split('/').pop()}</span>
+                  <span className="text-sm text-white/70">{file}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* File Info Panel */}
+          <FileInfoPanel 
+            fileInfo={fileInfo} 
+            isLoading={loadingFileInfo}
+          />
+        </div>
       )}
 
       {/* Compression Options */}
@@ -340,39 +429,17 @@ const CompressionTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Progress Bar */}
-      {isCompressing && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-xl p-4"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-medium">圧縮中...</span>
-            <span className="text-sm">{Math.round(progress)}%</span>
-          </div>
-          <div className="progress-bar">
-            <motion.div
-              className="progress-fill"
-              style={{ width: `${progress}%` }}
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-            />
-          </div>
-        </motion.div>
-      )}
-
       {/* Action Buttons */}
       <div className="flex gap-4">
         <motion.button
           className="btn-primary flex-1 flex items-center justify-center gap-2"
           onClick={handleCompress}
-          disabled={selectedFiles.length === 0 || isCompressing || isLoading}
-          whileHover={{ scale: selectedFiles.length > 0 && !isCompressing ? 1.02 : 1 }}
-          whileTap={{ scale: selectedFiles.length > 0 && !isCompressing ? 0.98 : 1 }}
+          disabled={selectedFiles.length === 0 || progressState.isActive || isLoading}
+          whileHover={{ scale: selectedFiles.length > 0 && !progressState.isActive ? 1.02 : 1 }}
+          whileTap={{ scale: selectedFiles.length > 0 && !progressState.isActive ? 0.98 : 1 }}
         >
           <Archive size={18} />
-          {isCompressing ? '圧縮中...' : '圧縮開始'}
+          {progressState.isActive ? '圧縮中...' : '圧縮開始'}
         </motion.button>
         <motion.button
           className="btn-secondary flex items-center gap-2"
@@ -389,11 +456,44 @@ const CompressionTab: React.FC = () => {
 
 // Extraction Tab Component
 const ExtractionTab: React.FC = () => {
-  const { extractFile, selectFile, isLoading, error } = useNXZip()
+  const { extractFile, selectFile, isLoading, error, getFileInfo } = useNXZip()
+  const { addRecentFile } = useRecentFiles()
+  const { progressState, startProgress, updateProgress, finishProgress, cancelProgress } = useProgress()
+  
   const [selectedFile, setSelectedFile] = useState<string>('')
   const [outputPath, setOutputPath] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [result, setResult] = useState<any>(null)
+  const [fileInfo, setFileInfo] = useState<any>(null)
+  const [loadingFileInfo, setLoadingFileInfo] = useState(false)
+
+  // Drag and drop functionality for extraction
+  const { isDragging, dragProps } = useDragAndDrop({
+    onFilesDropped: (files) => {
+      if (files.length > 0) {
+        const file = files[0]
+        setSelectedFile(file)
+        const baseName = file.replace(/\.(nxz\.sec|nxz)$/, '')
+        setOutputPath(`${baseName}_extracted`)
+        loadFileInfo(file)
+      }
+    },
+    acceptedExtensions: ['nxz', 'sec'],
+    multiple: false,
+  })
+
+  const loadFileInfo = async (filePath: string) => {
+    if (!filePath) return
+    setLoadingFileInfo(true)
+    try {
+      const info = await getFileInfo(filePath)
+      setFileInfo(info)
+    } catch (err) {
+      console.warn('Failed to load file info:', err)
+    } finally {
+      setLoadingFileInfo(false)
+    }
+  }
 
   const handleFileSelect = async () => {
     const file = await selectFile([
@@ -406,15 +506,52 @@ const ExtractionTab: React.FC = () => {
       // 出力パスを自動生成
       const baseName = file.replace(/\.(nxz\.sec|nxz)$/, '')
       setOutputPath(`${baseName}_extracted`)
+      loadFileInfo(file)
     }
   }
 
   const handleExtract = async () => {
     if (!selectedFile) return
 
+    startProgress('ファイルを展開中...', {
+      canCancel: true,
+      canPause: false,
+      stage: '初期化中...'
+    })
     setResult(null)
-    const extractResult = await extractFile(selectedFile, outputPath, password || undefined)
-    setResult(extractResult)
+
+    try {
+      updateProgress(20, { stage: 'アーカイブファイル読み込み中...' })
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      updateProgress(40, { stage: '復号化中...' })
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      updateProgress(70, { stage: '展開処理中...' })
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      updateProgress(90, { stage: 'ファイル保存中...' })
+      const extractResult = await extractFile(selectedFile, outputPath, password || undefined)
+      
+      updateProgress(100, { stage: '完了' })
+      setResult(extractResult)
+
+      // Add to recent files
+      if (extractResult?.success) {
+        addRecentFile({
+          fileName: selectedFile.split('\\').pop() || selectedFile.split('/').pop() || 'unknown',
+          filePath: outputPath,
+          operation: 'extract',
+          success: true,
+          fileSize: extractResult.extractedSize,
+        })
+      }
+
+      finishProgress()
+    } catch (err) {
+      console.error('Extraction error:', err)
+      cancelProgress()
+    }
   }
 
   return (
@@ -456,11 +593,23 @@ const ExtractionTab: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Enhanced File Selection for Extraction */}
+      {/* Progress Panel */}
+      <ProgressPanel
+        progressState={progressState}
+        onCancel={cancelProgress}
+        className={progressState.isActive ? '' : 'hidden'}
+      />
+
+      {/* Enhanced File Selection for Extraction with Drag & Drop */}
       <motion.div 
-        className="glass rounded-xl p-12 text-center cursor-pointer hover:bg-green-500/10 transition-all border-2 border-green-400/30 hover:border-green-400 hover:shadow-lg hover:shadow-green-500/20"
+        {...dragProps}
+        className={`glass rounded-xl p-12 text-center cursor-pointer transition-all border-2 ${
+          isDragging
+            ? 'border-green-400 bg-green-500/20 shadow-lg shadow-green-500/30 scale-105'
+            : 'border-green-400/30 hover:bg-green-500/10 hover:border-green-400 hover:shadow-lg hover:shadow-green-500/20'
+        }`}
         onClick={handleFileSelect}
-        whileHover={{ scale: 1.02 }}
+        whileHover={{ scale: isDragging ? 1.05 : 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
         <motion.div
@@ -473,7 +622,9 @@ const ExtractionTab: React.FC = () => {
         >
           <Download size={36} className="text-green-300" />
         </motion.div>
-        <h3 className="text-2xl font-bold mb-2 text-green-200">アーカイブを選択</h3>
+        <h3 className="text-2xl font-bold mb-2 text-green-200">
+          {isDragging ? 'アーカイブをドロップ' : 'アーカイブを選択'}
+        </h3>
         <p className="text-green-200/80 mb-4 text-lg">.nxz または .nxz.sec ファイルをドロップまたは選択</p>
         {selectedFile ? (
           <motion.div 
@@ -493,6 +644,14 @@ const ExtractionTab: React.FC = () => {
           {selectedFile ? 'ファイル変更' : 'アーカイブ選択'}
         </motion.div>
       </motion.div>
+
+      {/* File Info Panel for selected archive */}
+      {selectedFile && (
+        <FileInfoPanel 
+          fileInfo={fileInfo} 
+          isLoading={loadingFileInfo}
+        />
+      )}
 
       {/* Extraction Settings */}
       <div className="glass rounded-xl p-6">
@@ -528,12 +687,12 @@ const ExtractionTab: React.FC = () => {
       <motion.button 
         className="btn-primary w-full flex items-center justify-center gap-2"
         onClick={handleExtract}
-        disabled={!selectedFile || !outputPath || isLoading}
-        whileHover={{ scale: selectedFile && outputPath && !isLoading ? 1.02 : 1 }}
-        whileTap={{ scale: selectedFile && outputPath && !isLoading ? 0.98 : 1 }}
+        disabled={!selectedFile || !outputPath || progressState.isActive || isLoading}
+        whileHover={{ scale: selectedFile && outputPath && !progressState.isActive && !isLoading ? 1.02 : 1 }}
+        whileTap={{ scale: selectedFile && outputPath && !progressState.isActive && !isLoading ? 0.98 : 1 }}
       >
         <Download size={18} />
-        {isLoading ? '展開中...' : '展開開始'}
+        {progressState.isActive ? '展開中...' : '展開開始'}
       </motion.button>
     </motion.div>
   )
@@ -541,6 +700,14 @@ const ExtractionTab: React.FC = () => {
 
 // Settings Tab Component
 const SettingsTab: React.FC = () => {
+  const { 
+    settings, 
+    updateCompressionSettings, 
+    updatePerformanceSettings, 
+    updateSecuritySettings, 
+    resetSettings 
+  } = useSettings()
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -549,26 +716,80 @@ const SettingsTab: React.FC = () => {
     >
       <div className="glass rounded-xl p-6">
         <h4 className="font-semibold mb-4 flex items-center">
+          <Archive size={18} className="mr-2" />
+          圧縮設定
+        </h4>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">デフォルト圧縮アルゴリズム</label>
+            <select 
+              className="input-field"
+              value={settings.compression.defaultAlgorithm}
+              onChange={(e) => updateCompressionSettings({ defaultAlgorithm: e.target.value })}
+            >
+              <option value="auto">Auto (自動選択)</option>
+              <option value="zstd">Zstd (高速)</option>
+              <option value="lzma2">LZMA2 (高圧縮)</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">デフォルト圧縮レベル</label>
+            <select 
+              className="input-field"
+              value={settings.compression.defaultLevel}
+              onChange={(e) => updateCompressionSettings({ defaultLevel: parseInt(e.target.value) })}
+            >
+              <option value={1}>1 (最高速)</option>
+              <option value={3}>3 (高速)</option>
+              <option value={6}>6 (バランス)</option>
+              <option value={9}>9 (最高圧縮)</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">デフォルト暗号化</label>
+            <select 
+              className="input-field"
+              value={settings.compression.defaultEncryption}
+              onChange={(e) => updateCompressionSettings({ defaultEncryption: e.target.value })}
+            >
+              <option value="">なし</option>
+              <option value="aes-gcm">AES-256-GCM</option>
+              <option value="xchacha20">XChaCha20-Poly1305</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="glass rounded-xl p-6">
+        <h4 className="font-semibold mb-4 flex items-center">
           <Cpu size={18} className="mr-2" />
           パフォーマンス設定
         </h4>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">スレッド数</label>
-            <select className="input-field">
-              <option>自動 (推奨)</option>
-              <option>1 スレッド</option>
-              <option>2 スレッド</option>
-              <option>4 スレッド</option>
-              <option>8 スレッド</option>
+            <select 
+              className="input-field"
+              value={settings.performance.threads}
+              onChange={(e) => updatePerformanceSettings({ threads: e.target.value })}
+            >
+              <option value="auto">自動 (推奨)</option>
+              <option value="1">1 スレッド</option>
+              <option value="2">2 スレッド</option>
+              <option value="4">4 スレッド</option>
+              <option value="8">8 スレッド</option>
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">メモリ使用量</label>
-            <select className="input-field">
-              <option>中程度 (推奨)</option>
-              <option>低</option>
-              <option>高</option>
+            <select 
+              className="input-field"
+              value={settings.performance.memoryUsage}
+              onChange={(e) => updatePerformanceSettings({ memoryUsage: e.target.value })}
+            >
+              <option value="low">低</option>
+              <option value="medium">中程度 (推奨)</option>
+              <option value="high">高</option>
             </select>
           </div>
         </div>
@@ -582,19 +803,40 @@ const SettingsTab: React.FC = () => {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">デフォルト暗号化</label>
-            <select className="input-field">
-              <option>AES-256-GCM</option>
-              <option>XChaCha20-Poly1305</option>
+            <select 
+              className="input-field"
+              value={settings.security.defaultEncryption}
+              onChange={(e) => updateSecuritySettings({ defaultEncryption: e.target.value })}
+            >
+              <option value="aes-gcm">AES-256-GCM</option>
+              <option value="xchacha20">XChaCha20-Poly1305</option>
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">鍵導出方式</label>
-            <select className="input-field">
-              <option>Argon2id (推奨)</option>
-              <option>PBKDF2-SHA256</option>
+            <select 
+              className="input-field"
+              value={settings.security.defaultKdf}
+              onChange={(e) => updateSecuritySettings({ defaultKdf: e.target.value })}
+            >
+              <option value="argon2">Argon2id (推奨)</option>
+              <option value="pbkdf2">PBKDF2-SHA256</option>
             </select>
           </div>
         </div>
+      </div>
+
+      {/* Reset Button */}
+      <div className="flex justify-end">
+        <motion.button
+          onClick={resetSettings}
+          className="btn-secondary flex items-center gap-2 text-red-300 hover:text-red-200 border-red-400/30"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <AlertCircle size={16} />
+          設定をリセット
+        </motion.button>
       </div>
     </motion.div>
   )
@@ -706,10 +948,12 @@ const AboutTab: React.FC = () => {
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('compress')
   const [particles] = useState(() => Array.from({ length: 20 }, (_, i) => i))
+  const { recentFiles, removeRecentFile, clearRecentFiles } = useRecentFiles()
 
   const tabs = [
     { id: 'compress', title: '圧縮', icon: <Archive size={20} /> },
     { id: 'extract', title: '展開', icon: <Download size={20} /> },
+    { id: 'recent', title: '履歴', icon: <History size={20} /> },
     { id: 'settings', title: '設定', icon: <Settings size={20} /> },
     { id: 'about', title: '情報', icon: <Info size={20} /> },
   ]
@@ -720,6 +964,8 @@ const App: React.FC = () => {
         return <CompressionTab />
       case 'extract':
         return <ExtractionTab />
+      case 'recent':
+        return <RecentTab />
       case 'settings':
         return <SettingsTab />
       case 'about':
@@ -727,6 +973,27 @@ const App: React.FC = () => {
       default:
         return <CompressionTab />
     }
+  }
+
+  // Recent Tab Component
+  const RecentTab: React.FC = () => {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        <RecentFilesPanel
+          recentFiles={recentFiles}
+          onRemoveFile={removeRecentFile}
+          onClearAll={clearRecentFiles}
+          onFileSelect={(filePath) => {
+            console.log('Selected file:', filePath)
+            // Here you could switch to the appropriate tab and pre-fill the file
+          }}
+        />
+      </motion.div>
+    )
   }
 
   return (

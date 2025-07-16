@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nxzip"
+version = "1.0.0"
+description = "Next-generation eXtreme Universal Zip Archive System"
+authors = [
+    {name = "GitHub Copilot & User", email = "nxzip@example.com"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Archiving :: Compression",
+    "Topic :: System :: Archiving :: Packaging",
+    "Topic :: Utilities",
+]
+keywords = ["compression", "archive", "zip", "encryption", "nexus", "spe"]
+
+dependencies = [
+    "cryptography>=3.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov",
+    "black",
+    "isort",
+    "mypy",
+]
+
+[project.urls]
+Homepage = "https://github.com/negi000/nxzip"
+Repository = "https://github.com/negi000/nxzip"
+Issues = "https://github.com/negi000/nxzip/issues"
+Documentation = "https://github.com/negi000/nxzip/wiki"
+
+[project.scripts]
+nxzip = "nxzip.cli.main:main"
+
+[tool.setuptools]
+packages = ["nxzip", "nxzip.core", "nxzip.cli", "nxzip.crypto", "nxzip.utils", "nxzip.formats"]
+
+[tool.setuptools.package-data]
+nxzip = ["py.typed"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

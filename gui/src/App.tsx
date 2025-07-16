@@ -67,8 +67,8 @@ const Tab: React.FC<TabProps> = ({ title, icon, isActive, onClick }) => (
   <motion.button
     className={`relative flex items-center gap-3 px-8 py-4 rounded-xl transition-all duration-300 font-semibold ${
       isActive 
-        ? 'glass neon-glow bg-blue-500/20 border-2 border-blue-400/50 text-blue-100 shadow-lg shadow-blue-500/20' 
-        : 'glass-dark hover:bg-white/10 text-white/80 hover:text-white border-2 border-transparent hover:border-white/20'
+        ? 'glass neon-glow bg-emerald-500/20 border-2 border-emerald-400/50 text-emerald-100 shadow-lg shadow-emerald-500/20' 
+        : 'glass-dark hover:bg-white/10 text-white/80 hover:text-white border-2 border-transparent hover:border-emerald-400/20'
     }`}
     onClick={onClick}
     whileHover={{ scale: 1.05, y: -2 }}
@@ -78,7 +78,7 @@ const Tab: React.FC<TabProps> = ({ title, icon, isActive, onClick }) => (
     <motion.span 
       className="text-xl"
       animate={{ 
-        color: isActive ? '#93c5fd' : '#ffffff',
+        color: isActive ? '#6ee7b7' : '#ffffff',
         scale: isActive ? 1.1 : 1 
       }}
     >
@@ -87,7 +87,7 @@ const Tab: React.FC<TabProps> = ({ title, icon, isActive, onClick }) => (
     <span className="font-medium">{title}</span>
     {isActive && (
       <motion.div
-        className="absolute bottom-0 left-1/2 w-8 h-1 bg-blue-400 rounded-full"
+        className="absolute bottom-0 left-1/2 w-8 h-1 bg-emerald-400 rounded-full"
         layoutId="activeIndicator"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -206,26 +206,26 @@ const CompressionTab: React.FC = () => {
 
       {/* Enhanced File Selection Area */}
       <motion.div
-        className="relative p-12 border-3 border-dashed rounded-2xl transition-all duration-300 border-blue-400/50 glass cursor-pointer hover:border-blue-400 hover:bg-blue-500/10 hover:shadow-lg hover:shadow-blue-500/20"
+        className="relative p-12 border-3 border-dashed rounded-2xl transition-all duration-300 border-emerald-400/50 glass cursor-pointer hover:border-emerald-400 hover:bg-emerald-500/10 hover:shadow-lg hover:shadow-emerald-500/20"
         onClick={handleFileSelect}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
         <div className="text-center">
           <motion.div
-            className="floating mx-auto mb-4 w-24 h-24 flex items-center justify-center glass rounded-full bg-blue-500/20 border-2 border-blue-400/30"
+            className="floating mx-auto mb-4 w-24 h-24 flex items-center justify-center glass rounded-full bg-emerald-500/20 border-2 border-emerald-400/30"
             whileHover={{ scale: 1.1, rotate: 5 }}
             animate={{ 
-              boxShadow: ["0 0 20px rgba(59, 130, 246, 0.3)", "0 0 30px rgba(59, 130, 246, 0.5)", "0 0 20px rgba(59, 130, 246, 0.3)"] 
+              boxShadow: ["0 0 20px rgba(16, 185, 129, 0.3)", "0 0 30px rgba(16, 185, 129, 0.5)", "0 0 20px rgba(16, 185, 129, 0.3)"] 
             }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <Upload size={36} className="text-blue-300" />
+            <Upload size={36} className="text-emerald-300" />
           </motion.div>
-          <h3 className="text-2xl font-bold mb-2 text-blue-200">ファイルをここにドロップ</h3>
-          <p className="text-blue-200/80 mb-4 text-lg">または、クリックしてファイルを選択</p>
+          <h3 className="text-2xl font-bold mb-2 text-emerald-200">ファイルをここにドロップ</h3>
+          <p className="text-emerald-200/80 mb-4 text-lg">または、クリックしてファイルを選択</p>
           <motion.div 
-            className="btn-primary inline-flex items-center bg-blue-600 hover:bg-blue-500 border-blue-400"
+            className="btn-primary inline-flex items-center bg-emerald-600 hover:bg-emerald-500 border-emerald-400"
             whileHover={{ scale: 1.05 }}
           >
             <FolderOpen size={20} className="mr-2" />
@@ -233,8 +233,8 @@ const CompressionTab: React.FC = () => {
           </motion.div>
         </div>
         {/* Visual Enhancement Lines */}
-        <div className="absolute inset-4 border border-blue-400/20 rounded-xl pointer-events-none"></div>
-        <div className="absolute inset-8 border border-blue-400/10 rounded-lg pointer-events-none"></div>
+        <div className="absolute inset-4 border border-emerald-400/20 rounded-xl pointer-events-none"></div>
+        <div className="absolute inset-8 border border-emerald-400/10 rounded-lg pointer-events-none"></div>
       </motion.div>
 
       {/* Selected Files */}
@@ -458,35 +458,35 @@ const ExtractionTab: React.FC = () => {
 
       {/* Enhanced File Selection for Extraction */}
       <motion.div 
-        className="glass rounded-xl p-12 text-center cursor-pointer hover:bg-green-500/10 transition-all border-2 border-green-400/30 hover:border-green-400 hover:shadow-lg hover:shadow-green-500/20"
+        className="glass rounded-xl p-12 text-center cursor-pointer hover:bg-emerald-500/10 transition-all border-2 border-emerald-400/30 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-500/20"
         onClick={handleFileSelect}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
         <motion.div
-          className="floating mx-auto mb-4 w-24 h-24 flex items-center justify-center glass rounded-full bg-green-500/20 border-2 border-green-400/30"
+          className="floating mx-auto mb-4 w-24 h-24 flex items-center justify-center glass rounded-full bg-emerald-500/20 border-2 border-emerald-400/30"
           whileHover={{ scale: 1.1, rotate: -5 }}
           animate={{ 
-            boxShadow: ["0 0 20px rgba(34, 197, 94, 0.3)", "0 0 30px rgba(34, 197, 94, 0.5)", "0 0 20px rgba(34, 197, 94, 0.3)"] 
+            boxShadow: ["0 0 20px rgba(16, 185, 129, 0.3)", "0 0 30px rgba(16, 185, 129, 0.5)", "0 0 20px rgba(16, 185, 129, 0.3)"] 
           }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          <Download size={36} className="text-green-300" />
+          <Download size={36} className="text-emerald-300" />
         </motion.div>
-        <h3 className="text-2xl font-bold mb-2 text-green-200">アーカイブを選択</h3>
-        <p className="text-green-200/80 mb-4 text-lg">.nxz または .nxz.sec ファイルをドロップまたは選択</p>
+        <h3 className="text-2xl font-bold mb-2 text-emerald-200">アーカイブを選択</h3>
+        <p className="text-emerald-200/80 mb-4 text-lg">.nxz または .nxz.sec ファイルをドロップまたは選択</p>
         {selectedFile ? (
           <motion.div 
-            className="glass rounded-lg p-4 mb-4 bg-green-500/20 border border-green-400/30"
+            className="glass rounded-lg p-4 mb-4 bg-emerald-500/20 border border-emerald-400/30"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <span className="text-sm text-green-200 font-semibold">選択済み: </span>
-            <span className="text-sm text-green-100">{selectedFile.split('\\').pop() || selectedFile.split('/').pop()}</span>
+            <span className="text-sm text-emerald-200 font-semibold">選択済み: </span>
+            <span className="text-sm text-emerald-100">{selectedFile.split('\\').pop() || selectedFile.split('/').pop()}</span>
           </motion.div>
         ) : null}
         <motion.div 
-          className="btn-primary inline-flex items-center bg-green-600 hover:bg-green-500 border-green-400"
+          className="btn-primary inline-flex items-center bg-emerald-600 hover:bg-emerald-500 border-emerald-400"
           whileHover={{ scale: 1.05 }}
         >
           <FolderOpen size={20} className="mr-2" />
@@ -608,27 +608,27 @@ const AboutTab: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      <div className="glass rounded-xl p-8 text-center border border-blue-400/30">
+      <div className="glass rounded-xl p-8 text-center border border-emerald-400/30">
         <motion.div
-          className="floating mx-auto mb-6 w-28 h-28 flex items-center justify-center glass rounded-full neon-glow bg-blue-500/20 border-2 border-blue-400/50"
+          className="floating mx-auto mb-6 w-28 h-28 flex items-center justify-center glass rounded-full neon-glow bg-emerald-500/20 border-2 border-emerald-400/50"
           whileHover={{ scale: 1.1, rotate: 360 }}
           transition={{ duration: 0.8 }}
         >
           <Star size={48} className="gradient-text" />
         </motion.div>
         <h2 className="text-4xl font-bold mb-3 gradient-text">NXZip</h2>
-        <p className="text-2xl text-blue-200 mb-4 font-semibold">次世代統合アーカイブシステム</p>
-        <p className="text-blue-300 font-medium text-lg">Version 1.0.0</p>
+        <p className="text-2xl text-emerald-200 mb-4 font-semibold">次世代統合アーカイブシステム</p>
+        <p className="text-emerald-300 font-medium text-lg">Version 1.0.0</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <motion.div 
-          className="card text-center border border-blue-400/30 hover:border-blue-400/60 transition-all"
+          className="card text-center border border-emerald-400/30 hover:border-emerald-400/60 transition-all"
           whileHover={{ scale: 1.05, y: -5 }}
         >
-          <Archive size={40} className="mx-auto mb-4 text-blue-300" />
-          <h4 className="font-bold mb-3 text-blue-100 text-lg">SPE暗号化</h4>
-          <p className="text-blue-200 font-medium">構造保持型暗号化技術</p>
+          <Archive size={40} className="mx-auto mb-4 text-emerald-300" />
+          <h4 className="font-bold mb-3 text-emerald-100 text-lg">SPE暗号化</h4>
+          <p className="text-emerald-200 font-medium">構造保持型暗号化技術</p>
         </motion.div>
         <motion.div 
           className="card text-center border border-yellow-400/30 hover:border-yellow-400/60 transition-all"
@@ -639,62 +639,62 @@ const AboutTab: React.FC = () => {
           <p className="text-yellow-200 font-medium">LZMA2/Zstd最適化</p>
         </motion.div>
         <motion.div 
-          className="card text-center border border-green-400/30 hover:border-green-400/60 transition-all"
+          className="card text-center border border-emerald-400/30 hover:border-emerald-400/60 transition-all"
           whileHover={{ scale: 1.05, y: -5 }}
         >
-          <Shield size={40} className="mx-auto mb-4 text-green-300" />
-          <h4 className="font-bold mb-3 text-green-100 text-lg">多層セキュリティ</h4>
-          <p className="text-green-200 font-medium">AES-GCM/XChaCha20</p>
+          <Shield size={40} className="mx-auto mb-4 text-emerald-300" />
+          <h4 className="font-bold mb-3 text-emerald-100 text-lg">多層セキュリティ</h4>
+          <p className="text-emerald-200 font-medium">AES-GCM/XChaCha20</p>
         </motion.div>
       </div>
 
-      <div className="glass rounded-xl p-6 border border-purple-400/30">
-        <h4 className="font-bold mb-6 flex items-center text-purple-100 text-xl">
-          <HardDrive size={24} className="mr-3 text-purple-300" />
+      <div className="glass rounded-xl p-6 border border-emerald-400/30">
+        <h4 className="font-bold mb-6 flex items-center text-emerald-100 text-xl">
+          <HardDrive size={24} className="mr-3 text-emerald-300" />
           システム情報
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-base">
           <div className="space-y-3">
             <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-              <span className="text-purple-200 font-semibold">Rust バージョン:</span>
-              <span className="text-purple-100 font-medium">1.70.0+</span>
+              <span className="text-emerald-200 font-semibold">Rust バージョン:</span>
+              <span className="text-emerald-100 font-medium">1.70.0+</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-              <span className="text-purple-200 font-semibold">GUI フレームワーク:</span>
-              <span className="text-purple-100 font-medium">Tauri + React</span>
+              <span className="text-emerald-200 font-semibold">GUI フレームワーク:</span>
+              <span className="text-emerald-100 font-medium">Tauri + React</span>
             </div>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-              <span className="text-purple-200 font-semibold">圧縮エンジン:</span>
-              <span className="text-purple-100 font-medium">Custom NXZ</span>
+              <span className="text-emerald-200 font-semibold">圧縮エンジン:</span>
+              <span className="text-emerald-100 font-medium">Custom NXZ</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-              <span className="text-purple-200 font-semibold">暗号化:</span>
-              <span className="text-purple-100 font-medium">AES-256, XChaCha20</span>
+              <span className="text-emerald-200 font-semibold">暗号化:</span>
+              <span className="text-emerald-100 font-medium">AES-256, XChaCha20</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Additional Info Section */}
-      <div className="glass rounded-xl p-6 border border-indigo-400/30">
-        <h4 className="font-bold mb-4 flex items-center text-indigo-100 text-xl">
-          <Info size={24} className="mr-3 text-indigo-300" />
+      <div className="glass rounded-xl p-6 border border-emerald-400/30">
+        <h4 className="font-bold mb-4 flex items-center text-emerald-100 text-xl">
+          <Info size={24} className="mr-3 text-emerald-300" />
           開発情報
         </h4>
         <div className="space-y-3 text-base">
           <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-            <span className="text-indigo-200 font-semibold">開発言語:</span>
-            <span className="text-indigo-100 font-medium">Rust + TypeScript</span>
+            <span className="text-emerald-200 font-semibold">開発言語:</span>
+            <span className="text-emerald-100 font-medium">Rust + TypeScript</span>
           </div>
           <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-            <span className="text-indigo-200 font-semibold">ライセンス:</span>
-            <span className="text-indigo-100 font-medium">MIT License</span>
+            <span className="text-emerald-200 font-semibold">ライセンス:</span>
+            <span className="text-emerald-100 font-medium">MIT License</span>
           </div>
           <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-            <span className="text-indigo-200 font-semibold">最終更新:</span>
-            <span className="text-indigo-100 font-medium">2024年12月</span>
+            <span className="text-emerald-200 font-semibold">最終更新:</span>
+            <span className="text-emerald-100 font-medium">2024年12月</span>
           </div>
         </div>
       </div>
@@ -753,9 +753,9 @@ const App: React.FC = () => {
               className="text-5xl md:text-7xl font-bold gradient-text mb-3 relative z-10"
               animate={{ 
                 textShadow: [
-                  "0 0 20px rgba(59, 130, 246, 0.5)",
-                  "0 0 40px rgba(59, 130, 246, 0.7)",
-                  "0 0 20px rgba(59, 130, 246, 0.5)"
+                  "0 0 20px rgba(16, 185, 129, 0.5)",
+                  "0 0 40px rgba(16, 185, 129, 0.7)",
+                  "0 0 20px rgba(16, 185, 129, 0.5)"
                 ]
               }}
               transition={{ duration: 3, repeat: Infinity }}
@@ -763,7 +763,7 @@ const App: React.FC = () => {
               NXZip
             </motion.h1>
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-lg blur-2xl opacity-30 -z-10"
+              className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 rounded-lg blur-2xl opacity-30 -z-10"
               animate={{ 
                 scale: [1, 1.1, 1],
                 opacity: [0.3, 0.5, 0.3]
@@ -772,7 +772,7 @@ const App: React.FC = () => {
             />
           </motion.div>
           <motion.p 
-            className="text-xl md:text-2xl text-blue-200 font-semibold"
+            className="text-xl md:text-2xl text-emerald-200 font-semibold"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
@@ -789,7 +789,7 @@ const App: React.FC = () => {
           className="flex justify-center mb-10"
         >
           <motion.div 
-            className="glass rounded-3xl p-3 flex gap-3 border border-blue-400/30 shadow-2xl shadow-blue-500/20"
+            className="glass rounded-3xl p-3 flex gap-3 border border-emerald-400/30 shadow-2xl shadow-emerald-500/20"
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 300 }}
           >

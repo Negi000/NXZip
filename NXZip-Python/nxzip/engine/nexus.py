@@ -1,662 +1,568 @@
 #!/usr/bin/env python3
 """
-🚀 NXZip NEXUS - Next-Generation eXtreme Ultra Zip Engine
-次世代極限圧縮システム - 全フォーマット制覇版
+🚀 NXZip NEXUS Engine - High-Performance Compression System
+高性能圧縮システム - 安定版
 
-🏆 Achievement: 世界最高クラス99.98%圧縮率達成
-🌟 Revolutionary Features:
-- 📝 テキスト: 99.98% 圧縮率 (vs 7Zip: +0.4% 改善)
-- 🖼️ 画像: 99.84% 圧縮率 (vs 7Zip: +0.3% 改善)  
-- 🎵 音声: 99.77% 圧縮率 (vs 7Zip: +0.3% 改善)
-- 🎬 動画: メタデータ最適化で既存超越
-- 📄 文書: PDF/Office完全対応
-- 🔧 実行ファイル: PE/ELF セクション特化圧縮
-- 💾 アーカイブ: 二重圧縮対策
+🎯 Performance Goals:
+- 🚀 圧縮速度: 100+ MB/s (高速処理)
+- 💎 圧縮率: 90%+ (高圧縮率)
+- ⚡ 展開速度: 200+ MB/s (高速展開)
+- 🔐 完全可逆性: 100% (完璧なデータ整合性)
 
-🎯 Supported Formats: 30+ major file formats
-📊 Performance: 11.37 MB/s processing speed
-🌍 Unicode: 完全日本語対応 (UTF-8/Shift-JIS/CP932)
-⚡ Reversibility: 100% lossless guarantee
+🏆 NEXUS Core Features:
+- 🔥 Blazing Fast Processing (高速処理)
+- 💨 Instant Method Selection (瞬間選択)
+- 🚀 Optimized Parallel Processing (最適化並列処理)
+- ⚡ Lightning Standard Methods (高速標準手法)
+- 🌪️ Tornado Speed Optimization (竜巻速度最適化)
 
-Copyright (c) 2025 NXZip Project
-Licensed under MIT License
+Copyright (c) 2025 NXZip NEXUS Engine
+Licensed under MIT License - 安定版
 """
 
 import os
 import sys
 import struct
-import hashlib
 import time
-import re
-import zlib
-import heapq
-import pickle
-import bz2
-import lzma
-import mimetypes
-from typing import List, Tuple, Dict, Any, Optional, Union
-from collections import defaultdict, Counter
+import json
 import math
+import lzma
+import zlib
+import bz2
+from typing import List, Tuple, Dict, Any, Optional
+from collections import Counter
+import threading
+from concurrent.futures import ThreadPoolExecutor
+import hashlib
 
-class NEXUSFormatDetector:
-    """🔍 NEXUS Universal Format Detection Engine"""
+
+class NEXUSEngine:
+    """🚀 NEXUS Engine - 高性能圧縮エンジン（安定版）"""
     
     def __init__(self):
-        # ファイル形式別マジックナンバー
-        self.magic_signatures = {
-            # 画像フォーマット
-            b'\x89PNG\r\n\x1a\n': 'PNG',
-            b'\xff\xd8\xff': 'JPEG',
-            b'GIF87a': 'GIF87',
-            b'GIF89a': 'GIF89',
-            b'BM': 'BMP',
-            b'II*\x00': 'TIFF_LE',
-            b'MM\x00*': 'TIFF_BE',
-            b'RIFF': 'WEBP_CANDIDATE',
-            
-            # 音楽フォーマット
-            b'ID3': 'MP3_ID3',
-            b'\xff\xfb': 'MP3_MPEG',
-            b'\xff\xf3': 'MP3_MPEG',
-            b'\xff\xf2': 'MP3_MPEG',
-            b'RIFF': 'WAV_CANDIDATE',
-            b'fLaC': 'FLAC',
-            b'OggS': 'OGG',
-            
-            # 動画フォーマット
-            b'\x00\x00\x00\x14ftypmp4': 'MP4',
-            b'\x00\x00\x00\x18ftypmp4': 'MP4',
-            b'RIFF': 'AVI_CANDIDATE',
-            b'\x1a\x45\xdf\xa3': 'MKV',
-            
-            # 文書フォーマット
-            b'%PDF': 'PDF',
-            b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1': 'MS_OFFICE',
-            b'PK\x03\x04': 'ZIP_BASED',
-            
-            # アーカイブ
-            b'Rar!\x1a\x07\x00': 'RAR4',
-            b'Rar!\x1a\x07\x01\x00': 'RAR5',
-            b'7z\xbc\xaf\x27\x1c': '7ZIP',
-            b'ustar': 'TAR',
-            
-            # 実行ファイル
-            b'MZ': 'PE_EXE',
-            b'\x7fELF': 'ELF',
-            b'\xcf\xfa\xed\xfe': 'MACH_O',
-        }
-    
-    def detect_format(self, data: bytes, filename: str = "") -> str:
-        """高精度フォーマット検出"""
-        if not data:
-            return "EMPTY"
+        self.version = "NEXUS Engine v8.0"
+        self.max_threads = min(32, os.cpu_count() or 1)  # 最大並列数
         
-        # 1. マジックナンバーベース検出
-        for signature, format_type in self.magic_signatures.items():
-            if data.startswith(signature):
-                # 詳細検証
-                if format_type == 'WEBP_CANDIDATE':
-                    if b'WEBP' in data[:12]:
-                        return 'WEBP'
-                    elif b'AVI ' in data[:12]:
-                        return 'AVI'
-                    elif b'WAVE' in data[:12]:
-                        return 'WAV'
-                elif format_type == 'ZIP_BASED':
-                    return self._detect_zip_based(data, filename)
-                else:
-                    return format_type
-        
-        # 2. 拡張子ベース検出
-        if filename:
-            ext = os.path.splitext(filename.lower())[1]
-            ext_mapping = {
-                '.txt': 'TEXT', '.log': 'TEXT', '.csv': 'TEXT',
-                '.json': 'JSON', '.xml': 'XML', '.html': 'HTML',
-                '.jpg': 'JPEG', '.jpeg': 'JPEG', '.png': 'PNG',
-                '.gif': 'GIF', '.bmp': 'BMP', '.tiff': 'TIFF',
-                '.mp3': 'MP3', '.wav': 'WAV', '.flac': 'FLAC',
-                '.mp4': 'MP4', '.avi': 'AVI', '.mkv': 'MKV',
-                '.pdf': 'PDF', '.doc': 'DOC', '.xls': 'XLS',
-                '.zip': 'ZIP', '.rar': 'RAR', '.7z': '7ZIP',
-                '.exe': 'EXE', '.dll': 'DLL', '.so': 'SO',
-            }
-            if ext in ext_mapping:
-                return ext_mapping[ext]
-        
-        # 3. コンテンツ解析ベース検出
-        return self._detect_by_content(data)
-    
-    def _detect_zip_based(self, data: bytes, filename: str) -> str:
-        """ZIP系フォーマット詳細検出"""
-        if filename:
-            ext = os.path.splitext(filename.lower())[1]
-            if ext in ['.docx', '.xlsx', '.pptx']:
-                return 'MS_OFFICE_XML'
-            elif ext in ['.odt', '.ods', '.odp']:
-                return 'OPEN_OFFICE'
-            elif ext in ['.jar', '.war', '.ear']:
-                return 'JAVA_ARCHIVE'
-        return 'ZIP'
-    
-    def _detect_by_content(self, data: bytes) -> str:
-        """コンテンツ解析による検出"""
-        try:
-            # テキスト系検出
-            text = data.decode('utf-8')
-            if text.strip().startswith('{') and text.strip().endswith('}'):
-                return 'JSON'
-            elif text.strip().startswith('<') and text.strip().endswith('>'):
-                return 'XML'
-            elif re.match(r'^[\x20-\x7E\s\t\n\r]*$', text[:1000]):
-                return 'TEXT'
-        except:
-            pass
-        
-        # バイナリパターン解析
-        entropy = self._calculate_entropy(data[:1024])
-        if entropy < 3.0:
-            return 'LOW_ENTROPY_BINARY'
-        elif entropy > 7.5:
-            return 'HIGH_ENTROPY_BINARY'
-        else:
-            return 'MIXED_BINARY'
-    
-    def _calculate_entropy(self, data: bytes) -> float:
-        """エントロピー計算"""
-        if not data:
-            return 0.0
-        
-        counts = Counter(data)
-        total = len(data)
-        entropy = 0.0
-        
-        for count in counts.values():
-            p = count / total
-            entropy -= p * math.log2(p)
-        
-        return entropy
-
-
-class NEXUSFormatCompressor:
-    """🎯 NEXUS Format-Specific Ultra Compression Engine"""
-    
-    def __init__(self):
-        self.detector = NEXUSFormatDetector()
-    
-    def _safe_encode_text(self, text: str) -> bytes:
-        """安全なテキストエンコーディング"""
-        try:
-            return text.encode('utf-8')
-        except:
-            return text.encode('utf-8', errors='ignore')
-    
-    def _safe_decode_bytes(self, data: bytes) -> str:
-        """安全なバイトデコーディング"""
-        try:
-            return data.decode('utf-8')
-        except:
-            try:
-                return data.decode('shift-jis')
-            except:
-                try:
-                    return data.decode('cp932')
-                except:
-                    return data.decode('utf-8', errors='ignore')
-    
-    def compress_text_based(self, data: bytes, format_type: str) -> bytes:
-        """テキスト系フォーマット専用圧縮"""
-        try:
-            text = self._safe_decode_bytes(data)
-        except:
-            return self._compress_binary_fallback(data)
-        
-        if format_type == 'JSON':
-            return self._compress_json_nexus(text)
-        elif format_type == 'XML':
-            return self._compress_xml_nexus(text)
-        elif format_type == 'HTML':
-            return self._compress_html_nexus(text)
-        else:
-            return self._compress_text_nexus(text)
-    
-    def _compress_text_nexus(self, text: str) -> bytes:
-        """NEXUS テキスト圧縮"""
-        # 拡張日本語パターン辞書
-        patterns = {
-            'です': b'\x01', 'ます': b'\x02', 'ありがとう': b'\x03',
-            'こんにちは': b'\x04', 'よろしく': b'\x05', 'お願いします': b'\x06',
-            'テスト': b'\x07', 'データ': b'\x08', 'として': b'\x09',
-            'します': b'\x0A', 'される': b'\x0B', '作成': b'\x0C',
-            '確認': b'\x0D', '処理': b'\x0E', '圧縮': b'\x0F',
-            'the ': b'\x10', 'and ': b'\x11', 'that ': b'\x12',
-            'have ': b'\x13', 'for ': b'\x14', 'not ': b'\x15',
-            'with ': b'\x16', 'you ': b'\x17', 'this ': b'\x18',
-            'but ': b'\x19', 'ing ': b'\x20', 'tion ': b'\x21',
-            '。': b'\x30', '、': b'\x31', 'を': b'\x32',
-            'に': b'\x33', 'の': b'\x34', 'は': b'\x35',
-            'が': b'\x36', 'で': b'\x37', 'と': b'\x38', 'も': b'\x39',
-        }
-        
-        compressed = text
-        replacement_map = {}
-        
-        for pattern, replacement in patterns.items():
-            if pattern in compressed:
-                replacement_str = replacement.decode('latin-1')
-                compressed = compressed.replace(pattern, replacement_str)
-                replacement_map[replacement] = pattern
-        
-        metadata = pickle.dumps(replacement_map)
-        header = b'NXTU' + struct.pack('<I', len(metadata))
-        
-        compressed_bytes = self._safe_encode_text(compressed)
-        result = header + metadata + compressed_bytes
-        
-        return bz2.compress(result, compresslevel=9)
-    
-    def _compress_json_nexus(self, text: str) -> bytes:
-        """NEXUS JSON圧縮"""
-        json_patterns = {
-            '"id"': b'\x01', '"name"': b'\x02', '"type"': b'\x03',
-            '"value"': b'\x04', '"data"': b'\x05', '"status"': b'\x06',
-            '"result"': b'\x07', '"error"': b'\x08', '"message"': b'\x09',
-            '"timestamp"': b'\x0A', 'true': b'\x10', 'false': b'\x11', 'null': b'\x12',
-        }
-        
-        compressed = text
-        replacement_map = {}
-        
-        for pattern, replacement in json_patterns.items():
-            if pattern in compressed:
-                replacement_str = replacement.decode('latin-1')
-                compressed = compressed.replace(pattern, replacement_str)
-                replacement_map[replacement] = pattern
-        
-        metadata = pickle.dumps(replacement_map)
-        header = b'NXJS' + struct.pack('<I', len(metadata))
-        
-        compressed_bytes = self._safe_encode_text(compressed)
-        result = header + metadata + compressed_bytes
-        
-        return bz2.compress(result, compresslevel=9)
-    
-    def _compress_xml_nexus(self, text: str) -> bytes:
-        """NEXUS XML圧縮"""
-        xml_patterns = {
-            '<?xml': b'\x01', '<!DOCTYPE': b'\x02', '</': b'\x03',
-            '/>': b'\x04', 'xmlns': b'\x05', 'version': b'\x06', 'encoding': b'\x07',
-        }
-        
-        compressed = text
-        replacement_map = {}
-        
-        for pattern, replacement in xml_patterns.items():
-            if pattern in compressed:
-                replacement_str = replacement.decode('latin-1')
-                compressed = compressed.replace(pattern, replacement_str)
-                replacement_map[replacement] = pattern
-        
-        metadata = pickle.dumps(replacement_map)
-        header = b'NXML' + struct.pack('<I', len(metadata))
-        
-        compressed_bytes = self._safe_encode_text(compressed)
-        result = header + metadata + compressed_bytes
-        
-        return lzma.compress(result, preset=9)
-    
-    def _compress_html_nexus(self, text: str) -> bytes:
-        """NEXUS HTML圧縮"""
-        html_patterns = {
-            '<!DOCTYPE html>': b'\x01', '<html>': b'\x02', '</html>': b'\x03',
-            '<head>': b'\x04', '</head>': b'\x05', '<body>': b'\x06',
-            '</body>': b'\x07', '<div>': b'\x08', '</div>': b'\x09',
-        }
-        
-        compressed = text
-        replacement_map = {}
-        
-        for pattern, replacement in html_patterns.items():
-            if pattern in compressed:
-                replacement_str = replacement.decode('latin-1')
-                compressed = compressed.replace(pattern, replacement_str)
-                replacement_map[replacement] = pattern
-        
-        metadata = pickle.dumps(replacement_map)
-        header = b'NHTM' + struct.pack('<I', len(metadata))
-        
-        compressed_bytes = self._safe_encode_text(compressed)
-        result = header + metadata + compressed_bytes
-        
-        return bz2.compress(result, compresslevel=9)
-    
-    def compress_image_based(self, data: bytes, format_type: str) -> bytes:
-        """画像フォーマット専用圧縮"""
-        if format_type in ['JPEG', 'PNG', 'WEBP']:
-            return self._compress_image_differential_nexus(data, format_type)
-        else:
-            return self._compress_image_raw_nexus(data, format_type)
-    
-    def _compress_image_differential_nexus(self, data: bytes, format_type: str) -> bytes:
-        """NEXUS 圧縮済み画像の差分圧縮"""
-        if len(data) > 1000:
-            differences = []
-            prev_byte = data[0]
-            differences.append(prev_byte)
-            
-            for i in range(1, min(len(data), 10000)):
-                diff = (data[i] - prev_byte) % 256
-                differences.append(diff)
-                prev_byte = data[i]
-            
-            remaining = data[10000:] if len(data) > 10000 else b''
-            diff_data = bytes(differences) + remaining
-            header = b'NIMG' + struct.pack('<I', len(differences))
-            
-            return lzma.compress(header + diff_data, preset=9)
-        
-        return lzma.compress(data, preset=9)
-    
-    def _compress_image_raw_nexus(self, data: bytes, format_type: str) -> bytes:
-        """NEXUS 非圧縮画像の強力圧縮"""
-        return lzma.compress(data, preset=9)
-    
-    def compress_audio_based(self, data: bytes, format_type: str) -> bytes:
-        """音声フォーマット専用圧縮"""
-        if data.startswith(b'RIFF'):
-            header = data[:44] if len(data) > 44 else data[:len(data)//2]
-            audio_data = data[44:] if len(data) > 44 else data[len(data)//2:]
-            
-            header_compressed = bz2.compress(header, compresslevel=9)
-            audio_compressed = lzma.compress(audio_data, preset=9)
-            
-            meta_header = b'NAUD' + struct.pack('<II', len(header_compressed), len(audio_compressed))
-            return meta_header + header_compressed + audio_compressed
-        
-        return lzma.compress(data, preset=9)
-    
-    def compress_video_based(self, data: bytes, format_type: str) -> bytes:
-        """動画フォーマット専用圧縮"""
-        if len(data) > 1000:
-            metadata = data[:512]
-            video_data = data[512:]
-            
-            metadata_compressed = bz2.compress(metadata, compresslevel=9)
-            video_compressed = lzma.compress(video_data, preset=6)
-            
-            header = b'NVID' + struct.pack('<II', len(metadata_compressed), len(video_compressed))
-            return header + metadata_compressed + video_compressed
-        
-        return lzma.compress(data, preset=9)
-    
-    def compress_document_based(self, data: bytes, format_type: str) -> bytes:
-        """文書フォーマット専用圧縮"""
-        if format_type == 'PDF':
-            return self._compress_pdf_nexus(data)
-        else:
-            return lzma.compress(data, preset=9)
-    
-    def _compress_pdf_nexus(self, data: bytes) -> bytes:
-        """NEXUS PDF圧縮"""
-        if b'stream' in data and b'endstream' in data:
-            parts = data.split(b'stream')
-            if len(parts) > 1:
-                header_part = parts[0] + b'stream'
-                stream_parts = []
-                
-                for part in parts[1:]:
-                    if b'endstream' in part:
-                        stream_data, remainder = part.split(b'endstream', 1)
-                        stream_parts.append(stream_data)
-                        header_part += b'endstream' + remainder
-                    else:
-                        stream_parts.append(part)
-                
-                if stream_parts:
-                    stream_compressed = lzma.compress(b''.join(stream_parts), preset=9)
-                    header_compressed = bz2.compress(header_part, compresslevel=9)
-                    
-                    meta_header = b'NPDF' + struct.pack('<II', len(header_compressed), len(stream_compressed))
-                    return meta_header + header_compressed + stream_compressed
-        
-        return lzma.compress(data, preset=9)
-    
-    def compress_executable_based(self, data: bytes, format_type: str) -> bytes:
-        """実行ファイル専用圧縮"""
-        if format_type == 'PE_EXE':
-            if len(data) > 1024:
-                header = data[:1024]
-                code_data = data[1024:]
-                
-                header_compressed = bz2.compress(header, compresslevel=9)
-                code_compressed = lzma.compress(code_data, preset=9)
-                
-                meta_header = b'NEXE' + struct.pack('<II', len(header_compressed), len(code_compressed))
-                return meta_header + header_compressed + code_compressed
-        
-        return lzma.compress(data, preset=9)
-    
-    def _compress_binary_fallback(self, data: bytes) -> bytes:
-        """バイナリフォールバック圧縮"""
-        methods = [
-            ('BZIP2', lambda: bz2.compress(data, compresslevel=9)),
-            ('LZMA', lambda: lzma.compress(data, preset=9)),
-            ('GZIP', lambda: zlib.compress(data, level=9)),
-        ]
-        
-        best_result = None
-        best_size = float('inf')
-        best_method = None
-        
-        for method_name, compress_func in methods:
-            try:
-                result = compress_func()
-                if len(result) < best_size:
-                    best_size = len(result)
-                    best_result = result
-                    best_method = method_name
-            except:
-                continue
-        
-        if best_result:
-            header = best_method.encode('ascii')[:4].ljust(4, b'\x00')
-            return header + best_result
-        
-        return bz2.compress(data, compresslevel=9)
-
-
-class NXZipNEXUS:
-    """🚀 NXZip NEXUS - Ultimate Universal Compression Engine"""
-    
-    def __init__(self):
-        self.detector = NEXUSFormatDetector()
-        self.compressor = NEXUSFormatCompressor()
-        self.version = "NEXUS v1.0"
-        
-    def compress(self, data: bytes, filename: str = "", show_progress: bool = False) -> Tuple[bytes, Dict[str, Any]]:
-        """🚀 NEXUS Universal Compression"""
+    def compress(self, data: bytes, filename: str = "") -> Tuple[bytes, Dict]:
+        """🚀 NEXUS 高性能圧縮（安定版）"""
         if not data:
             return b'', {}
         
         start_time = time.time()
         original_size = len(data)
         
-        # フォーマット検出
-        detected_format = self.detector.detect_format(data, filename)
+        # 💨 瞬間手法選択
+        method = self._instant_method_selection(data)
         
-        if show_progress:
-            print(f"🚀 NXZip NEXUS v1.0 開始")
-            print(f"📊 入力: {original_size:,} bytes")
-            print(f"🔍 検出フォーマット: {detected_format}")
+        # 🚀 高性能圧縮実行
+        compressed_data = self._execute_blazing_compression(data, method)
         
-        # フォーマット別最適化圧縮
-        compressed_data = self._compress_by_format(data, detected_format, show_progress)
+        # 📦 高性能パッケージング
+        final_package = self._lightning_package_data(compressed_data, method, original_size)
         
         # 統計計算
-        total_time = time.time() - start_time
-        compressed_size = len(compressed_data)
-        compression_ratio = (1 - compressed_size / original_size) * 100
-        speed = (original_size / total_time) / (1024 * 1024) if total_time > 0 else 0
+        compression_time = time.time() - start_time
+        final_size = len(final_package)
+        compression_ratio = (1 - final_size / original_size) * 100 if original_size > 0 else 0
+        speed_mbps = (original_size / compression_time) / (1024 * 1024) if compression_time > 0 else 0
         
         stats = {
             'original_size': original_size,
-            'compressed_size': compressed_size,
+            'compressed_size': final_size,
             'compression_ratio': compression_ratio,
-            'detected_format': detected_format,
-            'processing_time': total_time,
-            'speed_mbps': speed,
+            'speed_mbps': speed_mbps,
+            'compression_time': compression_time,
+            'method': method,
             'nexus_version': self.version
         }
         
-        if show_progress:
-            print(f"\n🎉 圧縮完了!")
-            print(f"📈 最終圧縮率: {compression_ratio:.3f}%")
-            print(f"⚡ 処理速度: {speed:.2f} MB/s")
-            print(f"⏱️  総時間: {total_time:.3f}秒")
-            
-            # 7Zip比較
-            try:
-                import random
-                improvement = random.uniform(0.1, 0.5)
-                print(f"📊 7Zip比較: +{improvement:.3f}% 改善")
-            except:
-                pass
-        
-        return compressed_data, stats
+        return final_package, stats
     
-    def _compress_by_format(self, data: bytes, format_type: str, show_progress: bool) -> bytes:
-        """フォーマット別圧縮ルーティング"""
+    def decompress(self, compressed_data: bytes) -> Tuple[bytes, Dict]:
+        """🔓 NEXUS 高性能展開（安定版）"""
+        if not compressed_data:
+            return b'', {}
         
-        # テキスト系
-        if format_type in ['TEXT', 'JSON', 'XML', 'HTML']:
-            if show_progress:
-                print(f"📝 {format_type}特化圧縮...")
-            return self.compressor.compress_text_based(data, format_type)
+        start_time = time.time()
         
-        # 画像系
-        elif format_type in ['PNG', 'JPEG', 'GIF', 'BMP', 'TIFF', 'WEBP']:
-            if show_progress:
-                print(f"🖼️ {format_type}特化圧縮...")
-            return self.compressor.compress_image_based(data, format_type)
+        # 📦 高性能パッケージ解析
+        data, method, original_size = self._lightning_unpackage_data(compressed_data)
         
-        # 音声系
-        elif format_type in ['MP3', 'WAV', 'FLAC', 'AAC', 'OGG']:
-            if show_progress:
-                print(f"🎵 {format_type}特化圧縮...")
-            return self.compressor.compress_audio_based(data, format_type)
+        # 🚀 高性能展開実行
+        decompressed_data = self._execute_blazing_decompression(data, method)
         
-        # 動画系
-        elif format_type in ['MP4', 'AVI', 'MKV', 'MOV', 'WEBM']:
-            if show_progress:
-                print(f"🎬 {format_type}特化圧縮...")
-            return self.compressor.compress_video_based(data, format_type)
+        # データサイズ検証
+        if len(decompressed_data) != original_size:
+            raise ValueError(f"Decompressed size mismatch: expected {original_size}, got {len(decompressed_data)}")
         
-        # 文書系
-        elif format_type in ['PDF', 'MS_OFFICE', 'MS_OFFICE_XML']:
-            if show_progress:
-                print(f"📄 {format_type}特化圧縮...")
-            return self.compressor.compress_document_based(data, format_type)
+        # 統計計算
+        decompression_time = time.time() - start_time
+        decompressed_size = len(decompressed_data)
+        speed_mbps = (decompressed_size / decompression_time) / (1024 * 1024) if decompression_time > 0 else 0
         
-        # 実行ファイル系
-        elif format_type in ['PE_EXE', 'ELF', 'MACH_O']:
-            if show_progress:
-                print(f"🔧 {format_type}特化圧縮...")
-            return self.compressor.compress_executable_based(data, format_type)
+        stats = {
+            'decompressed_size': decompressed_size,
+            'decompression_time': decompression_time,
+            'speed_mbps': speed_mbps,
+            'method': method,
+            'nexus_version': self.version
+        }
         
-        # その他
+        return decompressed_data, stats
+    
+    def _instant_method_selection(self, data: bytes) -> str:
+        """💨 瞬間手法選択 - 高性能重視（安定版）"""
+        size = len(data)
+        
+        # 超小容量ファイル
+        if size < 1024:
+            return 'none'
+        
+        # 最小限の超高速分析
+        sample_size = min(256, size)  # サンプルサイズを少し増加で精度向上
+        sample = data[:sample_size]
+        
+        # 瞬間エントロピー推定（改良版）
+        unique_bytes = len(set(sample))
+        entropy_ratio = unique_bytes / sample_size
+        
+        # 高速パターン検出
+        repetition_score = 0
+        if sample_size >= 4:
+            # 4バイトパターンの繰り返し検出
+            pattern_4 = sample[:4]
+            repetition_score = sum(1 for i in range(0, sample_size-3, 4) if sample[i:i+4] == pattern_4) / (sample_size // 4)
+        
+        # ⚡ 電光石火判定ロジック（改良版 - より精密で高速）
+        if repetition_score > 0.7:  # 高繰り返しパターン
+            return 'zlib_lightning'  # 最高速
+        elif entropy_ratio < 0.15:  # 極低エントロピー
+            return 'zlib_lightning'  # 最高速
+        elif size > 800000:  # 大容量ファイル（並列処理が最も有効）
+            return 'zlib_tornado'
+        elif entropy_ratio < 0.25 and size > 50000:  # 低エントロピー中容量
+            return 'zlib_turbo'
+        elif size > 200000:  # 中大容量ファイル
+            return 'zlib_turbo'
+        else:  # その他全て最高速
+            return 'zlib_lightning'
+    
+    def _execute_blazing_compression(self, data: bytes, method: str) -> bytes:
+        """🚀 高性能圧縮実行（安定版）"""
+        if method == 'none':
+            return data
+        elif method == 'zlib_lightning':
+            return zlib.compress(data, level=2)  # レベル1→2で圧縮率少し改善
+        elif method == 'zlib_turbo':
+            return self._zlib_turbo_compress(data)
+        elif method == 'zlib_tornado':
+            return self._zlib_tornado_compress(data)
         else:
-            if show_progress:
-                print(f"🔧 汎用最適化圧縮...")
-            return self.compressor._compress_binary_fallback(data)
-
-
-def test_nexus_compression():
-    """🧪 NXZip NEXUS 包括的テスト"""
-    print("🚀 NXZip NEXUS - Next-Generation eXtreme Ultra Zip Engine テスト")
-    print("=" * 70)
+            return zlib.compress(data, level=2)  # フォールバック改善
     
-    # テストデータ生成
+    def _execute_blazing_decompression(self, data: bytes, method: str) -> bytes:
+        """🔓 高性能展開実行（安定版）"""
+        if method == 'none':
+            return data
+        elif method == 'zlib_lightning':
+            return zlib.decompress(data)
+        elif method == 'zlib_turbo':
+            return self._zlib_turbo_decompress(data)
+        elif method == 'zlib_tornado':
+            return self._zlib_tornado_decompress(data)
+        else:
+            return zlib.decompress(data)  # フォールバック
+    
+    def _zlib_turbo_compress(self, data: bytes) -> bytes:
+        """🚀 zlib ターボ圧縮（中容量向け）- 改良版"""
+        chunk_size = 32 * 1024  # 32KB chunks（より効率的サイズ）
+        
+        if len(data) < chunk_size * 2:
+            return zlib.compress(data, level=2)  # レベル2でバランス改善
+        
+        # チャンク分割
+        chunks = [data[i:i+chunk_size] for i in range(0, len(data), chunk_size)]
+        
+        # 並列圧縮（最適スレッド数）
+        optimal_workers = min(12, len(chunks), self.max_threads)  # より効率的なスレッド数
+        with ThreadPoolExecutor(max_workers=optimal_workers) as executor:
+            compressed_chunks = list(executor.map(lambda chunk: zlib.compress(chunk, level=2), chunks))
+        
+        # 高速パッケージング
+        result = bytearray()
+        result.extend(struct.pack('<I', len(chunks)))
+        for chunk in compressed_chunks:
+            result.extend(struct.pack('<I', len(chunk)))
+            result.extend(chunk)
+        
+        return bytes(result)
+    
+    def _zlib_turbo_decompress(self, data: bytes) -> bytes:
+        """🚀 zlib ターボ展開 - 改良版"""
+        if len(data) < 4:
+            return zlib.decompress(data)
+        
+        chunks_count = struct.unpack('<I', data[:4])[0]
+        offset = 4
+        
+        chunk_data_list = []
+        for _ in range(chunks_count):
+            if offset + 4 > len(data):
+                break
+            chunk_size = struct.unpack('<I', data[offset:offset+4])[0]
+            offset += 4
+            
+            if offset + chunk_size > len(data):
+                break
+            chunk_data_list.append(data[offset:offset+chunk_size])
+            offset += chunk_size
+        
+        # 並列展開（最適スレッド数）
+        optimal_workers = min(12, len(chunk_data_list), self.max_threads)
+        with ThreadPoolExecutor(max_workers=optimal_workers) as executor:
+            decompressed_chunks = list(executor.map(zlib.decompress, chunk_data_list))
+        
+        return b''.join(decompressed_chunks)
+    
+    def _zlib_tornado_compress(self, data: bytes) -> bytes:
+        """🌪️ zlib 竜巻圧縮（大容量向け）- 改良版"""
+        chunk_size = 64 * 1024  # 64KB chunks（大容量ファイル向けサイズ増加）
+        
+        if len(data) < chunk_size * 3:
+            return zlib.compress(data, level=2)  # レベル2でバランス改善
+        
+        # チャンク分割
+        chunks = [data[i:i+chunk_size] for i in range(0, len(data), chunk_size)]
+        
+        # 最大並列圧縮（効率的なスレッド数）
+        optimal_workers = min(16, len(chunks), self.max_threads)  # 最適化
+        with ThreadPoolExecutor(max_workers=optimal_workers) as executor:
+            compressed_chunks = list(executor.map(lambda chunk: zlib.compress(chunk, level=2), chunks))
+        
+        # 高速パッケージング
+        result = bytearray()
+        result.extend(struct.pack('<I', len(chunks)))
+        for chunk in compressed_chunks:
+            result.extend(struct.pack('<I', len(chunk)))
+            result.extend(chunk)
+        
+        return bytes(result)
+    
+    def _zlib_tornado_decompress(self, data: bytes) -> bytes:
+        """🌪️ zlib 竜巻展開 - 改良版"""
+        if len(data) < 4:
+            return zlib.decompress(data)
+        
+        chunks_count = struct.unpack('<I', data[:4])[0]
+        offset = 4
+        
+        chunk_data_list = []
+        for _ in range(chunks_count):
+            if offset + 4 > len(data):
+                break
+            chunk_size = struct.unpack('<I', data[offset:offset+4])[0]
+            offset += 4
+            
+            if offset + chunk_size > len(data):
+                break
+            chunk_data_list.append(data[offset:offset+chunk_size])
+            offset += chunk_size
+        
+        # 最大並列展開（効率的なスレッド数）
+        optimal_workers = min(16, len(chunk_data_list), self.max_threads)
+        with ThreadPoolExecutor(max_workers=optimal_workers) as executor:
+            decompressed_chunks = list(executor.map(zlib.decompress, chunk_data_list))
+        
+        return b''.join(decompressed_chunks)
+    
+    def _lightning_package_data(self, compressed_data: bytes, method: str, original_size: int) -> bytes:
+        """📦 高性能パッケージング（安定版）"""
+        method_bytes = method.encode('ascii')[:15]
+        method_len = len(method_bytes)
+        
+        # 高性能ヘッダー: magic(4) + original_size(4) + method_len(1) + method + data
+        magic = b'NXL8'  # NEXUS v8
+        header = magic + struct.pack('<I', original_size) + struct.pack('<B', method_len) + method_bytes
+        
+        return header + compressed_data
+    
+    def _lightning_unpackage_data(self, packaged_data: bytes) -> Tuple[bytes, str, int]:
+        """📦 高性能パッケージ解析（安定版）"""
+        if len(packaged_data) < 9:
+            raise ValueError("Invalid NEXUS package")
+        
+        magic = packaged_data[:4]
+        if magic not in [b'NXL8', b'NXL7']:  # 下位互換性
+            raise ValueError("Invalid NEXUS magic number")
+        
+        original_size = struct.unpack('<I', packaged_data[4:8])[0]
+        method_len = packaged_data[8]
+        
+        if len(packaged_data) < 9 + method_len:
+            raise ValueError("Incomplete NEXUS package")
+        
+        method = packaged_data[9:9 + method_len].decode('ascii')
+        compressed_data = packaged_data[9 + method_len:]
+        
+        return compressed_data, method, original_size
+
+
+class NXZipNEXUS:
+    """🚀 NXZip NEXUS - High-Performance Compression System（安定版）"""
+    
+    def __init__(self):
+        self.engine = NEXUSEngine()
+        self.version = "NXZip NEXUS v8.0 - Stable Edition"
+        
+    def compress(self, data: bytes, filename: str = "", show_progress: bool = False) -> Tuple[bytes, Dict[str, Any]]:
+        """🚀 NEXUS 高性能圧縮（安定版）"""
+        if not data:
+            return b'', {}
+        
+        start_time = time.time()
+        original_size = len(data)
+        
+        if show_progress:
+            print(f"🚀 NXZip NEXUS v8.0 - 高性能圧縮開始（安定版）")
+            print(f"📊 入力: {original_size:,} bytes")
+            print(f"🎯 目標: 高性能処理 (100+ MB/s, 90%+ 圧縮率)")
+            print(f"💨 Instant Method Selection...")
+            print(f"🚀 High Performance Processing...")
+            print(f"🌪️ Optimized Speed Processing...")
+        
+        # NEXUS Lightning圧縮実行
+        compressed_data, compression_stats = self.engine.compress(data, filename)
+        
+        # 統計更新
+        compression_stats['nexus_lightning_version'] = self.version
+        
+        if show_progress:
+            print(f"✅ NEXUS圧縮完了!")
+            print(f"📈 圧縮率: {compression_stats.get('compression_ratio', 0):.2f}%")
+            print(f"🚀 処理速度: {compression_stats.get('speed_mbps', 0):.2f} MB/s")
+            print(f"📦 圧縮サイズ: {len(compressed_data):,} bytes")
+            print(f"🔧 使用手法: {compression_stats.get('method', 'unknown')}")
+            
+            # 高性能評価
+            ratio = compression_stats.get('compression_ratio', 0)
+            speed = compression_stats.get('speed_mbps', 0)
+            
+            if speed >= 100 and ratio >= 90:
+                print("🎉🏆🚀 NEXUS 完全成功! 高性能目標達成!")
+            elif speed >= 75:
+                print("🎉🚀 NEXUS 高性能達成! 優秀な処理成功!")
+            elif speed >= 50:
+                print("🎉 NEXUS 実用達成! 良好な処理速度!")
+            else:
+                print("📊 NEXUS 最適化継続中...")
+        
+        return compressed_data, compression_stats
+    
+    def decompress(self, compressed_data: bytes, show_progress: bool = False) -> Tuple[bytes, Dict[str, Any]]:
+        """🔓 NEXUS 高性能展開（安定版）"""
+        if not compressed_data:
+            return b'', {}
+        
+        start_time = time.time()
+        
+        if show_progress:
+            print(f"🔓 NXZip NEXUS 高性能展開開始（安定版）")
+            print(f"📦 圧縮データ: {len(compressed_data):,} bytes")
+            print(f"🚀 High Performance Processing...")
+        
+        # NEXUS展開実行
+        decompressed_data, decompression_stats = self.engine.decompress(compressed_data)
+        
+        # 統計更新
+        decompression_stats['nexus_version'] = self.version
+        
+        if show_progress:
+            print(f"✅ NEXUS展開完了!")
+            print(f"📤 出力: {len(decompressed_data):,} bytes")
+            print(f"🚀 展開速度: {decompression_stats.get('speed_mbps', 0):.2f} MB/s")
+        
+        return decompressed_data, decompression_stats
+
+
+def test_nexus_performance():
+    """🧪 NXZip NEXUS - 高性能性能テスト（安定版）"""
+    print("🚀 NXZip NEXUS - 高性能性能テスト（安定版）")
+    print("=" * 80)
+    print("🎯 安定版目標: 高性能処理 (100+ MB/s, 90%+ 圧縮率, 100% 完全性)")
+    print("💨 Instant Fast + 🌪️ Tornado Boost + ⚡ Optimized Methods")
+    print("=" * 80)
+    
+    # 高性能テストデータ
     test_files = {}
     
-    # 日本語テキスト
-    japanese_text = """こんにちは、世界！
-これはNXZip NEXUSのテストです。
-日本語の文字も正しく処理されます。
-ありがとうございます。よろしくお願いします。
-テストデータとして十分な量の日本語テキストを作成しています。
-圧縮率の向上を確認するため、繰り返しパターンも含めています。
-です、ます、ありがとう、こんにちは、よろしく。
-""" * 600
-    test_files['japanese.txt'] = japanese_text.encode('utf-8')
+    # 🌸 日本語高性能テスト
+    japanese_text = """🚀 NXZip NEXUS 高性能テスト 🚀
+これは高性能圧縮アルゴリズムです。
+100MB/s以上の高速処理と90%以上の高圧縮率を目指します。
+Instant Method Selection による瞬間選択。
+Blazing Fast Processing による高速処理。
+Optimized Parallel Processing による最適化並列処理。
+Lightning Standard Methods による高速標準手法。
+Tornado Speed Optimization による竜巻速度最適化。
+これが高性能圧縮技術、NEXUS Engineの実力！
+""" * 150
+    test_files['nexus_japanese.txt'] = japanese_text.encode('utf-8')
     
-    # JSON data
-    json_data = '{"id": 1, "name": "nexus", "type": "data", "value": 100, "status": "active", "result": true, "error": null, "message": "success"}' * 1000
-    test_files['data.json'] = json_data.encode('utf-8')
+    # 🔄 高性能パターンテスト
+    pattern_data = b'NEXUS pattern test. ' * 4000 + b'High performance compression. ' * 3500
+    test_files['nexus_pattern.bin'] = pattern_data
     
-    # Mock image data
-    bmp_header = b'BM' + b'\x00' * 52
-    bmp_data = bmp_header + bytes([i % 256 for i in range(256000)])
-    test_files['image.bmp'] = bmp_data
+    # 📝 英語高性能テスト
+    english_text = ("NXZip NEXUS provides high performance compression processing. " * 1000).encode('utf-8')
+    test_files['nexus_english.txt'] = english_text
     
-    # Binary data
-    binary_data = bytes([i % 256 for i in range(125000)])
-    test_files['binary.dat'] = binary_data
+    # 🔢 数値高性能テスト
+    number_data = (''.join(f"NEXUS{i:06d}" for i in range(10000))).encode('utf-8')
+    test_files['nexus_numbers.txt'] = number_data
     
+    # 🌀 混合高性能テスト
+    mixed_data = (japanese_text[:10000] + english_text.decode('utf-8')[:10000] + 
+                 'NEXUS123456789' * 800).encode('utf-8')
+    test_files['nexus_mixed.txt'] = mixed_data
+    
+    # 🌪️ 大容量最適化テスト
+    large_data = b'High performance test for large files. ' * 15000
+    test_files['nexus_large.bin'] = large_data
+    
+    # 🚀 NEXUS エンジン初期化
     nexus = NXZipNEXUS()
     
-    # Target compression ratios
-    targets = {
-        'japanese.txt': 99.9,
-        'data.json': 99.0,
-        'image.bmp': 95.0,
-        'binary.dat': 99.0
-    }
+    print("\n🧪 NEXUS 高性能性能テスト開始")
+    print("=" * 60)
     
     total_tests = 0
     successful_tests = 0
     total_compression_ratio = 0
+    total_compression_speed = 0
+    total_decompression_speed = 0
     
     for filename, data in test_files.items():
-        print(f"\n🧪 テスト: {filename}")
+        print(f"\n📋 テストファイル: {filename}")
         print(f"📊 サイズ: {len(data):,} bytes")
         
         try:
+            # NEXUS圧縮
             compressed, stats = nexus.compress(data, filename, show_progress=True)
             
-            target = targets.get(filename, 90.0)
-            result_status = "✅ 達成" if stats['compression_ratio'] >= target else "❌ 未達成"
-            print(f"🏆 結果: {stats['compression_ratio']:.3f}% (目標: {target}%)")
-            print(f"🎯 目標: {result_status}")
+            # NEXUS展開
+            print("\n🔓 展開テスト...")
+            decompressed, decomp_stats = nexus.decompress(compressed, show_progress=True)
             
-            if stats['compression_ratio'] >= target:
+            # 完全性検証
+            integrity_ok = data == decompressed
+            print(f"\n🔐 完全性チェック: {'✅ 成功 (100%一致)' if integrity_ok else '❌ 失敗'}")
+            
+            if integrity_ok:
                 successful_tests += 1
-                
-            total_compression_ratio += stats['compression_ratio']
+            
+            # パフォーマンス統計
+            compression_ratio = stats.get('compression_ratio', 0)
+            compression_speed = stats.get('speed_mbps', 0)
+            decompression_speed = decomp_stats.get('speed_mbps', 0)
+            
+            print(f"\n📊 NEXUS パフォーマンス:")
+            print(f"   📈 圧縮率: {compression_ratio:.2f}%")
+            print(f"   🚀 圧縮速度: {compression_speed:.2f} MB/s")
+            print(f"   🔓 展開速度: {decompression_speed:.2f} MB/s")
+            print(f"   🔧 圧縮手法: {stats.get('method', 'unknown')}")
+            
+            # 高性能目標達成評価
+            print(f"\n🎯 高性能目標達成度:")
+            print(f"   📈 圧縮率目標 (90%+): {'✅' if compression_ratio >= 90 else '🔶' if compression_ratio >= 70 else '❌'} {compression_ratio:.1f}%")
+            print(f"   🚀 圧縮速度目標 (100+ MB/s): {'✅' if compression_speed >= 100 else '🔶' if compression_speed >= 75 else '🟡' if compression_speed >= 50 else '❌'} {compression_speed:.1f} MB/s")
+            print(f"   🔓 展開速度目標 (200+ MB/s): {'✅' if decompression_speed >= 200 else '🔶' if decompression_speed >= 150 else '🟡' if decompression_speed >= 100 else '❌'} {decompression_speed:.1f} MB/s")
+            print(f"   🔐 完全性目標 (100%): {'✅' if integrity_ok else '❌'}")
+            
+            total_compression_ratio += compression_ratio
+            total_compression_speed += compression_speed
+            total_decompression_speed += decompression_speed
             total_tests += 1
             
         except Exception as e:
-            print(f"❌ エラー: {e}")
+            print(f"❌ テストエラー: {e}")
             total_tests += 1
-        
-        print("-" * 50)
     
-    # Summary
-    print("\n🏆 NXZip NEXUS 総合結果")
+    # 🏆 NEXUS高性能結果報告
+    print("\n" + "=" * 80)
+    print("🏆 NXZip NEXUS v8.0 - 高性能結果報告（安定版）")
+    print("=" * 80)
+    
     if total_tests > 0:
         avg_compression = total_compression_ratio / total_tests
+        avg_comp_speed = total_compression_speed / total_tests
+        avg_decomp_speed = total_decompression_speed / total_tests
         success_rate = (successful_tests / total_tests) * 100
         
-        print(f"📊 平均圧縮率: {avg_compression:.3f}%")
-        print(f"🎯 目標達成: {successful_tests}/{total_tests}")
-        print(f"📈 成功率: {success_rate:.1f}%")
+        print(f"📊 平均圧縮率: {avg_compression:.2f}%")
+        print(f"🚀 平均圧縮速度: {avg_comp_speed:.2f} MB/s")
+        print(f"🔓 平均展開速度: {avg_decomp_speed:.2f} MB/s")
+        print(f"🔐 完全性成功率: {successful_tests}/{total_tests} ({success_rate:.1f}%)")
         
-        if success_rate == 100.0:
-            print("🎉🏆🎊 NEXUS完全勝利! 全フォーマットで7Zipを完全超越!")
-        elif success_rate >= 80.0:
-            print("🎉 NEXUS大成功! ほぼ全フォーマットで目標達成!")
+        # 高性能評価
+        compression_excellent = avg_compression >= 90
+        compression_good = avg_compression >= 70
+        speed_excellent = avg_comp_speed >= 100
+        speed_good = avg_comp_speed >= 75
+        speed_practical = avg_comp_speed >= 50
+        integrity_perfect = success_rate == 100.0
+        
+        print(f"\n🏆 高性能達成度:")
+        if compression_excellent:
+            print(f"📈 圧縮率: ✅ 優秀達成! ({avg_compression:.1f}% ≥ 90%)")
+        elif compression_good:
+            print(f"📈 圧縮率: 🔶 良好レベル ({avg_compression:.1f}% ≥ 70%)")
         else:
-            print("📈 NEXUS改善の余地あり")
+            print(f"📈 圧縮率: ❌ 要改善 ({avg_compression:.1f}% < 70%)")
+            
+        if speed_excellent:
+            print(f"🚀 圧縮速度: ✅ 高性能達成! ({avg_comp_speed:.1f} MB/s ≥ 100 MB/s)")
+        elif speed_good:
+            print(f"🚀 圧縮速度: � 良好レベル ({avg_comp_speed:.1f} MB/s ≥ 75 MB/s)")
+        elif speed_practical:
+            print(f"🚀 圧縮速度: � 実用レベル ({avg_comp_speed:.1f} MB/s ≥ 50 MB/s)")
+        else:
+            print(f"🚀 圧縮速度: ❌ 要改善 ({avg_comp_speed:.1f} MB/s < 50 MB/s)")
+            
+        if integrity_perfect:
+            print(f"🔐 完全性: ✅ 完璧! (100%)")
+        else:
+            print(f"🔐 完全性: ❌ 要改善 ({success_rate:.1f}%)")
+        
+        # 総合判定
+        if speed_excellent and compression_excellent and integrity_perfect:
+            print(f"\n🎉🏆🚀 NEXUS 完全成功!")
+            print(f"🚀 高性能圧縮システム完成!")
+            print(f"� 安定版として運用可能!")
+        elif speed_good and integrity_perfect:
+            print(f"\n🎉🚀 NEXUS 高性能成功!")
+            print(f"� 安定した高性能システム完成!")
+        elif speed_practical and integrity_perfect:
+            print(f"\n🎉 NEXUS 実用成功!")
+            print(f"📊 実用的システム完成!")
+        else:
+            print(f"\n📈 NEXUS 最適化継続中")
+            print(f"🔧 更なる改良を実施中")
+        
+        print(f"\n🌟 NXZip NEXUS - 安定版高性能圧縮技術!")
+    
+    return nexus
+
+
+# 互換性エイリアス（旧バージョンとの互換性のため）
+test_nexus_final_performance = test_nexus_performance
+test_nexus_turbo_performance = test_nexus_performance
+test_nexus_speed_performance = test_nexus_performance
+test_nexus_lightning_performance = test_nexus_performance
+NXZipNEXUSFinal = NXZipNEXUS
+NXZipNEXUSTurbo = NXZipNEXUS
+NXZipNEXUSSpeed = NXZipNEXUS
+NXZipNEXUSLightning = NXZipNEXUS
 
 
 if __name__ == "__main__":
-    test_nexus_compression()
+    test_nexus_performance()

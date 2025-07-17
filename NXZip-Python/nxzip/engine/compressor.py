@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 NXZip Compression Engine
-高性能圧縮アルゴリズムの統合インターフェース
+高性能圧縮アルゴリズムの統合インターフェース - NEXUS安定版
 """
 
 import zlib
@@ -9,6 +9,7 @@ import lzma
 from typing import Tuple, Optional
 from ..utils.progress import ProgressBar
 from ..utils.constants import CompressionAlgorithm
+from .nexus import NXZipNEXUS
 
 try:
     import zstandard as zstd
@@ -18,19 +19,21 @@ except ImportError:
 
 
 class SuperCompressor:
-    """7Zipを超える高圧縮率と超高速処理を実現する圧縮器"""
+    """7Zipを超える高圧縮率と超高速処理を実現する圧縮器 - NEXUS安定版"""
     
     def __init__(self, algorithm: str = CompressionAlgorithm.AUTO, level: int = 6):
         self.algorithm = algorithm
         self.level = level
+        self.nexus_engine = NXZipNEXUS()  # NEXUS安定版エンジン
     
     def compress(self, data: bytes, show_progress: bool = False) -> Tuple[bytes, str]:
-        """データを圧縮し、使用したアルゴリズムも返す"""
+        """データを圧縮し、使用したアルゴリズムも返す - NEXUS安定版"""
         if not data:
             return data, CompressionAlgorithm.ZLIB
         
-        if self.algorithm == CompressionAlgorithm.AUTO:
-            return self._auto_compress(data, show_progress)
+        # NEXUS最適化エンジンを優先使用
+        if self.algorithm == CompressionAlgorithm.AUTO or self.algorithm == "nexus":
+            return self._nexus_compress(data, show_progress)
         elif self.algorithm == CompressionAlgorithm.ZSTD and ZSTD_AVAILABLE:
             return self._compress_zstd(data, show_progress), CompressionAlgorithm.ZSTD
         elif self.algorithm == CompressionAlgorithm.LZMA2:
@@ -39,11 +42,14 @@ class SuperCompressor:
             return self._compress_zlib(data, show_progress), CompressionAlgorithm.ZLIB
     
     def decompress(self, data: bytes, algorithm: str, show_progress: bool = False) -> bytes:
-        """指定されたアルゴリズムでデータを展開"""
+        """指定されたアルゴリズムでデータを展開 - NEXUS最適化版"""
         if not data:
             return data
         
-        if algorithm == CompressionAlgorithm.ZSTD and ZSTD_AVAILABLE:
+        # NEXUS最適化エンジンで展開
+        if algorithm == "nexus":
+            return self._nexus_decompress(data, show_progress)
+        elif algorithm == CompressionAlgorithm.ZSTD and ZSTD_AVAILABLE:
             return self._decompress_zstd(data, show_progress)
         elif algorithm == CompressionAlgorithm.LZMA2:
             return self._decompress_lzma2(data, show_progress)
@@ -137,3 +143,31 @@ class SuperCompressor:
             pb.close()
             return result
         return decompressor.decompress(data)
+    
+    def _nexus_compress(self, data: bytes, show_progress: bool) -> Tuple[bytes, str]:
+        """NEXUS最適化圧縮"""
+        if show_progress:
+            pb = ProgressBar(len(data), "NEXUS圧縮")
+        
+        compressed_data, stats = self.nexus_engine.compress(data, show_progress=show_progress)
+        
+        if show_progress:
+            pb.update(len(data))
+            pb.close()
+            print(f"🚀 NEXUS圧縮完了: {stats.get('compression_ratio', 0):.2f}% 圧縮率")
+        
+        return compressed_data, "nexus"
+    
+    def _nexus_decompress(self, data: bytes, show_progress: bool) -> bytes:
+        """NEXUS最適化展開"""
+        if show_progress:
+            pb = ProgressBar(len(data), "NEXUS展開")
+        
+        decompressed_data, stats = self.nexus_engine.decompress(data, show_progress=show_progress)
+        
+        if show_progress:
+            pb.update(len(data))
+            pb.close()
+            print(f"🔓 NEXUS展開完了: {stats.get('speed_mbps', 0):.2f} MB/s")
+        
+        return decompressed_data

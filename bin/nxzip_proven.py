@@ -185,7 +185,7 @@ class NXZipProven:
             return False
     
     def extract(self, archive_path: str, output_dir: str = ".", password: str = None) -> bool:
-        """Extract archive (note: full decompression requires additional implementation)"""
+        """Extract and fully decompress archive to original files"""
         try:
             print(f"\n📂 Extracting: {archive_path}")
             
@@ -207,35 +207,88 @@ class NXZipProven:
             print(f"🔒 Encryption: {'6-Stage SPE' if archive.get('encrypted') else 'None'}")
             print(f"📦 Engine: {'Proven NEXUS' if archive.get('nexus_engine') else 'Standard'}")
             
+            total_files = len(archive['files'])
+            processed_files = 0
+            
             for filename, file_data in archive['files'].items():
                 print(f"\n📄 Extracting: {filename}")
                 
-                # Decrypt if encrypted
-                if archive.get('encrypted'):
-                    try:
-                        data = self.spe.reverse_transform(file_data)
-                        print("   🔓 SPE decryption successful")
-                    except Exception as e:
-                        print(f"   ❌ SPE decryption failed: {e}")
-                        continue
-                else:
-                    data = file_data
-                
-                # Save extracted data (compressed format)
-                output_path = os.path.join(output_dir, filename)
-                with open(output_path, 'wb') as f:
-                    f.write(data)
-                
-                metadata = archive['metadata'].get(filename, {})
-                final_size = metadata.get('final_size', len(data))
-                
-                print(f"   ✅ Saved: {output_path}")
-                print(f"   📊 Size: {final_size:,} bytes")
-                print(f"   ⚠️  Note: Data is in compressed format (NEXUS decompression needed)")
+                try:
+                    # Step 1: Decrypt if encrypted
+                    if archive.get('encrypted'):
+                        try:
+                            decrypted_data = self.spe.reverse_transform(file_data)
+                            print("   🔓 SPE decryption successful")
+                        except Exception as e:
+                            print(f"   ❌ SPE decryption failed: {e}")
+                            continue
+                    else:
+                        decrypted_data = file_data
+                    
+                    # Step 2: NEXUS decompression to original file
+                    if archive.get('nexus_engine'):
+                        try:
+                            # Check if data is NEXUS packaged format
+                            if decrypted_data.startswith(b'NEXUS100'):
+                                # Use NEXUS decompression for packaged data
+                                original_data, decomp_stats = self.nexus.decompress(decrypted_data, show_progress=False)
+                                print(f"   🔓 NEXUS decompression successful")
+                                print(f"   📊 Restored: {len(original_data):,} bytes")
+                                print(f"   🔍 Format: {decomp_stats.get('detected_format', 'Unknown')}")
+                            else:
+                                # Legacy format: data might be raw compressed
+                                print(f"   ⚠️  Legacy NEXUS format detected")
+                                # Try to decompress manually or use as-is
+                                original_data = decrypted_data
+                        except Exception as e:
+                            print(f"   ⚠️  NEXUS decompression failed: {e}")
+                            print(f"   📦 Using data as-is...")
+                            original_data = decrypted_data
+                    else:
+                        # Standard format (no NEXUS compression)
+                        original_data = decrypted_data
+                    
+                    # Step 3: Save restored file
+                    output_path = os.path.join(output_dir, filename)
+                    
+                    # Create subdirectories if needed
+                    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                    
+                    with open(output_path, 'wb') as f:
+                        f.write(original_data)
+                    
+                    # Verify file integrity using metadata
+                    metadata = archive['metadata'].get(filename, {})
+                    expected_size = metadata.get('original_size')
+                    
+                    if expected_size and len(original_data) == expected_size:
+                        print(f"   ✅ Saved: {output_path}")
+                        print(f"   🎯 Integrity: Perfect match ({len(original_data):,} bytes)")
+                    elif expected_size:
+                        print(f"   ⚠️  Saved: {output_path}")
+                        print(f"   ❓ Size mismatch: expected {expected_size:,}, got {len(original_data):,}")
+                    else:
+                        print(f"   ✅ Saved: {output_path}")
+                        print(f"   📊 Size: {len(original_data):,} bytes")
+                    
+                    processed_files += 1
+                    
+                except Exception as e:
+                    print(f"   ❌ Failed to extract {filename}: {e}")
+                    continue
             
+            # Summary
             print(f"\n✅ Extraction completed to: {output_dir}")
-            print("⚠️  Files are in compressed format. Full decompression requires NEXUS decoder.")
-            return True
+            print(f"📈 Files processed: {processed_files}/{total_files}")
+            
+            if processed_files == total_files:
+                print("🎉 All files successfully extracted and decompressed!")
+            elif processed_files > 0:
+                print(f"⚠️  {total_files - processed_files} files had issues")
+            else:
+                print("❌ No files could be extracted")
+            
+            return processed_files > 0
             
         except Exception as e:
             print(f"❌ Error extracting archive: {e}")

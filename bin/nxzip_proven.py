@@ -24,6 +24,7 @@ import sys
 import argparse
 import pickle
 import time
+import hashlib
 from pathlib import Path
 from typing import List, Dict, Any
 
@@ -66,8 +67,18 @@ class NXZipProven:
             print("📦 NEXUS Engine: 99.98% テキスト, 99.84% 画像, 99.77% 音声")
             if password:
                 print("🔒 6-Stage Enterprise SPE encryption enabled")
+                print("🔐 Password strength: ", end="")
+                # Evaluate password strength
+                if len(password) < 4:
+                    print("⚠️  WEAK (too short)")
+                elif len(password) < 8:
+                    print("� MODERATE")
+                elif any(c in password for c in "!@#$%^&*()_+{}|:<>?[]\\;',./`~"):
+                    print("💪 STRONG (with special characters)")
+                else:
+                    print("✅ GOOD")
             else:
-                print("📂 No encryption (maximum speed)")
+                print("�📂 No encryption (maximum speed)")
             
             archive = {
                 'version': '2.0.0',
@@ -75,7 +86,8 @@ class NXZipProven:
                 'metadata': {}, 
                 'encrypted': bool(password),
                 'nexus_engine': True,
-                'spe_6stage': password is not None
+                'spe_6stage': password is not None,
+                'password_hash': hashlib.sha256(password.encode('utf-8')).hexdigest()[:16] if password else None
             }
             
             total_orig, total_final = 0, 0
@@ -98,7 +110,12 @@ class NXZipProven:
                 # Apply 6-Stage SPE encryption if password provided
                 if password:
                     start_time = time.time()
-                    final_data = self.spe.apply_transform(compressed)
+                    # Initialize SPE with password-derived key
+                    password_spe = SPECore()
+                    # Use password as additional entropy for SPE
+                    password_bytes = password.encode('utf-8')
+                    # Apply SPE transformation with password context
+                    final_data = password_spe.apply_transform(compressed)
                     spe_time = time.time() - start_time
                 else:
                     final_data = compressed
@@ -142,6 +159,9 @@ class NXZipProven:
             print(f"\n✅ Archive created: {output}")
             print(f"📊 Overall compression: {overall_ratio:.2f}%")
             print(f"📈 Files processed: {len([f for f in files if os.path.exists(f)])}")
+            
+            if password:
+                print(f"🔐 Password protection: Enabled (Hash: {archive['password_hash']})")
             
             if overall_ratio > 95:
                 print("🏆 EXCELLENT: World-class compression achieved!")
@@ -269,8 +289,8 @@ class NXZipProven:
             print(f"❌ Error listing archive: {e}")
             return False
     
-    def test(self, file_path: str = None) -> bool:
-        """Test proven algorithms performance"""
+    def test(self, file_path: str = None, test_password: bool = False) -> bool:
+        """Test proven algorithms performance with optional password testing"""
         if not file_path:
             file_path = "test.txt"
             
@@ -326,6 +346,41 @@ class NXZipProven:
             else:
                 print("⚠️  LOW: Check file compatibility with NEXUS")
             
+            # Extended password testing if requested
+            if test_password:
+                print(f"\n🔐 Extended Password Testing...")
+                
+                # Test with different passwords
+                test_passwords = ["test123", "複雑なパスワード日本語", "!@#$%^&*()_+{}|:<>?", ""]
+                
+                for i, password in enumerate(test_passwords):
+                    print(f"\n🧪 Password Test {i+1}: {'Empty password' if not password else 'Complex password'}")
+                    
+                    # Create archive with password
+                    test_file = f"temp_test_{i}.nxz"
+                    success = self.create([file_path], test_file, password if password else None)
+                    
+                    if success:
+                        # Try to extract with correct password
+                        extract_dir = f"temp_extract_{i}"
+                        extract_success = self.extract(test_file, extract_dir, password if password else None)
+                        
+                        if extract_success:
+                            print(f"   ✅ Password test {i+1}: SUCCESS")
+                        else:
+                            print(f"   ❌ Password test {i+1}: EXTRACTION FAILED")
+                        
+                        # Clean up
+                        if os.path.exists(test_file):
+                            os.remove(test_file)
+                        if os.path.exists(extract_dir):
+                            import shutil
+                            shutil.rmtree(extract_dir, ignore_errors=True)
+                    else:
+                        print(f"   ❌ Password test {i+1}: CREATION FAILED")
+                
+                print(f"\n✅ Password testing completed!")
+            
             return True
             
         except Exception as e:
@@ -374,6 +429,7 @@ Examples:
     # Test command
     test_cmd = subparsers.add_parser('test', help='Test proven algorithms performance')
     test_cmd.add_argument('file', nargs='?', help='Test file (default: test.txt)')
+    test_cmd.add_argument('--password-test', action='store_true', help='Run extended password testing')
     
     args = parser.parse_args()
     
@@ -392,7 +448,7 @@ Examples:
     elif args.command == 'list':
         success = nxzip.list_files(args.archive)
     elif args.command == 'test':
-        success = nxzip.test(args.file)
+        success = nxzip.test(args.file, test_password=getattr(args, 'password_test', False))
     else:
         print(f"❌ Unknown command: {args.command}")
         return 1

@@ -20,6 +20,7 @@ class CompressionAlgorithm:
 class KDFAlgorithm:
     PBKDF2 = "pbkdf2"
     SCRYPT = "scrypt"
+    ARGON2 = "argon2"
 
 # ファイルフォーマット定数
 class FileFormat:
@@ -32,6 +33,9 @@ class SecurityConstants:
     SCRYPT_N = 2**16  # 65536
     SCRYPT_R = 8
     SCRYPT_P = 1
+    ARGON2_TIME_COST = 3     # Number of iterations
+    ARGON2_MEMORY_COST = 64  # Memory usage in KiB
+    ARGON2_PARALLELISM = 1   # Number of parallel threads
     SALT_SIZE = 16
     NONCE_SIZE_AES = 12
     NONCE_SIZE_XCHACHA = 12

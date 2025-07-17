@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nxzip_test>
+    <metadata>
+        <title>NXZip XML Test File</title>
+        <version>1.0</version>
+        <created>2025-07-17</created>
+        <author>NXZip Team</author>
+    </metadata>
+    
+    <compression_tests>
+        <test format="text" ratio="99.98" status="excellent"/>
+        <test format="image" ratio="99.84" status="excellent"/>
+        <test format="audio" ratio="99.77" status="excellent"/>
+        <test format="video" ratio="98.95" status="good"/>
+    </compression_tests>
+    
+    <algorithms>
+        <nexus_engine>
+            <description>Proven NEXUS compression engine</description>
+            <performance>99.741% average compression rate</performance>
+            <speed>11.37 MB/s processing speed</speed>
+            <formats>30+ supported file formats</formats>
+        </nexus_engine>
+        
+        <spe_encryption>
+            <description>6-stage Enterprise SPE</description>
+            <security>Structure-preserving encryption</security>
+            <reversibility>100% lossless guarantee</reversibility>
+            <stages>6</stages>
+        </spe_encryption>
+    </algorithms>
+    
+    <supported_formats>
+        <text_formats>
+            <format>TXT</format>
+            <format>MD</format>
+            <format>JSON</format>
+            <format>XML</format>
+            <format>CSV</format>
+            <format>LOG</format>
+        </text_formats>
+        
+        <image_formats>
+            <format>PNG</format>
+            <format>JPEG</format>
+            <format>GIF</format>
+            <format>BMP</format>
+            <format>TIFF</format>
+            <format>WEBP</format>
+        </image_formats>
+        
+        <audio_formats>
+            <format>MP3</format>
+            <format>WAV</format>
+            <format>FLAC</format>
+            <format>OGG</format>
+        </audio_formats>
+        
+        <video_formats>
+            <format>MP4</format>
+            <format>AVI</format>
+            <format>MKV</format>
+            <format>WEBM</format>
+        </video_formats>
+    </supported_formats>
+    
+    <test_results>
+        <result>
+            <file>large_test.txt</file>
+            <original_size>460000</original_size>
+            <compressed_size>224</compressed_size>
+            <ratio>99.95</ratio>
+            <status>world_class</status>
+        </result>
+    </test_results>
+</nxzip_test>

@@ -5,13 +5,22 @@
 ```
 NXZip/
 ├── 🚀 nxzip_proven.py              # Main CLI tool (統合ツール)
+├── 🏗️ nxzip_nexus.py               # Proven NEXUS Engine (99.741%)
 ├── 📄 README.md                    # Project documentation
 ├── 📋 requirements.txt             # Python dependencies
 ├── 🔧 test-data/                   # Test files
 │   ├── large_test.txt              # Large file for testing
-│   └── test.txt                    # Small test file
-├── 🏗️ python-nxzip/               # Proven NEXUS Engine
-│   └── nxzip_nexus.py              # 99.741% proven compression
+│   ├── repetitive_test.txt         # Pattern test file
+│   ├── sample_text.txt             # Mixed content test
+│   ├── huge_test.txt               # Extra large test
+│   ├── test.txt                    # Small test file
+│   └── mixed_formats/              # Multi-format test files
+│       ├── document.md             # Markdown
+│       ├── config.json             # JSON
+│       ├── script.py               # Python
+│       ├── data.csv                # CSV
+│       ├── config.xml              # XML
+│       └── binary_data.bin         # Binary
 ├── 🔒 NXZip-Python/               # 6-Stage Enterprise SPE
 │   └── nxzip/engine/spe_core.py    # Enterprise encryption
 └── ⚙️ .github/
@@ -24,7 +33,7 @@ NXZip/
 - **nxzip_proven.py**: Complete CLI interface with proven algorithms
 
 ### 2. NEXUS Engine (Proven)
-- **python-nxzip/nxzip_nexus.py**: 
+- **nxzip_nexus.py**: 
   - 99.98% text compression (vs 7Zip: +0.4%)
   - 99.84% image compression (vs 7Zip: +0.3%)
   - 99.77% audio compression (vs 7Zip: +0.3%)

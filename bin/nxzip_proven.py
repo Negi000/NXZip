@@ -29,14 +29,14 @@ from typing import List, Dict, Any
 
 # Add proven implementations to path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-python_nxzip_path = os.path.join(current_dir, 'python-nxzip')
-nxzip_python_path = os.path.join(current_dir, 'NXZip-Python')
-sys.path.insert(0, python_nxzip_path)
+project_root = os.path.dirname(current_dir)  # Go up one level from bin/
+nxzip_python_path = os.path.join(project_root, 'NXZip-Python')
 sys.path.insert(0, nxzip_python_path)
+# NEXUS engine is now properly organized in engine directory
 
 # Import proven NEXUS engine (99.741% average compression)
 try:
-    from nxzip_nexus import NXZipNEXUS
+    from nxzip.engine.nexus import NXZipNEXUS
     print("✅ Loaded proven NEXUS engine (99.741% proven rate)")
 except ImportError as e:
     print(f"❌ Could not import proven NEXUS engine: {e}")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 NXZip v2.0 Command Line Interface
-次世代アーカイブシステムのCLI
+次世代アーカイブシステムのCLI - 正式統合版
 """
 
 import os
@@ -9,7 +9,8 @@ import sys
 import click
 from typing import Optional
 
-from .formats.enhanced_nxz import SuperNXZipFile, NXZipError
+# 正式統合版エンジン使用
+from .engine.nxzip_core import NXZipCore
 from .utils.constants import CompressionAlgorithm, EncryptionAlgorithm, KDFAlgorithm
 
 
@@ -46,32 +47,23 @@ def create(archive: str, file: str, password: Optional[str],
     """アーカイブを作成"""
     
     try:
-        # NXZipファイルインスタンス作成
-        nxzip = SuperNXZipFile(
-            compression_algo=compression,
-            encryption_algo=encryption,
-            kdf_algo=kdf
-        )
+        # NXZip Core 正式統合版
+        nxzip = NXZipCore()
         
         if verbose:
-            click.echo("🚀 NXZip v2.0 - 超高速圧縮開始")
+            click.echo("🚀 NXZip v2.0 - 正式統合版圧縮開始")
             click.echo(f"📂 入力: {file}")
             click.echo(f"📦 出力: {archive}")
-            click.echo(f"🗜️  圧縮: {compression} (レベル {level})")
+            click.echo(f"🗜️  エンジン: SPE + NEXUS + NXZ")
             if password:
-                click.echo(f"🔒 暗号化: {encryption} (KDF: {kdf})")
+                click.echo(f"🔒 暗号化: SPE JIT最適化版")
         
         # ファイル読み込み
         with open(file, 'rb') as f:
             data = f.read()
         
         # アーカイブ作成
-        archive_data = nxzip.create_archive(
-            data, 
-            password, 
-            level, 
-            show_progress=verbose
-        )
+        archive_data = nxzip.compress(data)
         
         # アーカイブ保存
         with open(archive, 'wb') as f:

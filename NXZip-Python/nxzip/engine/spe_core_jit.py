@@ -21,22 +21,18 @@ from numba import jit, prange, types
 from numba.core import config
 import numba
 
-# NumbaのJIT最適化設定
+# NumbaのJIT最適化設定（並列処理をオフにして安定性を優先）
 try:
-    config.THREADING_LAYER = 'tbb'  # Intel TBBによる並列化
-    numba.set_num_threads(8)  # 8スレッド並列実行
+    config.THREADING_LAYER = 'workqueue'  # より安定な並列化
+    numba.set_num_threads(1)  # 安定性優先でシングルスレッド
 except Exception:
-    # TBBが利用できない場合は通常の並列化を使用
-    try:
-        numba.set_num_threads(4)  # 4スレッド並列実行
-    except Exception:
-        pass  # 並列化なしで続行
+    pass  # 並列化なしで続行
 
 # ========== JIT最適化関数 ==========
 
-@jit(nopython=True, parallel=True, fastmath=True, cache=True)
+@jit(nopython=True, fastmath=True, cache=True)
 def _jit_ultra_fast_stage1(data: np.ndarray, original_len: int) -> np.ndarray:
-    """JIT最適化された超高速Stage1"""
+    """JIT最適化された超高速Stage1（安定版）"""
     # パディングサイズ計算
     padding_size = (8 - (original_len % 8)) % 8
     
@@ -47,8 +43,8 @@ def _jit_ultra_fast_stage1(data: np.ndarray, original_len: int) -> np.ndarray:
     # オリジナルデータコピー
     result[:original_len] = data[:original_len]
     
-    # パディング追加
-    for i in prange(padding_size):
+    # パディング追加（シーケンシャル処理）
+    for i in range(padding_size):
         result[original_len + i] = padding_size
     
     # 長さ情報追加（little endian手動実装）
@@ -58,9 +54,9 @@ def _jit_ultra_fast_stage1(data: np.ndarray, original_len: int) -> np.ndarray:
     
     return result
 
-@jit(nopython=True, parallel=True, fastmath=True, cache=True)
+@jit(nopython=True, fastmath=True, cache=True)
 def _jit_reverse_stage1(data: np.ndarray) -> np.ndarray:
-    """JIT最適化された超高速Stage1逆変換"""
+    """JIT最適化された超高速Stage1逆変換（安定版）"""
     if len(data) < 8:
         return data
     
@@ -71,69 +67,53 @@ def _jit_reverse_stage1(data: np.ndarray) -> np.ndarray:
     
     return data[:original_len]
 
-@jit(nopython=True, parallel=True, fastmath=True, cache=True)
+@jit(nopython=True, fastmath=True, cache=True)
 def _jit_ultra_fast_stage2(data: np.ndarray, sbox: np.ndarray, xor_key: np.ndarray) -> np.ndarray:
-    """JIT最適化された超高速Stage2（置換+XOR）"""
+    """JIT最適化された超高速Stage2（置換+XOR）安定版"""
     data_len = len(data)
     
-    # 64バイトずつ並列処理（最大並列化）
-    for i in prange(0, data_len, 64):
-        end_idx = min(i + 64, data_len)
-        
-        # 64バイトブロック並列処理
-        for j in range(i, end_idx):
-            key_idx = j & 0x1F  # % 32
-            data[j] = sbox[data[j]] ^ xor_key[key_idx]
+    # 高速シーケンシャル処理
+    for j in range(data_len):
+        key_idx = j & 0x1F  # % 32
+        data[j] = sbox[data[j]] ^ xor_key[key_idx]
     
     return data
 
-@jit(nopython=True, parallel=True, fastmath=True, cache=True)
+@jit(nopython=True, fastmath=True, cache=True)
 def _jit_reverse_stage2(data: np.ndarray, inverse_sbox: np.ndarray, xor_key: np.ndarray) -> np.ndarray:
-    """JIT最適化された超高速Stage2逆変換"""
+    """JIT最適化された超高速Stage2逆変換（安定版）"""
     data_len = len(data)
     
-    # 64バイトずつ並列処理（最大並列化）
-    for i in prange(0, data_len, 64):
-        end_idx = min(i + 64, data_len)
-        
-        # 64バイトブロック並列処理
-        for j in range(i, end_idx):
-            key_idx = j & 0x1F  # % 32
-            data[j] = inverse_sbox[data[j] ^ xor_key[key_idx]]
+    # 高速シーケンシャル処理
+    for j in range(data_len):
+        key_idx = j & 0x1F  # % 32
+        data[j] = inverse_sbox[data[j] ^ xor_key[key_idx]]
     
     return data
 
-@jit(nopython=True, parallel=True, fastmath=True, cache=True)
+@jit(nopython=True, fastmath=True, cache=True)
 def _jit_ultra_fast_stage3(data: np.ndarray, shift_values: np.ndarray) -> np.ndarray:
-    """JIT最適化された超高速Stage3（シフト）"""
+    """JIT最適化された超高速Stage3（シフト）安定版"""
     data_len = len(data)
     
-    # 64バイトずつ並列処理（最大並列化）
-    for i in prange(0, data_len, 64):
-        end_idx = min(i + 64, data_len)
-        
-        # 64バイトブロック並列処理
-        for j in range(i, end_idx):
-            shift_idx = j & 0x1F  # % 32
-            shift_val = shift_values[shift_idx]
-            data[j] = ((data[j] << shift_val) | (data[j] >> (8 - shift_val))) & 0xFF
+    # 高速シーケンシャル処理
+    for j in range(data_len):
+        shift_idx = j & 0x1F  # % 32
+        shift_val = shift_values[shift_idx]
+        data[j] = ((data[j] << shift_val) | (data[j] >> (8 - shift_val))) & 0xFF
     
     return data
 
-@jit(nopython=True, parallel=True, fastmath=True, cache=True)
+@jit(nopython=True, fastmath=True, cache=True)
 def _jit_reverse_stage3(data: np.ndarray, shift_values: np.ndarray) -> np.ndarray:
-    """JIT最適化された超高速Stage3逆変換"""
+    """JIT最適化された超高速Stage3逆変換（安定版）"""
     data_len = len(data)
     
-    # 64バイトずつ並列処理（最大並列化）
-    for i in prange(0, data_len, 64):
-        end_idx = min(i + 64, data_len)
-        
-        # 64バイトブロック並列処理
-        for j in range(i, end_idx):
-            shift_idx = j & 0x1F  # % 32
-            shift_val = shift_values[shift_idx]
-            data[j] = ((data[j] >> shift_val) | (data[j] << (8 - shift_val))) & 0xFF
+    # 高速シーケンシャル処理
+    for j in range(data_len):
+        shift_idx = j & 0x1F  # % 32
+        shift_val = shift_values[shift_idx]
+        data[j] = ((data[j] >> shift_val) | (data[j] << (8 - shift_val))) & 0xFF
     
     return data
 

@@ -7,6 +7,6 @@ from .spe_core_jit import SPECoreJIT
 from .nexus import NXZipNEXUSFinal
 from .nxzip_core import NXZipCore
 from .nxzip_final import NXZipFinal
-from .compressor import *
+from .compressor import SuperCompressor
 
 __all__ = ['SPECoreJIT', 'NXZipNEXUSFinal', 'NXZipCore', 'NXZipFinal', 'SuperCompressor']

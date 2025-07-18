@@ -35,7 +35,7 @@ class NXZipFinal:
     
     def __init__(self):
         self.spe = SPECoreJIT()
-        
+    
     def compress(self, data: bytes) -> bytes:
         """NXZip最終圧縮（SPE + 高性能圧縮）"""
         if not data:

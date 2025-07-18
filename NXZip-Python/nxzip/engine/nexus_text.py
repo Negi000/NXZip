@@ -45,13 +45,15 @@ class NEXUSText:
         encoding = self._detect_text_encoding(data)
         print(f"📝 検出: {encoding}")
         
-        # 2. テキスト最適圧縮
+        # 2. テキスト最適圧縮（速度改善版）
         data_size = len(data)
-        if data_size < 1024 * 1024:  # 1MB未満
+        if data_size < 1024 * 1024:  # 1MB未満は最高圧縮
             compressed_data = b'TXTLZMA' + lzma.compress(data, preset=6)
+        elif data_size < 50 * 1024 * 1024:  # 50MB未満は中圧縮
+            compressed_data = b'TXTLZMA' + lzma.compress(data, preset=4)
         else:
-            # 大きなテキストファイル用の最適化
-            compressed_data = b'TXTLZMA' + lzma.compress(data, preset=6)
+            # 大きなテキストファイル用の高速圧縮
+            compressed_data = b'TXTLZMA' + lzma.compress(data, preset=2)
         
         # 3. SPE暗号化
         encrypted_data = self.spe.apply_transform(compressed_data)
@@ -176,8 +178,8 @@ def test_nexus_text():
     print("📝 NEXUS Text テスト - テキスト専用圧縮エンジン")
     print("=" * 60)
     
-    # テキストテストファイル
-    test_file = Path(r"C:\Users\241822\Desktop\新しいフォルダー (2)\需要引当予測リスト クエリ.txt")
+    # 新しいテキストサンプル
+    test_file = Path(r"C:\Users\241822\Desktop\新しいフォルダー (2)\NXZip\NXZip-Python\sample\出庫実績明細_202412.txt")
     
     if not test_file.exists():
         print("❌ テストファイルが見つかりません")
@@ -185,7 +187,7 @@ def test_nexus_text():
     
     file_size = test_file.stat().st_size
     print(f"📄 ファイル: {test_file.name}")
-    print(f"📊 サイズ: {file_size//1024//1024} MB")
+    print(f"📊 サイズ: {file_size//1024} KB")
     
     # データ読み込み
     print("\n📖 データ読み込み中...")

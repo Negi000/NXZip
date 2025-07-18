@@ -1,20 +1,10 @@
 #!/usr/bin/env python3
 """
-NEXUS Image Engine - 画像専用圧縮エンジン
-JPEG、PNG、GIF、BMPなどの画像フォーマットに最適化
-""        # 4. フォーマット別展開
-        if compressed_data.startswith(b'IMGJPEG'):
-            original_data = lzma.decompress(compressed_data[7:])
-        elif compressed_data.startswith(b'IMGPNG'):
-            original_data = lzma.decompress(compressed_data[6:])
-        elif compressed_data.startswith(b'IMGBMP'):
-            original_data = lzma.decompress(compressed_data[6:])
-        elif compressed_data.startswith(b'IMGGIF'):
-            original_data = lzma.decompress(compressed_data[6:])
-        elif compressed_data.startswith(b'IMGWEBP'):
-            original_data = lzma.decompress(compressed_data[7:])
-        elif compressed_data.startswith(b'IMGOTHER'):
-            original_data = lzma.decompress(compressed_data[8:])truct
+NEXUS Image - 画像専用圧縮エンジン
+画像フォーマットに最適化された圧縮処理
+"""
+
+import struct
 import time
 import zlib
 import lzma
@@ -107,17 +97,17 @@ class NEXUSImage:
         
         # 4. フォーマット別展開
         if compressed_data.startswith(b'IMGJPEG'):
-            original_data = zlib.decompress(compressed_data[7:])
+            original_data = lzma.decompress(compressed_data[7:])
         elif compressed_data.startswith(b'IMGPNG'):
             original_data = lzma.decompress(compressed_data[6:])
         elif compressed_data.startswith(b'IMGBMP'):
             original_data = lzma.decompress(compressed_data[6:])
         elif compressed_data.startswith(b'IMGGIF'):
-            original_data = zlib.decompress(compressed_data[6:])
+            original_data = lzma.decompress(compressed_data[6:])
         elif compressed_data.startswith(b'IMGWEBP'):
-            original_data = zlib.decompress(compressed_data[7:])
+            original_data = lzma.decompress(compressed_data[7:])
         elif compressed_data.startswith(b'IMGOTHER'):
-            original_data = zlib.decompress(compressed_data[8:])
+            original_data = lzma.decompress(compressed_data[8:])
         else:
             raise ValueError("Unknown image compression format")
         
@@ -131,16 +121,16 @@ class NEXUSImage:
         # 画像マジック検出
         if data.startswith(b'\xFF\xD8\xFF'):
             return "jpeg"
-        elif data.startswith(b'\x89PNG\r\n\x1A\n'):
+        elif data.startswith(b'\x89PNG\r\n\x1a\n'):
             return "png"
-        elif data.startswith(b'GIF87a') or data.startswith(b'GIF89a'):
-            return "gif"
         elif data.startswith(b'BM'):
             return "bmp"
-        elif data.startswith(b'RIFF') and b'WEBP' in data[:16]:
+        elif data.startswith(b'GIF87a') or data.startswith(b'GIF89a'):
+            return "gif"
+        elif data.startswith(b'RIFF') and b'WEBP' in data[:12]:
             return "webp"
         else:
-            return "image"
+            return "unknown"
     
     def _create_image_header(self, original_size: int, compressed_size: int, 
                            encrypted_size: int, format_type: str) -> bytes:
@@ -155,43 +145,41 @@ class NEXUSImage:
         
         # サイズ情報
         header[8:16] = struct.pack('<Q', original_size)
-        header[16:24] = struct.pack('<Q', encrypted_size)
+        header[16:24] = struct.pack('<Q', compressed_size)
+        header[24:32] = struct.pack('<Q', encrypted_size)
         
         # フォーマット情報
-        format_bytes = format_type.encode('ascii')[:8].ljust(8, b'\x00')
-        header[24:32] = format_bytes
-        
-        # タイムスタンプ
-        header[32:36] = struct.pack('<I', int(time.time()) & 0xffffffff)
-        
-        # CRC32
-        crc32 = zlib.crc32(header[0:36])
-        header[36:40] = struct.pack('<I', crc32 & 0xffffffff)
+        format_bytes = format_type.encode('ascii')[:8]
+        header[32:40] = format_bytes.ljust(8, b'\x00')
         
         return bytes(header)
     
-    def _parse_image_header(self, nxz_data: bytes) -> Optional[dict]:
-        """画像専用ヘッダー解析"""
-        if len(nxz_data) < 40:
+    def _parse_image_header(self, data: bytes) -> Optional[dict]:
+        """画像ヘッダー解析"""
+        if len(data) < 40:
             return None
         
-        if nxz_data[0:4] != NXZ_MAGIC:
+        # マジックナンバー確認
+        if data[0:4] != NXZ_MAGIC:
             return None
         
-        version = struct.unpack('<I', nxz_data[4:8])[0]
-        original_size = struct.unpack('<Q', nxz_data[8:16])[0]
-        encrypted_size = struct.unpack('<Q', nxz_data[16:24])[0]
-        format_type = nxz_data[24:32].rstrip(b'\x00').decode('ascii', errors='ignore')
+        # ヘッダー情報抽出
+        version = struct.unpack('<I', data[4:8])[0]
+        original_size = struct.unpack('<Q', data[8:16])[0]
+        compressed_size = struct.unpack('<Q', data[16:24])[0]
+        encrypted_size = struct.unpack('<Q', data[24:32])[0]
+        format_type = data[32:40].rstrip(b'\x00').decode('ascii')
         
         return {
             'version': version,
             'original_size': original_size,
+            'compressed_size': compressed_size,
             'encrypted_size': encrypted_size,
             'format_type': format_type
         }
     
     def _create_empty_nxz(self) -> bytes:
-        """空の画像NXZファイル作成"""
+        """空のNXZファイル作成"""
         return self._create_image_header(0, 0, 0, "empty")
 
 def test_nexus_image():
@@ -199,30 +187,33 @@ def test_nexus_image():
     print("🖼️ NEXUS Image テスト - 画像専用圧縮エンジン")
     print("=" * 60)
     
-    # 画像テストファイル - 複数テスト
+    # 画像テストファイル
     test_files = [
-        Path(r"C:\Users\241822\Desktop\新しいフォルダー (2)\NXZip\NXZip-Python\sample\COT-001.jpg"),
-        Path(r"C:\Users\241822\Desktop\新しいフォルダー (2)\NXZip\NXZip-Python\sample\COT-012.png")
+        "COT-001.jpg",
+        "COT-012.png"
     ]
     
-    nexus = NEXUSImage()
-    
-    for test_file in test_files:
+    for test_filename in test_files:
+        test_file = Path(rf"C:\Users\241822\Desktop\新しいフォルダー (2)\NXZip\NXZip-Python\sample\{test_filename}")
+        
         if not test_file.exists():
-            print(f"❌ {test_file.name} が見つかりません")
+            print(f"❌ {test_filename} が見つかりません")
             continue
         
         file_size = test_file.stat().st_size
-        print(f"\n📄 ファイル: {test_file.name}")
+        print(f"📄 ファイル: {test_file.name}")
         print(f"📊 サイズ: {file_size//1024} KB")
         
         # データ読み込み
-        print("\n📖 データ読み込み中...")
+        print("📖 データ読み込み中...")
         with open(test_file, 'rb') as f:
             data = f.read()
         
+        # NEXUS Image初期化
+        nexus = NEXUSImage()
+        
         # 圧縮テスト
-        print(f"\n🖼️ NEXUS Image 圧縮中...")
+        print("\n🖼️ NEXUS Image 圧縮中...")
         start_time = time.perf_counter()
         compressed = nexus.compress(data)
         compress_time = time.perf_counter() - start_time
@@ -263,14 +254,13 @@ def test_nexus_image():
         print(f"   戦略: 画像フォーマット別最適化")
         print(f"   完全可逆性: ✅ 保証")
         
-        # 画像目標評価
-        target_compression = 25  # 25%を目標
-        target_speed = 80        # 80MB/sを目標
+        # 目標評価
+        target_ratio = 25  # 25%圧縮率目標
+        target_speed = 80  # 80MB/s目標
         
         print(f"\n🎯 画像目標評価:")
-        print(f"   圧縮率: {compression_ratio:.2f}% {'✅' if compression_ratio >= target_compression else '⚠️'} (目標{target_compression}%)")
+        print(f"   圧縮率: {compression_ratio:.2f}% {'✅' if compression_ratio >= target_ratio else '⚠️'} (目標{target_ratio}%)")
         print(f"   速度: {total_speed:.2f} MB/s {'✅' if total_speed >= target_speed else '⚠️'} (目標{target_speed}MB/s)")
-        
         print("=" * 60)
 
 if __name__ == "__main__":

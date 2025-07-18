@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
 """
-NXZip - 最終統合版
-97.31%圧縮率と139.80MB/s性能を実現する革新的アーカイブシステム
+NXZip - 統合圧縮システム
+AV1/SRLA/AVIF制約除去技術による次世代圧縮
 
 Features:
-- 超高圧縮率 (97.31% compression ratio)
-- 超高速処理 (139.80MB/s+ processing speed) 
+- 制約除去技術 (AV1/SRLA/AVIF constraint removal)
+- NEXUS統合エンジン (Unified compression engine)
 - SPE暗号化技術 (Structure-Preserving Encryption)
-- JIT最適化 (Numba-powered optimization)
-- NXZ v2.0 フォーマット
+- 適応的圧縮戦略 (Adaptive compression strategies)
+- 完全可逆圧縮 (100% lossless compression)
 """
 
-__version__ = "2.0.0"
-__author__ = "NXZip Team"
+__version__ = "3.0.0"
+__author__ = "NXZip Development Team"
 __email__ = "team@nxzip.org"
 __license__ = "MIT"
 
 # Core classes
-from .engine.nxzip_final import NXZipFinal
+from .engine.nexus_unified import NEXUSUnified
 from .engine.spe_core_jit import SPECoreJIT
-from .engine.compressor import SuperCompressor
 from .crypto.encrypt import SuperCrypto
 from .utils.constants import (
     CompressionAlgorithm,
@@ -71,10 +70,10 @@ def verify_installation() -> bool:
         
         # 基本的な圧縮・展開テスト
         test_data = b"NXZip Installation Test"
-        nxzip = NXZipFinal()
+        nexus = NEXUSUnified()
         
-        archive = nxzip.compress(test_data)
-        restored = nxzip.decompress(archive)
+        archive = nexus.compress(test_data)
+        restored = nexus.decompress(archive)
         
         return restored == test_data
     

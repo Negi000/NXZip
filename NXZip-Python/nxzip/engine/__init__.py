@@ -1,12 +1,24 @@
 """
-NXZip Engine Package - 最終統合版
-SPE + 高性能圧縮 + NXZ 統合エンジン
+NXZip Engine Package - 統合版
+NEXUS統合エンジン + SPE暗号化
 """
 
 from .spe_core_jit import SPECoreJIT
-from .nexus import NXZipNEXUSFinal
-from .nxzip_core import NXZipCore
-from .nxzip_final import NXZipFinal
-from .compressor import SuperCompressor
+from .nexus_unified import NEXUSUnified
+from .nexus_target import NEXUSTarget
+from .nexus_breakthrough import NEXUSBreakthrough
+from .nexus_extreme import NEXUSExtreme
+from .nexus_ultimate import NEXUSUltimate
+from .nexus_audio_advanced import NEXUSAudioAdvanced
+from .nexus_image_advanced import NEXUSImageAdvanced
 
-__all__ = ['SPECoreJIT', 'NXZipNEXUSFinal', 'NXZipCore', 'NXZipFinal', 'SuperCompressor']
+__all__ = [
+    'SPECoreJIT',
+    'NEXUSUnified', 
+    'NEXUSTarget',
+    'NEXUSBreakthrough',
+    'NEXUSExtreme',
+    'NEXUSUltimate',
+    'NEXUSAudioAdvanced',
+    'NEXUSImageAdvanced'
+]

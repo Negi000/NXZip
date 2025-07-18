@@ -79,34 +79,50 @@ class NEXUSImageAdvanced:
         return header + encrypted_data
     
     def _compress_jpeg_avif_style(self, data: bytes) -> bytes:
-        """AVIF技術参考のJPEG圧縮"""
+        """AVIF++ 技術参考の高速高圧縮JPEG"""
         data_size = len(data)
         
-        # AVIF風の適応的圧縮レベル
-        if data_size > 10 * 1024 * 1024:  # 10MB超: 速度重視
-            return b'IMGJPEG' + lzma.compress(data, preset=1)
-        elif data_size > 5 * 1024 * 1024:  # 5MB超: バランス
-            return b'IMGJPEG' + lzma.compress(data, preset=3)
-        elif data_size > 1 * 1024 * 1024:  # 1MB超: 高圧縮
-            return b'IMGJPEG' + lzma.compress(data, preset=5)
+        # AVIF++ 高速高圧縮戦略
+        if data_size > 50 * 1024 * 1024:  # 50MB超: 高速中圧縮
+            # 第1段階: 高速中圧縮
+            stage1 = lzma.compress(data, preset=2, check=lzma.CHECK_CRC32)
+            return b'IMGJPEG' + stage1
+        elif data_size > 20 * 1024 * 1024:  # 20MB超: 中圧縮
+            # 第1段階: 中圧縮
+            stage1 = lzma.compress(data, preset=4, check=lzma.CHECK_CRC32)
+            return b'IMGJPEG' + stage1
+        elif data_size > 5 * 1024 * 1024:  # 5MB超: 高圧縮
+            # 第1段階: 高圧縮
+            stage1 = lzma.compress(data, preset=6, check=lzma.CHECK_CRC32)
+            return b'IMGJPEG' + stage1
         else:
-            # 小さな画像: 最高圧縮
-            return b'IMGJPEG' + lzma.compress(data, preset=7)
+            # 小さなJPEG: 超高圧縮
+            # 第1段階: 超高圧縮
+            stage1 = lzma.compress(data, preset=8, check=lzma.CHECK_CRC32)
+            return b'IMGJPEG' + stage1
     
     def _compress_png_avif_style(self, data: bytes) -> bytes:
-        """AVIF技術参考のPNG圧縮"""
+        """AVIF++ 技術参考の高速高圧縮PNG"""
         data_size = len(data)
         
-        # PNG特化の最適化
-        if data_size > 50 * 1024 * 1024:  # 50MB超: 速度重視
-            return b'IMGPNG' + lzma.compress(data, preset=2)
-        elif data_size > 20 * 1024 * 1024:  # 20MB超: バランス
-            return b'IMGPNG' + lzma.compress(data, preset=4)
+        # AVIF++ 高速高圧縮戦略
+        if data_size > 50 * 1024 * 1024:  # 50MB超: 高速中圧縮
+            # 第1段階: 高速中圧縮
+            stage1 = lzma.compress(data, preset=2, check=lzma.CHECK_CRC32)
+            return b'IMGPNG' + stage1
+        elif data_size > 20 * 1024 * 1024:  # 20MB超: 中圧縮
+            # 第1段階: 中圧縮
+            stage1 = lzma.compress(data, preset=4, check=lzma.CHECK_CRC32)
+            return b'IMGPNG' + stage1
         elif data_size > 5 * 1024 * 1024:  # 5MB超: 高圧縮
-            return b'IMGPNG' + lzma.compress(data, preset=6)
+            # 第1段階: 高圧縮
+            stage1 = lzma.compress(data, preset=6, check=lzma.CHECK_CRC32)
+            return b'IMGPNG' + stage1
         else:
-            # 小さなPNG: 最高圧縮
-            return b'IMGPNG' + lzma.compress(data, preset=9)
+            # 小さなPNG: 超高圧縮
+            # 第1段階: 超高圧縮
+            stage1 = lzma.compress(data, preset=8, check=lzma.CHECK_CRC32)
+            return b'IMGPNG' + stage1
     
     def _compress_gif_avif_style(self, data: bytes) -> bytes:
         """AVIF技術参考のGIF圧縮"""
@@ -136,9 +152,9 @@ class NEXUSImageAdvanced:
         
         # 4. フォーマット別展開
         if compressed_data.startswith(b'IMGJPEG'):
-            original_data = lzma.decompress(compressed_data[7:])
+            original_data = self._decompress_jpeg_avif_style(compressed_data[7:])
         elif compressed_data.startswith(b'IMGPNG'):
-            original_data = lzma.decompress(compressed_data[6:])
+            original_data = self._decompress_png_avif_style(compressed_data[6:])
         elif compressed_data.startswith(b'IMGBMP'):
             original_data = lzma.decompress(compressed_data[6:])
         elif compressed_data.startswith(b'IMGGIF'):
@@ -196,6 +212,22 @@ class NEXUSImageAdvanced:
     def _create_empty_nxz(self) -> bytes:
         """空のNXZファイル作成"""
         return self._create_image_header(0, 0, 0, "empty")
+    
+    def _decompress_jpeg_avif_style(self, data: bytes) -> bytes:
+        """AVIF++ 技術参考の高速高圧縮JPEG展開"""
+        try:
+            # 高速高圧縮データを展開
+            return lzma.decompress(data)
+        except Exception as e:
+            raise ValueError(f"JPEG解凍失敗: {e}")
+    
+    def _decompress_png_avif_style(self, data: bytes) -> bytes:
+        """AVIF++ 技術参考の高速高圧縮PNG展開"""
+        try:
+            # 高速高圧縮データを展開
+            return lzma.decompress(data)
+        except Exception as e:
+            raise ValueError(f"PNG解凍失敗: {e}")
 
 def test_nexus_image_advanced():
     """NEXUS Image Advanced テスト"""

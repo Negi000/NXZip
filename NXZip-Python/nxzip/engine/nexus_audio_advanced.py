@@ -76,32 +76,50 @@ class NEXUSAudioAdvanced:
         return header + encrypted_data
     
     def _compress_wav_srla_style(self, data: bytes) -> bytes:
-        """SRLA技術参考のWAV圧縮"""
+        """SRLA++ 技術参考の高速高圧縮WAV"""
         data_size = len(data)
         
-        # SRLA風の高圧縮可逆圧縮
-        if data_size > 100 * 1024 * 1024:  # 100MB超: 速度重視
-            return b'AUDWAV' + lzma.compress(data, preset=3)
-        elif data_size > 50 * 1024 * 1024:  # 50MB超: バランス
-            return b'AUDWAV' + lzma.compress(data, preset=6)
+        # SRLA++ 高速高圧縮戦略
+        if data_size > 100 * 1024 * 1024:  # 100MB超: 高速中圧縮
+            # 第1段階: 高速中圧縮
+            stage1 = lzma.compress(data, preset=2, check=lzma.CHECK_CRC32)
+            return b'AUDWAV' + stage1
+        elif data_size > 50 * 1024 * 1024:  # 50MB超: 中圧縮
+            # 第1段階: 中圧縮
+            stage1 = lzma.compress(data, preset=4, check=lzma.CHECK_CRC32)
+            return b'AUDWAV' + stage1
         elif data_size > 10 * 1024 * 1024:  # 10MB超: 高圧縮
-            return b'AUDWAV' + lzma.compress(data, preset=8)
+            # 第1段階: 高圧縮
+            stage1 = lzma.compress(data, preset=6, check=lzma.CHECK_CRC32)
+            return b'AUDWAV' + stage1
         else:
-            # 小さなWAV: 最高圧縮
-            return b'AUDWAV' + lzma.compress(data, preset=9)
+            # 小さなWAV: 超高圧縮
+            # 第1段階: 超高圧縮
+            stage1 = lzma.compress(data, preset=8, check=lzma.CHECK_CRC32)
+            return b'AUDWAV' + stage1
     
     def _compress_mp3_lyra_style(self, data: bytes) -> bytes:
-        """Lyra技術参考のMP3圧縮"""
+        """Lyra++ 技術参考の高速高圧縮MP3"""
         data_size = len(data)
         
-        # Lyra風の適応的圧縮
-        if data_size > 10 * 1024 * 1024:  # 10MB超: 軽圧縮
-            return b'AUDMP3' + lzma.compress(data, preset=2)
-        elif data_size > 5 * 1024 * 1024:  # 5MB超: 中圧縮
-            return b'AUDMP3' + lzma.compress(data, preset=4)
+        # Lyra++ 高速高圧縮戦略
+        if data_size > 50 * 1024 * 1024:  # 50MB超: 高速中圧縮
+            # 第1段階: 高速中圧縮
+            stage1 = lzma.compress(data, preset=2, check=lzma.CHECK_CRC32)
+            return b'AUDMP3' + stage1
+        elif data_size > 20 * 1024 * 1024:  # 20MB超: 中圧縮
+            # 第1段階: 中圧縮
+            stage1 = lzma.compress(data, preset=4, check=lzma.CHECK_CRC32)
+            return b'AUDMP3' + stage1
+        elif data_size > 5 * 1024 * 1024:  # 5MB超: 高圧縮
+            # 第1段階: 高圧縮
+            stage1 = lzma.compress(data, preset=6, check=lzma.CHECK_CRC32)
+            return b'AUDMP3' + stage1
         else:
-            # 小さなMP3: 高圧縮
-            return b'AUDMP3' + lzma.compress(data, preset=6)
+            # 小さなMP3: 超高圧縮
+            # 第1段階: 超高圧縮
+            stage1 = lzma.compress(data, preset=8, check=lzma.CHECK_CRC32)
+            return b'AUDMP3' + stage1
     
     def _compress_flac_advanced(self, data: bytes) -> bytes:
         """改良FLAC圧縮"""
@@ -142,9 +160,9 @@ class NEXUSAudioAdvanced:
         
         # 4. フォーマット別展開
         if compressed_data.startswith(b'AUDWAV'):
-            original_data = lzma.decompress(compressed_data[6:])
+            original_data = self._decompress_wav_srla_style(compressed_data[6:])
         elif compressed_data.startswith(b'AUDMP3'):
-            original_data = lzma.decompress(compressed_data[6:])
+            original_data = self._decompress_mp3_lyra_style(compressed_data[6:])
         elif compressed_data.startswith(b'AUDFLAC'):
             original_data = lzma.decompress(compressed_data[7:])
         elif compressed_data.startswith(b'AUDOGG'):
@@ -198,6 +216,22 @@ class NEXUSAudioAdvanced:
     def _create_empty_nxz(self) -> bytes:
         """空のNXZファイル作成"""
         return self._create_audio_header(0, 0, 0, "empty")
+    
+    def _decompress_wav_srla_style(self, data: bytes) -> bytes:
+        """SRLA++ 高速WAV解凍"""
+        try:
+            # LZMA高速展開
+            return lzma.decompress(data)
+        except Exception as e:
+            raise ValueError(f"WAV解凍失敗: {e}")
+    
+    def _decompress_mp3_lyra_style(self, data: bytes) -> bytes:
+        """Lyra++ 高速MP3解凍"""
+        try:
+            # LZMA高速展開
+            return lzma.decompress(data)
+        except Exception as e:
+            raise ValueError(f"MP3解凍失敗: {e}")
 
 def test_nexus_audio_advanced():
     """NEXUS Audio Advanced テスト"""

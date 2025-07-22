@@ -1,0 +1,213 @@
+{
+  "success": true,
+  "audit_results": [
+    {
+      "engine": "nexus_lightning_ultra.py",
+      "file_format": "TEXT",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_lightning_ultra.py\", line 398, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip",
+      "compression_time": 0.27317166328430176
+    },
+    {
+      "engine": "nexus_lightning_ultra.py",
+      "file_format": "MP4",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_lightning_ultra.py\", line 398, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip",
+      "compression_time": 0.2711458206176758
+    },
+    {
+      "engine": "nexus_ultimate_lightning.py",
+      "file_format": "TEXT",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_ultimate_lightning.py\", line 512, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NX",
+      "compression_time": 0.20523691177368164
+    },
+    {
+      "engine": "nexus_ultimate_lightning.py",
+      "file_format": "MP4",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_ultimate_lightning.py\", line 512, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NX",
+      "compression_time": 0.14809274673461914
+    },
+    {
+      "engine": "nexus_optimization_phase6.py",
+      "file_format": "TEXT",
+      "reversibility_status": "ERROR",
+      "error": "Compressed file not found",
+      "compression_time": 0.22520732879638672
+    },
+    {
+      "engine": "nexus_ultimate_final.py",
+      "file_format": "MP4",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_ultimate_final.py\", line 520, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\",
+      "compression_time": 1.122504711151123
+    },
+    {
+      "engine": "nexus_ultimate_final.py",
+      "file_format": "TEXT",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_ultimate_final.py\", line 520, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\",
+      "compression_time": 1.4333469867706299
+    },
+    {
+      "engine": "nexus_optimization_phase6.py",
+      "file_format": "MP4",
+      "reversibility_status": "FAILED",
+      "compression_ratio": 4.540426667241626,
+      "compression_time": 0.09490680694580078,
+      "decompression_error": "All decompression methods failed",
+      "decompression_time": 0.48651671409606934
+    },
+    {
+      "engine": "nexus_absolute_final.py",
+      "file_format": "TEXT",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_absolute_final.py\", line 485, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\",
+      "compression_time": 0.12514519691467285
+    },
+    {
+      "engine": "nexus_absolute_final.py",
+      "file_format": "MP4",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_absolute_final.py\", line 485, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\",
+      "compression_time": 0.09754395484924316
+    },
+    {
+      "engine": "nexus_final_integrated.py",
+      "file_format": "TEXT",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_final_integrated.py\", line 475, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZi",
+      "compression_time": 0.34001851081848145
+    },
+    {
+      "engine": "nexus_final_integrated.py",
+      "file_format": "MP4",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_final_integrated.py\", line 475, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZi",
+      "compression_time": 0.31644272804260254
+    },
+    {
+      "engine": "nexus_ai_driven.py",
+      "file_format": "TEXT",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_ai_driven.py\", line 616, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\n",
+      "compression_time": 0.3336641788482666
+    },
+    {
+      "engine": "nexus_ai_driven.py",
+      "file_format": "MP4",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_ai_driven.py\", line 616, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\n",
+      "compression_time": 0.27922654151916504
+    },
+    {
+      "engine": "nexus_quantum.py",
+      "file_format": "TEXT",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_quantum.py\", line 526, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nex",
+      "compression_time": 0.32627224922180176
+    },
+    {
+      "engine": "nexus_optimal_balance.py",
+      "file_format": "TEXT",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_optimal_balance.py\", line 483, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip",
+      "compression_time": 0.17628169059753418
+    },
+    {
+      "engine": "nexus_optimal_balance.py",
+      "file_format": "MP4",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_optimal_balance.py\", line 483, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip",
+      "compression_time": 0.14479660987854004
+    },
+    {
+      "engine": "nexus_quantum.py",
+      "file_format": "MP4",
+      "reversibility_status": "ERROR",
+      "error": "Exit code 1: Traceback (most recent call last):\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nexus_quantum.py\", line 526, in <module>\n    main()\n  File \"C:\\Users\\241822\\Desktop\\新しいフォルダー (2)\\NXZip\\bin\\nex",
+      "compression_time": 0.26162123680114746
+    }
+  ],
+  "analysis": {
+    "perfect_count": 0,
+    "partial_count": 0,
+    "failed_count": 1,
+    "error_count": 17,
+    "by_engine": {
+      "nexus_lightning_ultra.py": {
+        "perfect": 0,
+        "partial": 0,
+        "failed": 0,
+        "error": 2
+      },
+      "nexus_ultimate_lightning.py": {
+        "perfect": 0,
+        "partial": 0,
+        "failed": 0,
+        "error": 2
+      },
+      "nexus_optimization_phase6.py": {
+        "perfect": 0,
+        "partial": 0,
+        "failed": 1,
+        "error": 1
+      },
+      "nexus_ultimate_final.py": {
+        "perfect": 0,
+        "partial": 0,
+        "failed": 0,
+        "error": 2
+      },
+      "nexus_absolute_final.py": {
+        "perfect": 0,
+        "partial": 0,
+        "failed": 0,
+        "error": 2
+      },
+      "nexus_final_integrated.py": {
+        "perfect": 0,
+        "partial": 0,
+        "failed": 0,
+        "error": 2
+      },
+      "nexus_ai_driven.py": {
+        "perfect": 0,
+        "partial": 0,
+        "failed": 0,
+        "error": 2
+      },
+      "nexus_quantum.py": {
+        "perfect": 0,
+        "partial": 0,
+        "failed": 0,
+        "error": 2
+      },
+      "nexus_optimal_balance.py": {
+        "perfect": 0,
+        "partial": 0,
+        "failed": 0,
+        "error": 2
+      }
+    },
+    "by_format": {
+      "TEXT": {
+        "perfect": 0,
+        "partial": 0,
+        "failed": 0,
+        "error": 9
+      },
+      "MP4": {
+        "perfect": 0,
+        "partial": 0,
+        "failed": 1,
+        "error": 8
+      }
+    },
+    "suspicious_patterns": []
+  },
+  "suspicious_engines": [],
+  "verified_engines": [],
+  "audit_time": 2.4207682609558105
+}

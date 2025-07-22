@@ -70,7 +70,7 @@ class NEXUSUnified:
         format_type = self._detect_format(data)
         config = self.configs[format_type]
         
-        print(f"🔬 形式: {format_type} (目標: {config['target_ratio']*100:.0f}%)")
+        # 形式検出情報を内部で使用（表示は統一）
         
         # 適応的戦略選択
         data_size = len(data)

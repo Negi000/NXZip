@@ -28,7 +28,7 @@ def format_size(size_bytes):
 
 def compress_file(input_file, output_file=None):
     """ファイル圧縮"""
-    print(f"🔥 NXZip NEXUS - 統合圧縮システム")
+    print(f"🔥 NXZip - 次世代圧縮システム")
     print(f"📄 圧縮: {input_file}")
     
     # 入力ファイル確認
@@ -75,7 +75,7 @@ def compress_file(input_file, output_file=None):
 
 def decompress_file(input_file, output_file=None):
     """ファイル展開"""
-    print(f"💨 NXZip NEXUS - 統合展開システム")
+    print(f"💨 NXZip - 統合展開システム")
     print(f"📄 展開: {input_file}")
     
     # 入力ファイル確認

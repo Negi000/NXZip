@@ -1,0 +1,289 @@
+{
+  "test_timestamp": "2025-07-23T11:26:24.739155",
+  "test_files_count": 13,
+  "engines_tested": 4,
+  "engines": {
+    "nexus_quantum.py": {
+      "engine": "量子圧縮エンジン",
+      "script": "nexus_quantum.py",
+      "target_formats": [
+        ".jpg",
+        ".jpeg",
+        ".png"
+      ],
+      "tests": [
+        {
+          "file": "NXZip-Python\\sample\\COT-001.jpg",
+          "original_size": 2802871,
+          "original_hash": "27d481322de6c3d19af7b0accd7d317e5b870aeb9aac27c2c23d17efaf13bd16",
+          "compression_success": true,
+          "decompression_success": false,
+          "hash_match": false,
+          "compression_ratio": 29.132164840979126,
+          "error": "解凍失敗: 解凍失敗 - 全アルゴリズム試行済み: bz2失敗: Invalid data stream",
+          "compressed_size": 1986334
+        },
+        {
+          "file": "NXZip-Python\\sample\\COT-001.png",
+          "original_size": 7906973,
+          "original_hash": "8cbbb17a7dbeb307dc6ec027585a3e5cad423cd556e1f1d24d355e532a467d4d",
+          "compression_success": true,
+          "decompression_success": false,
+          "hash_match": false,
+          "compression_ratio": 74.87870516315157,
+          "error": "解凍失敗: 解凍失敗 - 全アルゴリズム試行済み: bz2失敗: Invalid data stream",
+          "compressed_size": 1986334
+        },
+        {
+          "file": "NXZip-Python\\sample\\COT-012.png",
+          "original_size": 34956418,
+          "original_hash": "b366bc88be9658c946344e0b5b076c8fc986ea9fc415c696344f0f4ce0a69901",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 0.1673312179754749,
+          "error": null,
+          "compressed_size": 34897925,
+          "restored_hash": "b366bc88be9658c946344e0b5b076c8fc986ea9fc415c696344f0f4ce0a69901"
+        }
+      ],
+      "summary": {
+        "total_tests": 3,
+        "passed": 1,
+        "failed": 2,
+        "success_rate": 33.33333333333333
+      }
+    },
+    "nexus_phase8_turbo.py": {
+      "engine": "Phase8 Turbo AI強化エンジン",
+      "script": "nexus_phase8_turbo.py",
+      "target_formats": [
+        ".mp4",
+        ".avi",
+        ".mov",
+        ".txt",
+        ".jpg",
+        ".png",
+        ".mp3",
+        ".wav"
+      ],
+      "tests": [
+        {
+          "file": "NXZip-Python\\sample\\COT-001.jpg",
+          "original_size": 2802871,
+          "original_hash": "27d481322de6c3d19af7b0accd7d317e5b870aeb9aac27c2c23d17efaf13bd16",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 11.265520246918248,
+          "error": null,
+          "compressed_size": 2487113,
+          "restored_hash": "27d481322de6c3d19af7b0accd7d317e5b870aeb9aac27c2c23d17efaf13bd16"
+        },
+        {
+          "file": "NXZip-Python\\sample\\COT-001.png",
+          "original_size": 7906973,
+          "original_hash": "8cbbb17a7dbeb307dc6ec027585a3e5cad423cd556e1f1d24d355e532a467d4d",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 0.015024712996991596,
+          "error": null,
+          "compressed_size": 7905785,
+          "restored_hash": "8cbbb17a7dbeb307dc6ec027585a3e5cad423cd556e1f1d24d355e532a467d4d"
+        },
+        {
+          "file": "NXZip-Python\\sample\\COT-012.png",
+          "original_size": 34956418,
+          "original_hash": "b366bc88be9658c946344e0b5b076c8fc986ea9fc415c696344f0f4ce0a69901",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 0.1673312179754749,
+          "error": null,
+          "compressed_size": 34897925,
+          "restored_hash": "b366bc88be9658c946344e0b5b076c8fc986ea9fc415c696344f0f4ce0a69901"
+        },
+        {
+          "file": "NXZip-Python\\sample\\generated-music-1752042054079.wav",
+          "original_size": 3969044,
+          "original_hash": "ff03921f7431094b73e86ffdf24dff6140273c68b8a4213774c9d2026be8ccd6",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 99.98213675635745,
+          "error": null,
+          "compressed_size": 709,
+          "restored_hash": "ff03921f7431094b73e86ffdf24dff6140273c68b8a4213774c9d2026be8ccd6"
+        },
+        {
+          "file": "NXZip-Python\\sample\\Python基礎講座3_4月26日-3.mp4",
+          "original_size": 30981802,
+          "original_hash": "b277bf586ee2d7fe77aa2455a4bc72c7a7e65bcc1d05841bf0270562d05f1321",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 28.33699924878482,
+          "error": null,
+          "compressed_size": 22202489,
+          "restored_hash": "b277bf586ee2d7fe77aa2455a4bc72c7a7e65bcc1d05841bf0270562d05f1321"
+        },
+        {
+          "file": "NXZip-Python\\sample\\Python基礎講座3_4月26日-3.restored.mp4",
+          "original_size": 30981802,
+          "original_hash": "b277bf586ee2d7fe77aa2455a4bc72c7a7e65bcc1d05841bf0270562d05f1321",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 28.33699924878482,
+          "error": null,
+          "compressed_size": 22202489,
+          "restored_hash": "b277bf586ee2d7fe77aa2455a4bc72c7a7e65bcc1d05841bf0270562d05f1321"
+        },
+        {
+          "file": "NXZip-Python\\sample\\Python基礎講座3_4月26日-3.verified.mp4",
+          "original_size": 3050418,
+          "original_hash": "6f397fcaec267c76386494bd4f3b49d7a1d3ff1cbddac75efea0df7e54cbf0ba",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 13.352825743881658,
+          "error": null,
+          "compressed_size": 2643101,
+          "restored_hash": "6f397fcaec267c76386494bd4f3b49d7a1d3ff1cbddac75efea0df7e54cbf0ba"
+        },
+        {
+          "file": "NXZip-Python\\sample\\出庫実績明細_202412.restored.txt",
+          "original_size": 96921198,
+          "original_hash": "5fc8d44a5f9d18b3e4c96a2802c6f378a0ae7be35e037005f2c89cb30eccd83c",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 94.16442107948356,
+          "error": null,
+          "compressed_size": 5655913,
+          "restored_hash": "5fc8d44a5f9d18b3e4c96a2802c6f378a0ae7be35e037005f2c89cb30eccd83c"
+        },
+        {
+          "file": "NXZip-Python\\sample\\出庫実績明細_202412.txt",
+          "original_size": 96921198,
+          "original_hash": "5fc8d44a5f9d18b3e4c96a2802c6f378a0ae7be35e037005f2c89cb30eccd83c",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 94.16442107948356,
+          "error": null,
+          "compressed_size": 5655913,
+          "restored_hash": "5fc8d44a5f9d18b3e4c96a2802c6f378a0ae7be35e037005f2c89cb30eccd83c"
+        },
+        {
+          "file": "NXZip-Python\\sample\\陰謀論.mp3",
+          "original_size": 1979616,
+          "original_hash": "4a2b12d6dcaf2d92220373e908b3d82dd31b688964ea7c580e8c1c6cc3d94181",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 79.05427113137094,
+          "error": null,
+          "compressed_size": 414645,
+          "restored_hash": "4a2b12d6dcaf2d92220373e908b3d82dd31b688964ea7c580e8c1c6cc3d94181"
+        }
+      ],
+      "summary": {
+        "total_tests": 10,
+        "passed": 10,
+        "failed": 0,
+        "success_rate": 100.0
+      }
+    },
+    "nexus_optimal_balance.py": {
+      "engine": "最適バランスエンジン",
+      "script": "nexus_optimal_balance.py",
+      "target_formats": [
+        ".txt",
+        ".md",
+        ".log",
+        ".csv"
+      ],
+      "tests": [
+        {
+          "file": "NXZip-Python\\sample\\出庫実績明細_202412.restored.txt",
+          "original_size": 96921198,
+          "original_hash": "5fc8d44a5f9d18b3e4c96a2802c6f378a0ae7be35e037005f2c89cb30eccd83c",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 94.16442107948356,
+          "error": null,
+          "compressed_size": 5655913,
+          "restored_hash": "5fc8d44a5f9d18b3e4c96a2802c6f378a0ae7be35e037005f2c89cb30eccd83c"
+        },
+        {
+          "file": "NXZip-Python\\sample\\出庫実績明細_202412.txt",
+          "original_size": 96921198,
+          "original_hash": "5fc8d44a5f9d18b3e4c96a2802c6f378a0ae7be35e037005f2c89cb30eccd83c",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 94.16442107948356,
+          "error": null,
+          "compressed_size": 5655913,
+          "restored_hash": "5fc8d44a5f9d18b3e4c96a2802c6f378a0ae7be35e037005f2c89cb30eccd83c"
+        }
+      ],
+      "summary": {
+        "total_tests": 2,
+        "passed": 2,
+        "failed": 0,
+        "success_rate": 100.0
+      }
+    },
+    "nexus_lightning_fast.py": {
+      "engine": "超高速音声エンジン",
+      "script": "nexus_lightning_fast.py",
+      "target_formats": [
+        ".mp3",
+        ".wav",
+        ".aac",
+        ".flac"
+      ],
+      "tests": [
+        {
+          "file": "NXZip-Python\\sample\\generated-music-1752042054079.wav",
+          "original_size": 3969044,
+          "original_hash": "ff03921f7431094b73e86ffdf24dff6140273c68b8a4213774c9d2026be8ccd6",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 99.98213675635745,
+          "error": null,
+          "compressed_size": 709,
+          "restored_hash": "ff03921f7431094b73e86ffdf24dff6140273c68b8a4213774c9d2026be8ccd6"
+        },
+        {
+          "file": "NXZip-Python\\sample\\陰謀論.mp3",
+          "original_size": 1979616,
+          "original_hash": "4a2b12d6dcaf2d92220373e908b3d82dd31b688964ea7c580e8c1c6cc3d94181",
+          "compression_success": true,
+          "decompression_success": true,
+          "hash_match": true,
+          "compression_ratio": 79.05427113137094,
+          "error": null,
+          "compressed_size": 414645,
+          "restored_hash": "4a2b12d6dcaf2d92220373e908b3d82dd31b688964ea7c580e8c1c6cc3d94181"
+        }
+      ],
+      "summary": {
+        "total_tests": 2,
+        "passed": 2,
+        "failed": 0,
+        "success_rate": 100.0
+      }
+    }
+  },
+  "overall_summary": {
+    "total_tests": 17,
+    "total_passed": 15,
+    "overall_success_rate": 88.23529411764706
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "test_timestamp": "2025-07-23T11:34:01.362285",
+  "engine": "nexus_quantum.py",
+  "tests": [
+    {
+      "file": "NXZip-Python/sample/COT-001.png",
+      "original_size": 7906973,
+      "original_hash": "8cbbb17a7dbeb307dc6ec027585a3e5cad423cd556e1f1d24d355e532a467d4d",
+      "compression_success": true,
+      "decompression_success": true,
+      "hash_match": false,
+      "compression_ratio": 74.87870516315157,
+      "error": null,
+      "compressed_size": 1986334,
+      "restored_hash": "f845f8a54770fc47fe420f889d3ae903e47cc911859af160dcc8138c7ead8a16"
+    },
+    {
+      "file": "NXZip-Python/sample/COT-012.png",
+      "original_size": 34956418,
+      "original_hash": "b366bc88be9658c946344e0b5b076c8fc986ea9fc415c696344f0f4ce0a69901",
+      "compression_success": true,
+      "decompression_success": true,
+      "hash_match": false,
+      "compression_ratio": 74.90590139985167,
+      "error": null,
+      "compressed_size": 8771998,
+      "restored_hash": "cc8759f4f0a8b60f398d677f2afeda213aa998c8cf4e948e355c4386b91dc187"
+    },
+    {
+      "file": "NXZip-Python/sample/COT-001.jpg",
+      "original_size": 2802871,
+      "original_hash": "27d481322de6c3d19af7b0accd7d317e5b870aeb9aac27c2c23d17efaf13bd16",
+      "compression_success": true,
+      "decompression_success": true,
+      "hash_match": false,
+      "compression_ratio": 29.132164840979126,
+      "error": null,
+      "compressed_size": 1986334,
+      "restored_hash": "f845f8a54770fc47fe420f889d3ae903e47cc911859af160dcc8138c7ead8a16"
+    }
+  ],
+  "summary": {
+    "total_tests": 3,
+    "passed": 0,
+    "failed": 3,
+    "success_rate": 0.0
+  }
+}

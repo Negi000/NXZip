@@ -285,13 +285,15 @@ class LightningFastVideoEngine:
             return b'NXJPG' + zlib.compress(data, 3)
     
     def universal_compress(self, data: bytes, format_type: str) -> bytes:
-        """汎用超高速圧縮"""
+        """汎用超高速圧縮（NXZヘッダー付き）"""
+        magic_header = b'NXZ\x01'
         if format_type == 'TEXT':
-            return bz2.compress(data, 3)  # 中速度・高圧縮
+            compressed = bz2.compress(data, 3)  # 中速度・高圧縮
         elif format_type in ['MP3', 'WAV']:
-            return bz2.compress(data, 6)  # 音声用最適化
+            compressed = bz2.compress(data, 6)  # 音声用最適化
         else:
-            return zlib.compress(data, 3)  # 汎用高速
+            compressed = zlib.compress(data, 3)  # 汎用高速
+        return magic_header + compressed
     
     def compress_file(self, filepath: str) -> dict:
         """ファイル圧縮 - NXZ形式統一"""
@@ -453,24 +455,38 @@ def run_lightning_test():
 def main():
     """メイン関数"""
     if len(sys.argv) < 2:
-        print("⚡ NEXUS Lightning Fast - 超高速並列動画圧縮エンジン")
+        print("NEXUS Lightning Fast - 超高速並列動画圧縮エンジン")
         print("使用方法:")
         print("  python nexus_lightning_fast.py test                     # 超高速改善テスト")
         print("  python nexus_lightning_fast.py compress <file>          # ファイル圧縮")
+        print("  python nexus_lightning_fast.py <file>                   # ファイル圧縮(直接)")
         return
     
-    command = sys.argv[1].lower()
+    # 引数解析
+    if len(sys.argv) == 2:
+        arg = sys.argv[1].lower()
+        if arg == "test":
+            command = "test"
+            input_file = None
+        else:
+            command = "compress"
+            input_file = sys.argv[1]
+    else:
+        command = sys.argv[1].lower()
+        input_file = sys.argv[2] if len(sys.argv) >= 3 else None
+    
     engine = LightningFastVideoEngine()
     
     if command == "test":
         run_lightning_test()
-    elif command == "compress" and len(sys.argv) >= 3:
-        input_file = sys.argv[2]
+    elif command == "compress" and input_file:
         result = engine.compress_file(input_file)
         if not result['success']:
-            print(f"❌ 圧縮失敗: {result.get('error', '不明なエラー')}")
+            print(f"ERROR: 圧縮失敗: {result.get('error', '不明なエラー')}")
+        else:
+            print(f"SUCCESS: 圧縮完了 - {result.get('output_file', 'output.nxz')}")
     else:
-        print("❌ 無効なコマンドまたは引数です")
+        print("ERROR: 無効なコマンドまたは引数です")
 
 if __name__ == "__main__":
     main()

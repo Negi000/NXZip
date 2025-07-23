@@ -730,6 +730,51 @@ class Phase8TurboEngine:
             'structure_type': structure_type
         }
     
+    def compress_turbo(self, data: bytes) -> bytes:
+        """Turbo圧縮実行"""
+        if len(data) == 0:
+            return data
+        
+        # LZMAによる基本圧縮
+        try:
+            compressed = lzma.compress(data, preset=6)
+            return compressed
+        except Exception:
+            return zlib.compress(data)
+    
+    def compress_file(self, file_path: str) -> Dict:
+        """ファイル圧縮"""
+        try:
+            if not os.path.exists(file_path):
+                return {'success': False, 'error': f'ファイルが見つかりません: {file_path}'}
+            
+            with open(file_path, 'rb') as f:
+                data = f.read()
+            
+            compressed = self.compress_turbo(data)
+            
+            # 出力ファイル名
+            output_file = f"{os.path.splitext(file_path)[0]}.nxz"
+            
+            # マジックヘッダー + 圧縮データ
+            nxz_data = self.magic_header + compressed
+            
+            with open(output_file, 'wb') as f:
+                f.write(nxz_data)
+            
+            compression_ratio = (1 - len(compressed) / len(data)) * 100
+            
+            return {
+                'success': True,
+                'output_file': output_file,
+                'compression_ratio': compression_ratio,
+                'original_size': len(data),
+                'compressed_size': len(compressed)
+            }
+            
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
     def _turbo_compression_hint(self, analysis_result: Dict) -> Dict:
         """Turbo 圧縮戦略推定（効率化版）"""
         complexity = analysis_result.get('complexity_score', 0.5)
@@ -828,20 +873,55 @@ class Phase8TurboEngine:
         
         return hints
 
-if __name__ == "__main__":
-    print("🚀 NEXUS SDC Phase 8 Turbo - 効率化AI強化構造破壊型圧縮エンジン")
-    print("高度解析維持 + 処理速度大幅向上")
+def main():
+    """メイン関数"""
+    if len(sys.argv) < 2:
+        print("NEXUS SDC Phase 8 Turbo - 効率化AI強化構造破壊型圧縮エンジン")
+        print("高度解析維持 + 処理速度大幅向上")
+        print("使用方法:")
+        print("  python nexus_phase8_turbo.py test")
+        print("  python nexus_phase8_turbo.py compress <file>")
+        print("  python nexus_phase8_turbo.py <file>   # ファイル圧縮(直接)")
+        return
     
-    # 簡易テスト
+    # 引数解析
+    if len(sys.argv) == 2:
+        arg = sys.argv[1].lower()
+        if arg == "test":
+            command = "test"
+            input_file = None
+        else:
+            command = "compress"
+            input_file = sys.argv[1]
+    else:
+        command = sys.argv[1].lower()
+        input_file = sys.argv[2] if len(sys.argv) >= 3 else None
+    
     engine = Phase8TurboEngine()
-    test_data = b"Hello, World! " * 100
     
-    print(f"\n📊 Turbo エンジンテスト:")
-    print(f"テストデータサイズ: {len(test_data)} bytes")
-    
-    start_time = time.time()
-    elements = engine.analyze_file_structure(test_data)
-    analysis_time = time.time() - start_time
-    
-    print(f"✅ 解析完了: {len(elements)}要素 ({analysis_time:.3f}秒)")
-    print(f"🚀 処理速度: {len(test_data) / analysis_time / 1024:.1f} KB/s")
+    if command == "test":
+        # 簡易テスト
+        test_data = b"Hello, World! " * 100
+        print(f"\nTurbo エンジンテスト:")
+        print(f"テストデータサイズ: {len(test_data)} bytes")
+        
+        start_time = time.time()
+        compressed = engine.compress_turbo(test_data)
+        compress_time = time.time() - start_time
+        
+        compression_ratio = (1 - len(compressed) / len(test_data)) * 100
+        print(f"圧縮サイズ: {len(compressed)} bytes")
+        print(f"圧縮率: {compression_ratio:.1f}%")
+        print(f"圧縮時間: {compress_time:.4f}秒")
+        
+    elif command == "compress" and input_file:
+        result = engine.compress_file(input_file)
+        if result.get('success', False):
+            print(f"SUCCESS: 圧縮完了 - {result.get('output_file', 'output.nxz')}")
+        else:
+            print(f"ERROR: 圧縮失敗: {result.get('error', '不明なエラー')}")
+    else:
+        print("ERROR: 無効なコマンドまたは引数です")
+
+if __name__ == "__main__":
+    main()

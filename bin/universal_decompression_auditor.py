@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-🔍 Universal Decompression Auditor - 汎用解凍監査システム
-あらゆる圧縮形式の可逆性を検証
+🔍 Universal Reversibility Auditor - 包括的可逆性監査システム
+全フォーマット・全エンジンの可逆性を徹底検証
 
-🎯 検証範囲:
-- 全形式圧縮ファイル (.nxz)
-- 複数解凍アルゴリズム試行
-- 完全可逆性検証
-- 偽装圧縮検出
+🎯 監査対象:
+- 全形式エンジン (MP4, MP3, TEXT, etc.)
+- 最新最適化エンジン
+- 古いバージョンエンジン
+- SDCエンジン
+- 可逆性完全検証
 """
 
 import os
@@ -18,376 +19,453 @@ import zlib
 import bz2
 import lzma
 from pathlib import Path
-import hashlib
 import struct
+import hashlib
+import json
+import importlib.util
+from typing import Dict, List, Tuple, Any
 
-class UniversalDecompressionAuditor:
-    """汎用解凍監査システム"""
+class UniversalReversibilityAuditor:
+    """包括的可逆性監査システム"""
     
     def __init__(self):
-        pass
+        self.audit_results = []
+        self.test_data_sets = {}
+        self.engine_modules = {}
+        
+    def discover_engines(self) -> Dict[str, str]:
+        """エンジン発見"""
+        try:
+            print("🔍 エンジン発見中...")
+            
+            bin_dir = Path(__file__).parent
+            engines = {}
+            
+            # nexus_*.py ファイルを検索
+            for py_file in bin_dir.glob("nexus_*.py"):
+                if py_file.name != "nexus_reversibility_test.py":  # 自分自身を除外
+                    engine_name = py_file.stem
+                    engines[engine_name] = str(py_file)
+                    print(f"📦 発見: {engine_name}")
+            
+            # NXZip-Python内のエンジンも検索
+            nxzip_dir = bin_dir.parent / "NXZip-Python" / "nxzip" / "engine"
+            if nxzip_dir.exists():
+                for py_file in nxzip_dir.glob("nexus_*.py"):
+                    engine_name = f"nxzip_{py_file.stem}"
+                    engines[engine_name] = str(py_file)
+                    print(f"📦 発見: {engine_name}")
+            
+            print(f"🎯 総発見数: {len(engines)} エンジン")
+            return engines
+            
+        except Exception as e:
+            print(f"❌ エンジン発見エラー: {e}")
+            return {}
     
-    def audit_all_compressed_files(self) -> dict:
-        """全圧縮ファイルの可逆性監査"""
-        print("🔍 Universal Decompression Audit")
-        print("🎯 全圧縮ファイル可逆性検証")
+    def prepare_test_datasets(self) -> Dict[str, bytes]:
+        """テストデータセット準備"""
+        try:
+            print("📋 テストデータセット準備中...")
+            
+            datasets = {}
+            sample_dir = Path(__file__).parent.parent / "NXZip-Python" / "sample"
+            
+            # MP4テストデータ
+            mp4_file = sample_dir / "Python基礎講座3_4月26日-3.mp4"
+            if mp4_file.exists():
+                with open(mp4_file, 'rb') as f:
+                    datasets['MP4'] = f.read()
+                print(f"📹 MP4データ: {len(datasets['MP4']):,} bytes")
+            
+            # MP3テストデータ
+            mp3_file = sample_dir / "test_audio.mp3"
+            if mp3_file.exists():
+                with open(mp3_file, 'rb') as f:
+                    datasets['MP3'] = f.read()
+                print(f"🎵 MP3データ: {len(datasets['MP3']):,} bytes")
+            
+            # TEXTテストデータ
+            text_file = sample_dir / "test_text.txt"
+            if text_file.exists():
+                with open(text_file, 'rb') as f:
+                    datasets['TEXT'] = f.read()
+                print(f"📝 TEXTデータ: {len(datasets['TEXT']):,} bytes")
+            
+            # 合成テストデータ (小さなファイル)
+            if not datasets:
+                print("⚠️ サンプルファイルなし - 合成データ作成")
+                datasets['SYNTHETIC_MP4'] = self._create_synthetic_mp4()
+                datasets['SYNTHETIC_MP3'] = self._create_synthetic_mp3()
+                datasets['SYNTHETIC_TEXT'] = self._create_synthetic_text()
+            
+            print(f"✅ テストデータセット準備完了: {len(datasets)} 種類")
+            return datasets
+            
+        except Exception as e:
+            print(f"❌ テストデータ準備エラー: {e}")
+            return {}
+    
+    def _create_synthetic_mp4(self) -> bytes:
+        """合成MP4データ作成"""
+        # 最小限のMP4構造
+        ftyp = b'\x00\x00\x00\x20ftypisom\x00\x00\x02\x00isomiso2avc1mp41'
+        mdat = b'\x00\x00\x10\x00mdat' + b'\x00' * (4096 - 8)
+        return ftyp + mdat
+    
+    def _create_synthetic_mp3(self) -> bytes:
+        """合成MP3データ作成"""
+        # MP3ヘッダー + データ
+        mp3_header = b'\xFF\xFB\x90\x00'  # MP3フレームヘッダー
+        return mp3_header + b'\x00' * 2048
+    
+    def _create_synthetic_text(self) -> bytes:
+        """合成TEXTデータ作成"""
+        text = "Hello, World! " * 200  # 繰り返しテキスト
+        return text.encode('utf-8')
+    
+    def load_engine_module(self, engine_name: str, engine_path: str) -> Any:
+        """エンジンモジュール動的読み込み"""
+        try:
+            spec = importlib.util.spec_from_file_location(engine_name, engine_path)
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                return module
+            return None
+        except Exception as e:
+            print(f"❌ {engine_name} 読み込みエラー: {e}")
+            return None
+    
+    def detect_engine_capabilities(self, module: Any) -> Dict[str, Any]:
+        """エンジン機能検出"""
+        capabilities = {
+            'has_compress': False,
+            'has_decompress': False,
+            'compress_methods': [],
+            'decompress_methods': [],
+            'engine_classes': []
+        }
+        
+        try:
+            # クラスと関数の検出
+            for attr_name in dir(module):
+                attr = getattr(module, attr_name)
+                
+                if callable(attr):
+                    if 'compress' in attr_name.lower() and 'decompress' not in attr_name.lower():
+                        capabilities['compress_methods'].append(attr_name)
+                        capabilities['has_compress'] = True
+                    elif 'decompress' in attr_name.lower():
+                        capabilities['decompress_methods'].append(attr_name)
+                        capabilities['has_decompress'] = True
+                
+                # エンジンクラスの検出
+                if hasattr(attr, '__name__') and 'engine' in attr.__name__.lower():
+                    capabilities['engine_classes'].append(attr_name)
+            
+            return capabilities
+            
+        except Exception as e:
+            print(f"❌ 機能検出エラー: {e}")
+            return capabilities
+    
+    def test_engine_reversibility(self, engine_name: str, engine_path: str, 
+                                test_data: Dict[str, bytes]) -> Dict[str, Any]:
+        """エンジン可逆性テスト"""
+        print(f"\n🧪 {engine_name} 可逆性テスト開始")
+        print("-" * 60)
+        
+        result = {
+            'engine_name': engine_name,
+            'engine_path': engine_path,
+            'status': 'unknown',
+            'capabilities': {},
+            'test_results': {},
+            'errors': []
+        }
+        
+        try:
+            # モジュール読み込み
+            module = self.load_engine_module(engine_name, engine_path)
+            if not module:
+                result['status'] = 'load_failed'
+                result['errors'].append('モジュール読み込み失敗')
+                return result
+            
+            print(f"✅ モジュール読み込み成功")
+            
+            # 機能検出
+            capabilities = self.detect_engine_capabilities(module)
+            result['capabilities'] = capabilities
+            
+            print(f"🔍 圧縮メソッド: {capabilities['compress_methods']}")
+            print(f"🔍 解凍メソッド: {capabilities['decompress_methods']}")
+            print(f"🔍 エンジンクラス: {capabilities['engine_classes']}")
+            
+            # 可逆性テスト実行
+            if capabilities['has_compress'] and capabilities['has_decompress']:
+                result['test_results'] = self._run_reversibility_tests(
+                    module, capabilities, test_data
+                )
+                result['status'] = 'tested'
+            elif capabilities['has_compress']:
+                result['status'] = 'compress_only'
+                result['errors'].append('解凍機能なし - 可逆性テスト不可')
+                print("⚠️ 解凍機能なし - 可逆性テスト不可")
+            else:
+                result['status'] = 'no_compress'
+                result['errors'].append('圧縮機能なし')
+                print("⚠️ 圧縮機能なし")
+            
+            return result
+            
+        except Exception as e:
+            result['status'] = 'error'
+            result['errors'].append(str(e))
+            print(f"❌ テストエラー: {e}")
+            return result
+    
+    def _run_reversibility_tests(self, module: Any, capabilities: Dict[str, Any], 
+                               test_data: Dict[str, bytes]) -> Dict[str, Any]:
+        """可逆性テスト実行"""
+        test_results = {}
+        
+        try:
+            # エンジンインスタンス作成試行
+            engine_instance = None
+            
+            for class_name in capabilities['engine_classes']:
+                try:
+                    engine_class = getattr(module, class_name)
+                    engine_instance = engine_class()
+                    print(f"✅ エンジンインスタンス作成: {class_name}")
+                    break
+                except Exception as e:
+                    print(f"⚠️ {class_name} インスタンス作成失敗: {e}")
+                    continue
+            
+            if not engine_instance:
+                print("⚠️ エンジンインスタンス作成失敗 - 関数レベルテスト試行")
+                return self._test_function_level_reversibility(module, capabilities, test_data)
+            
+            # 各データタイプでテスト
+            for data_type, data in test_data.items():
+                print(f"\n📋 {data_type} テスト ({len(data):,} bytes)")
+                
+                test_result = {
+                    'data_type': data_type,
+                    'original_size': len(data),
+                    'compressed_size': 0,
+                    'decompressed_size': 0,
+                    'compression_ratio': 0.0,
+                    'byte_match': False,
+                    'hash_match': False,
+                    'errors': []
+                }
+                
+                try:
+                    # 圧縮テスト
+                    if hasattr(engine_instance, 'compress'):
+                        compressed_data = engine_instance.compress(data)
+                        test_result['compressed_size'] = len(compressed_data)
+                        test_result['compression_ratio'] = (1 - len(compressed_data)/len(data)) * 100
+                        print(f"✅ 圧縮成功: {len(data)} -> {len(compressed_data)} ({test_result['compression_ratio']:.1f}%)")
+                        
+                        # 解凍テスト
+                        if hasattr(engine_instance, 'decompress'):
+                            decompressed_data = engine_instance.decompress(compressed_data)
+                            test_result['decompressed_size'] = len(decompressed_data)
+                            
+                            # 可逆性検証
+                            test_result['byte_match'] = (data == decompressed_data)
+                            test_result['hash_match'] = (
+                                hashlib.sha256(data).hexdigest() == 
+                                hashlib.sha256(decompressed_data).hexdigest()
+                            )
+                            
+                            print(f"✅ 解凍成功: {len(compressed_data)} -> {len(decompressed_data)}")
+                            print(f"🔍 バイト一致: {'PASS' if test_result['byte_match'] else 'FAIL'}")
+                            print(f"🔍 ハッシュ一致: {'PASS' if test_result['hash_match'] else 'FAIL'}")
+                            
+                            if test_result['byte_match'] and test_result['hash_match']:
+                                print("🎉 完全可逆性確認!")
+                            else:
+                                print("❌ 可逆性問題あり!")
+                                
+                        else:
+                            test_result['errors'].append('解凍メソッドなし')
+                    else:
+                        test_result['errors'].append('圧縮メソッドなし')
+                
+                except Exception as e:
+                    test_result['errors'].append(str(e))
+                    print(f"❌ テストエラー: {e}")
+                
+                test_results[data_type] = test_result
+            
+            return test_results
+            
+        except Exception as e:
+            print(f"❌ 可逆性テスト実行エラー: {e}")
+            return {'error': str(e)}
+    
+    def _test_function_level_reversibility(self, module: Any, capabilities: Dict[str, Any], 
+                                         test_data: Dict[str, bytes]) -> Dict[str, Any]:
+        """関数レベル可逆性テスト"""
+        print("🔧 関数レベルテスト実行")
+        # 実装省略 - 必要に応じて追加
+        return {'status': 'function_level_not_implemented'}
+    
+    def run_comprehensive_audit(self) -> Dict[str, Any]:
+        """包括的監査実行"""
+        print("🔍 Universal Reversibility Audit - 包括的可逆性監査")
+        print("🎯 全エンジンの可逆性を徹底検証")
         print("=" * 70)
         
-        # 圧縮ファイル検索
-        compressed_files = self._find_compressed_files()
-        print(f"📦 発見圧縮ファイル: {len(compressed_files)}")
+        # エンジン発見
+        engines = self.discover_engines()
+        if not engines:
+            print("❌ エンジンが見つかりません")
+            return {'status': 'no_engines'}
         
-        if not compressed_files:
-            print("⚠️ 圧縮ファイルが見つかりません")
-            return {'success': False, 'error': 'No compressed files found'}
+        # テストデータ準備
+        test_data = self.prepare_test_datasets()
+        if not test_data:
+            print("❌ テストデータが準備できません")
+            return {'status': 'no_test_data'}
         
+        # 各エンジンをテスト
         audit_results = []
+        total_engines = len(engines)
         
-        for compressed_file in compressed_files:
-            print(f"\n🧪 監査: {Path(compressed_file).name}")
-            print("-" * 50)
+        print(f"\n🧪 {total_engines} エンジンの可逆性監査開始")
+        print("=" * 70)
+        
+        for i, (engine_name, engine_path) in enumerate(engines.items(), 1):
+            print(f"\n[{i}/{total_engines}] {engine_name}")
             
-            result = self._audit_single_file(compressed_file)
+            result = self.test_engine_reversibility(engine_name, engine_path, test_data)
             audit_results.append(result)
             
-            # 結果表示
-            status = result.get('reversibility_status', 'UNKNOWN')
-            if status == 'PERFECT':
-                print(f"✅ 完全可逆: {result.get('compression_ratio', 0):.1f}%")
-            elif status == 'PARTIAL':
-                print(f"⚠️ 部分可逆: {result.get('compression_ratio', 0):.1f}%")
-            elif status == 'FAILED':
-                print(f"❌ 可逆失敗: {result.get('compression_ratio', 0):.1f}%")
-            else:
-                print(f"🔧 監査エラー: {result.get('error', 'Unknown')}")
+            # 進捗表示
+            progress = (i / total_engines) * 100
+            print(f"📈 進捗: {progress:.1f}% ({i}/{total_engines})")
         
-        # 総合評価
-        print("\n" + "=" * 70)
-        print("🏆 総合可逆性監査結果")
-        print("=" * 70)
+        # 総合結果分析
+        summary = self._analyze_audit_results(audit_results)
         
-        perfect_count = sum(1 for r in audit_results if r.get('reversibility_status') == 'PERFECT')
-        partial_count = sum(1 for r in audit_results if r.get('reversibility_status') == 'PARTIAL')
-        failed_count = sum(1 for r in audit_results if r.get('reversibility_status') == 'FAILED')
-        error_count = len(audit_results) - perfect_count - partial_count - failed_count
-        
-        print(f"📊 監査統計:")
-        print(f"   ✅ 完全可逆: {perfect_count}/{len(audit_results)}")
-        print(f"   ⚠️ 部分可逆: {partial_count}/{len(audit_results)}")
-        print(f"   ❌ 可逆失敗: {failed_count}/{len(audit_results)}")
-        print(f"   🔧 エラー: {error_count}/{len(audit_results)}")
-        
-        if perfect_count == len(audit_results):
-            print("\n🎉🎉🎉🎉 全ファイル完全可逆!")
-            print("🏆 すべての圧縮が可逆性を保証!")
-        elif perfect_count > 0:
-            print(f"\n🎉 部分成功: {perfect_count}ファイルが完全可逆")
-            print("🔧 一部のエンジンに可逆性問題あり")
-        else:
-            print("\n🚨 重大な問題: 完全可逆ファイルなし")
-            print("❌ すべてのエンジンに可逆性問題あり")
+        # 結果表示
+        self._display_audit_summary(summary, audit_results)
         
         return {
-            'success': True,
-            'audit_results': audit_results,
-            'statistics': {
-                'total': len(audit_results),
-                'perfect': perfect_count,
-                'partial': partial_count,
-                'failed': failed_count,
-                'error': error_count
-            }
+            'status': 'completed',
+            'summary': summary,
+            'detailed_results': audit_results
         }
     
-    def _find_compressed_files(self) -> list:
-        """圧縮ファイル検索"""
-        compressed_files = []
+    def _analyze_audit_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """監査結果分析"""
+        summary = {
+            'total_engines': len(results),
+            'fully_reversible': 0,
+            'partially_reversible': 0,
+            'not_reversible': 0,
+            'compress_only': 0,
+            'load_failed': 0,
+            'critical_issues': []
+        }
         
-        # 検索ディレクトリ
-        search_dirs = [
-            r"c:\Users\241822\Desktop\新しいフォルダー (2)\NXZip\NXZip-Python\sample",
-            r"c:\Users\241822\Desktop\新しいフォルダー (2)\NXZip\test-data",
-            "."  # 現在のディレクトリ
-        ]
+        for result in results:
+            status = result['status']
+            
+            if status == 'tested':
+                test_results = result.get('test_results', {})
+                all_reversible = True
+                any_reversible = False
+                
+                for data_type, test_data in test_results.items():
+                    if isinstance(test_data, dict):
+                        if test_data.get('byte_match', False) and test_data.get('hash_match', False):
+                            any_reversible = True
+                        else:
+                            all_reversible = False
+                
+                if all_reversible and any_reversible:
+                    summary['fully_reversible'] += 1
+                elif any_reversible:
+                    summary['partially_reversible'] += 1
+                else:
+                    summary['not_reversible'] += 1
+                    summary['critical_issues'].append(f"{result['engine_name']}: 可逆性なし")
+            
+            elif status == 'compress_only':
+                summary['compress_only'] += 1
+                summary['critical_issues'].append(f"{result['engine_name']}: 解凍機能なし")
+            
+            elif status == 'load_failed':
+                summary['load_failed'] += 1
         
-        for search_dir in search_dirs:
-            if os.path.exists(search_dir):
-                for root, dirs, files in os.walk(search_dir):
-                    for file in files:
-                        if file.endswith('.nxz'):
-                            full_path = os.path.join(root, file)
-                            compressed_files.append(full_path)
-        
-        return compressed_files
+        return summary
     
-    def _audit_single_file(self, compressed_file: str) -> dict:
-        """単一ファイル監査"""
-        try:
-            # 元ファイル推定
-            original_file = self._find_original_file(compressed_file)
-            
-            if not original_file:
-                return {
-                    'compressed_file': compressed_file,
-                    'reversibility_status': 'ERROR',
-                    'error': 'Original file not found'
-                }
-            
-            print(f"📄 元ファイル: {Path(original_file).name}")
-            
-            # 元ファイル読み込み
-            with open(original_file, 'rb') as f:
-                original_data = f.read()
-            
-            # 圧縮ファイル読み込み
-            with open(compressed_file, 'rb') as f:
-                compressed_data = f.read()
-            
-            # 解凍試行
-            decompressed_data = self._attempt_universal_decompression(compressed_data)
-            
-            if decompressed_data is None:
-                return {
-                    'compressed_file': compressed_file,
-                    'original_file': original_file,
-                    'reversibility_status': 'FAILED',
-                    'error': 'Decompression failed',
-                    'compression_ratio': (1 - len(compressed_data) / len(original_data)) * 100
-                }
-            
-            # 可逆性検証
-            size_match = len(original_data) == len(decompressed_data)
-            byte_match = original_data == decompressed_data
-            
-            original_hash = hashlib.sha256(original_data).hexdigest()
-            decompressed_hash = hashlib.sha256(decompressed_data).hexdigest()
-            hash_match = original_hash == decompressed_hash
-            
-            # 判定
-            if size_match and byte_match and hash_match:
-                status = 'PERFECT'
-            elif size_match:
-                status = 'PARTIAL'
-            else:
-                status = 'FAILED'
-            
-            compression_ratio = (1 - len(compressed_data) / len(original_data)) * 100
-            
-            print(f"📊 圧縮率: {compression_ratio:.1f}%")
-            print(f"🔍 サイズ一致: {'✅' if size_match else '❌'}")
-            print(f"🔍 バイト一致: {'✅' if byte_match else '❌'}")
-            print(f"🔍 ハッシュ一致: {'✅' if hash_match else '❌'}")
-            
-            return {
-                'compressed_file': compressed_file,
-                'original_file': original_file,
-                'reversibility_status': status,
-                'compression_ratio': compression_ratio,
-                'original_size': len(original_data),
-                'compressed_size': len(compressed_data),
-                'decompressed_size': len(decompressed_data),
-                'size_match': size_match,
-                'byte_match': byte_match,
-                'hash_match': hash_match
-            }
-            
-        except Exception as e:
-            return {
-                'compressed_file': compressed_file,
-                'reversibility_status': 'ERROR',
-                'error': str(e)
-            }
-    
-    def _find_original_file(self, compressed_file: str) -> str:
-        """元ファイル検索"""
-        base_name = Path(compressed_file).stem
-        dir_path = Path(compressed_file).parent
+    def _display_audit_summary(self, summary: Dict[str, Any], results: List[Dict[str, Any]]):
+        """監査結果表示"""
+        print("\n" + "=" * 70)
+        print("🏆 包括的可逆性監査結果")
+        print("=" * 70)
         
-        # 可能な拡張子
-        possible_extensions = ['.mp4', '.mp3', '.png', '.txt', '.wav', '.jpg', '.pdf']
+        total = summary['total_engines']
+        print(f"📊 総エンジン数: {total}")
+        print(f"✅ 完全可逆: {summary['fully_reversible']} ({summary['fully_reversible']/total*100:.1f}%)")
+        print(f"⚠️ 部分可逆: {summary['partially_reversible']} ({summary['partially_reversible']/total*100:.1f}%)")
+        print(f"❌ 非可逆: {summary['not_reversible']} ({summary['not_reversible']/total*100:.1f}%)")
+        print(f"🔧 圧縮のみ: {summary['compress_only']} ({summary['compress_only']/total*100:.1f}%)")
+        print(f"💥 読み込み失敗: {summary['load_failed']} ({summary['load_failed']/total*100:.1f}%)")
         
-        # 同じディレクトリで検索
-        for ext in possible_extensions:
-            possible_path = dir_path / f"{base_name}{ext}"
-            if possible_path.exists():
-                return str(possible_path)
+        if summary['critical_issues']:
+            print(f"\n🚨 重要な問題:")
+            for issue in summary['critical_issues'][:10]:  # 最初の10件
+                print(f"   - {issue}")
+            if len(summary['critical_issues']) > 10:
+                print(f"   ... 他 {len(summary['critical_issues']) - 10} 件")
         
-        # 他のディレクトリでも検索
-        search_dirs = [
-            r"c:\Users\241822\Desktop\新しいフォルダー (2)\NXZip\NXZip-Python\sample",
-            r"c:\Users\241822\Desktop\新しいフォルダー (2)\NXZip\test-data"
-        ]
+        # 完全可逆エンジンリスト
+        fully_reversible_engines = []
+        for result in results:
+            if result['status'] == 'tested':
+                test_results = result.get('test_results', {})
+                all_reversible = all(
+                    test_data.get('byte_match', False) and test_data.get('hash_match', False)
+                    for test_data in test_results.values()
+                    if isinstance(test_data, dict)
+                )
+                if all_reversible:
+                    fully_reversible_engines.append(result['engine_name'])
         
-        for search_dir in search_dirs:
-            if os.path.exists(search_dir):
-                for ext in possible_extensions:
-                    possible_path = Path(search_dir) / f"{base_name}{ext}"
-                    if possible_path.exists():
-                        return str(possible_path)
-        
-        return None
-    
-    def _attempt_universal_decompression(self, compressed_data: bytes) -> bytes:
-        """汎用解凍試行"""
-        try:
-            print("🔄 汎用解凍試行中...")
-            
-            # ヘッダーベース解凍
-            if compressed_data.startswith(b'NXMP4_OPTIMAL_BALANCE_V1'):
-                return self._decompress_optimal_balance(compressed_data)
-            elif compressed_data.startswith(b'NXMP4_PERFECT_REVERSIBLE'):
-                return self._decompress_perfect_reversible(compressed_data)
-            elif compressed_data.startswith(b'NXMP4_VIDEO_BREAKTHROUGH'):
-                return self._decompress_video_breakthrough(compressed_data)
-            elif compressed_data.startswith(b'NEXUS_LIGHTNING_ULTRA'):
-                return self._decompress_lightning_ultra(compressed_data)
-            
-            # 直接解凍試行
-            algorithms = [
-                ('LZMA', lzma.decompress),
-                ('BZ2', bz2.decompress),
-                ('ZLIB', zlib.decompress),
-            ]
-            
-            for name, decompress_func in algorithms:
-                try:
-                    result = decompress_func(compressed_data)
-                    print(f"✅ {name}直接解凍成功")
-                    return result
-                except:
-                    continue
-            
-            # ヘッダーを除去して試行
-            for header_size in [16, 20, 24, 32]:
-                payload = compressed_data[header_size:]
-                for name, decompress_func in algorithms:
-                    try:
-                        result = decompress_func(payload)
-                        print(f"✅ {name}ヘッダー除去解凍成功 (ヘッダー: {header_size}bytes)")
-                        return result
-                    except:
-                        continue
-            
-            print("❌ 全解凍方法失敗")
-            return None
-            
-        except Exception as e:
-            print(f"❌ 解凍エラー: {e}")
-            return None
-    
-    def _decompress_optimal_balance(self, data: bytes) -> bytes:
-        """最適バランス解凍"""
-        try:
-            import json
-            
-            # メタデータサイズ取得
-            metadata_size = struct.unpack('<I', data[24:28])[0]
-            metadata_compressed = data[28:28 + metadata_size]
-            
-            # メタデータ解凍
-            metadata_json = zlib.decompress(metadata_compressed).decode('utf-8')
-            metadata = json.loads(metadata_json)
-            
-            # コア部分解凍
-            core_start = 28 + metadata_size
-            compressed_core = data[core_start:]
-            
-            # 複数アルゴリズム試行
-            for decompress_func in [lzma.decompress, bz2.decompress, zlib.decompress]:
-                try:
-                    return decompress_func(compressed_core)
-                except:
-                    continue
-            
-            return None
-            
-        except:
-            return None
-    
-    def _decompress_perfect_reversible(self, data: bytes) -> bytes:
-        """完全可逆解凍"""
-        try:
-            # 簡易実装 - ヘッダー除去後解凍試行
-            payload = data[32:]  # ヘッダー除去
-            
-            for decompress_func in [lzma.decompress, bz2.decompress, zlib.decompress]:
-                try:
-                    return decompress_func(payload)
-                except:
-                    continue
-            
-            return None
-            
-        except:
-            return None
-    
-    def _decompress_video_breakthrough(self, data: bytes) -> bytes:
-        """動画突破解凍"""
-        try:
-            # ヘッダー除去
-            if data.startswith(b'NXMP4_VIDEO_BREAKTHROUGH_SUCCESS'):
-                payload = data[32:]
-            else:
-                payload = data[29:]  # その他の変種
-            
-            for decompress_func in [lzma.decompress, bz2.decompress, zlib.decompress]:
-                try:
-                    return decompress_func(payload)
-                except:
-                    continue
-            
-            return None
-            
-        except:
-            return None
-    
-    def _decompress_lightning_ultra(self, data: bytes) -> bytes:
-        """Lightning Ultra解凍"""
-        try:
-            # ヘッダー除去
-            payload = data[20:]  # NEXUS_LIGHTNING_ULTRA
-            
-            for decompress_func in [lzma.decompress, bz2.decompress, zlib.decompress]:
-                try:
-                    return decompress_func(payload)
-                except:
-                    continue
-            
-            return None
-            
-        except:
-            return None
-
-def run_universal_audit():
-    """汎用監査実行"""
-    auditor = UniversalDecompressionAuditor()
-    result = auditor.audit_all_compressed_files()
-    
-    if result['success']:
-        stats = result['statistics']
-        
-        if stats['perfect'] == stats['total'] and stats['total'] > 0:
-            print("\n🎉🎉🎉🎉 全エンジン可逆性確認!")
-            print("🏆 すべての圧縮技術が信頼できます!")
-        elif stats['perfect'] > 0:
-            print(f"\n⚠️ 混在状況: {stats['perfect']}/{stats['total']}エンジンが可逆")
-            print("🔧 一部エンジンに問題があります")
+        if fully_reversible_engines:
+            print(f"\n🌟 完全可逆エンジン:")
+            for engine in fully_reversible_engines:
+                print(f"   ✅ {engine}")
         else:
-            print("\n🚨 深刻な問題: 可逆エンジンなし")
-            print("❌ 全圧縮技術の見直しが必要")
+            print(f"\n⚠️ 完全可逆エンジンなし - 緊急対応が必要")
 
 def main():
     """メイン関数"""
     if len(sys.argv) < 2:
-        print("🔍 Universal Decompression Auditor")
+        print("🔍 Universal Reversibility Auditor")
         print("使用方法:")
-        print("  python universal_decompression_auditor.py audit    # 汎用可逆性監査")
+        print("  python universal_decompression_auditor.py audit    # 包括的可逆性監査")
         return
     
     command = sys.argv[1].lower()
+    auditor = UniversalReversibilityAuditor()
     
     if command == "audit":
-        run_universal_audit()
+        result = auditor.run_comprehensive_audit()
+        if result['status'] == 'completed':
+            print("\n✅ 包括的可逆性監査完了")
+        else:
+            print(f"\n❌ 監査失敗: {result['status']}")
     else:
         print("❌ 無効なコマンドです")
 

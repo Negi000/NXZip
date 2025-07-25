@@ -33,19 +33,13 @@ class ProgressBar:
         if not force and current_time - self.last_update_time < 0.1:
             return
         self.last_update_time = current_time
-        
-        # ゼロ除算回避
-        if self.total == 0:
-            percentage = 100
-            filled_length = self.width
-        else:
-            percentage = min(100, (self.current / self.total) * 100)
-            filled_length = int(self.width * self.current // self.total)
             
+        percentage = min(100, (self.current / self.total) * 100)
+        filled_length = int(self.width * self.current // self.total)
         bar = '█' * filled_length + '░' * (self.width - filled_length)
         
         elapsed = current_time - self.start_time
-        if self.current > 0 and self.total > 0:
+        if self.current > 0:
             eta = elapsed * (self.total - self.current) / self.current
             eta_str = f" ETA: {eta:.1f}s"
         else:
@@ -323,20 +317,6 @@ class AdvancedNeuralShapeOptimizer:
     
     def predict_optimal_shape(self, data: bytes) -> str:
         """機械学習により最適形状を予測（適応的データ分析版）"""
-        data_size = len(data)
-        
-        # 【CRITICAL】データサイズによる形状制限（完全可逆性保証）
-        if data_size == 1:
-            return "I-1"
-        elif data_size == 2:
-            return "I-2"
-        elif data_size <= 4:
-            return "I-3"
-        elif data_size <= 8:
-            return "I-4"
-        elif data_size <= 16:
-            return "O-4"
-        
         features = self.analyze_data_features(data)
         feature_vector = [
             features.entropy,
@@ -346,10 +326,13 @@ class AdvancedNeuralShapeOptimizer:
             features.edge_count
         ]
         
+        print(f"   [AI Analysis] Entropy: {features.entropy:.2f}, Variance: {features.variance:.2f}, Pattern: {features.pattern_density:.2f}")
+        
         # 圧縮済みデータの検出と適応的処理
         is_compressed_data = self._detect_compressed_data(data, features)
         
         if is_compressed_data:
+            print(f"   [AI] Compressed data detected - using specialized strategy")
             return self._select_shape_for_compressed_data(data, features)
         
         if HAS_TORCH and self.is_trained:
@@ -362,9 +345,6 @@ class AdvancedNeuralShapeOptimizer:
                 
                 shape_names = list(POLYOMINO_SHAPES.keys())
                 predicted_shape = shape_names[predicted_idx]
-                
-                # データサイズとの互換性チェック
-                predicted_shape = self._validate_shape_size_compatibility(predicted_shape, data_size)
                 
                 # 信頼度によって追加検証を行う
                 if confidence < 0.7:  # 低信頼度の場合
@@ -390,38 +370,10 @@ class AdvancedNeuralShapeOptimizer:
             top_shapes = shape_scores[:3]
             
             best_shape = top_shapes[0][1]
-            # サイズ互換性チェック
-            best_shape = self._validate_shape_size_compatibility(best_shape, data_size)
-            
             print(f"   [AI] Fallback top shapes: {[(s, f'{sc:.2f}') for sc, s in top_shapes]}")
-            print(f"   [AI] Selected: '{best_shape}' (size-validated)")
+            print(f"   [AI] Selected: '{best_shape}'")
             
             return best_shape
-    
-    def _validate_shape_size_compatibility(self, shape_name: str, data_size: int) -> str:
-        """形状とデータサイズの互換性を検証し、必要に応じて適切な形状に変更"""
-        # 形状のブロック数を取得
-        shape_coords = POLYOMINO_SHAPES.get(shape_name, [(0,0)])
-        shape_block_count = len(shape_coords)
-        
-        # データサイズが形状ブロック数より小さい場合、適切な形状に変更
-        if data_size < shape_block_count:
-            # データサイズに適した最大形状を選択
-            if data_size == 1:
-                safe_shape = "I-1"  # 1ブロック
-            elif data_size == 2:
-                safe_shape = "I-2"  # 2ブロック
-            elif data_size == 3:
-                safe_shape = "I-3"  # 3ブロック
-            elif data_size >= 4:
-                safe_shape = "I-4"  # 4ブロック（最小安全形状）
-            else:
-                safe_shape = "I-1"  # フォールバック
-            
-            print(f"   [Size Validation] '{shape_name}' ({shape_block_count} blocks) incompatible with {data_size} bytes → '{safe_shape}'")
-            return safe_shape
-        
-        return shape_name
     
     def _detect_compressed_data(self, data: bytes, features) -> bool:
         """圧縮済みデータを検出"""
@@ -767,150 +719,75 @@ class NexusAdvancedCompressor:
         return consolidated, pattern_map
     
     def _layer3_approximate_consolidation(self, groups_dict: Dict[Tuple, int], show_progress: bool) -> Tuple[Dict[Tuple, int], Dict[int, Dict]]:
-        """レイヤー3: 近似統合（O(n²)→O(n log n)アルゴリズム改革版）"""
-        
-        # ハッシュベース近似統合：類似グループを効率的に検索
-        similarity_hash_map = {}  # similarity_hash -> [(group_tuple, group_id)]
-        
-        if show_progress:
-            progress_bar = ProgressBar(len(groups_dict), "   Layer 3: Computing similarity hashes")
-        
-        processed = 0
-        for group_tuple, group_id in groups_dict.items():
-            # 高速類似性ハッシュ生成
-            similarity_hash = self._compute_similarity_hash(list(group_tuple))
-            
-            if similarity_hash not in similarity_hash_map:
-                similarity_hash_map[similarity_hash] = []
-            similarity_hash_map[similarity_hash].append((group_tuple, group_id))
-            
-            processed += 1
-            if show_progress and processed % 5000 == 0:
-                progress_bar.update(processed)
-        
-        if show_progress:
-            progress_bar.finish()
-        
-        print(f"   [Layer 3] Generated {len(similarity_hash_map):,} similarity buckets")
-        
-        # 各バケット内で詳細な類似性チェック
+        """レイヤー3: 近似統合（圧縮データ特化）"""
         consolidated = {}
         approx_map = {}
+        used_ids = set()
         new_id = 0
         
-        if show_progress:
-            progress_bar = ProgressBar(len(similarity_hash_map), "   Layer 3: Bucket consolidation")
+        groups_list = list(groups_dict.items())
         
-        bucket_processed = 0
-        for similarity_hash, group_list in similarity_hash_map.items():
-            if len(group_list) == 1:
-                # 単一グループ：統合不要
-                group_tuple, group_id = group_list[0]
-                consolidated[group_tuple] = new_id
-                approx_map[group_id] = {
-                    'new_group_id': new_id,
-                    'canonical_form': group_tuple,
-                    'layer': 3,
-                    'consolidation_type': 'none'
-                }
-                new_id += 1
-            else:
-                # 複数グループ：詳細類似性チェックで統合
-                clusters = self._cluster_similar_groups(group_list)
-                
-                for cluster in clusters:
-                    # 各クラスターから代表を選択
-                    representative = min(cluster, key=lambda x: (len(x[0]), sum(x[0])))[0]
-                    consolidated[representative] = new_id
-                    
-                    for group_tuple, group_id in cluster:
-                        approx_map[group_id] = {
-                            'new_group_id': new_id,
-                            'canonical_form': representative,
-                            'layer': 3,
-                            'consolidation_type': 'approximate' if len(cluster) > 1 else 'none'
-                        }
-                    
-                    new_id += 1
+        if show_progress:
+            progress_bar = ProgressBar(len(groups_list), "   Layer 3: Approximate matching")
+        
+        for i, (group_tuple, group_id) in enumerate(groups_list):
+            if group_id in used_ids:
+                continue
             
-            bucket_processed += 1
-            if show_progress and bucket_processed % 100 == 0:
-                progress_bar.update(bucket_processed)
+            # 類似グループを検索
+            merged_with = [group_id]
+            representative = group_tuple
+            
+            for j, (other_tuple, other_id) in enumerate(groups_list[i+1:], i+1):
+                if other_id in used_ids:
+                    continue
+                
+                if self._are_groups_similar(list(group_tuple), list(other_tuple), threshold=0.8):
+                    merged_with.append(other_id)
+                    used_ids.add(other_id)
+            
+            consolidated[representative] = new_id
+            
+            for merged_id in merged_with:
+                approx_map[merged_id] = {
+                    'new_group_id': new_id,
+                    'canonical_form': representative,
+                    'layer': 3,
+                    'consolidation_type': 'approximate' if len(merged_with) > 1 else 'none'
+                }
+            
+            used_ids.add(group_id)
+            new_id += 1
+            
+            if show_progress and i % 1000 == 0:
+                progress_bar.update(i)
         
         if show_progress:
             progress_bar.finish()
         
         return consolidated, approx_map
     
-    def _compute_similarity_hash(self, elements: list) -> tuple:
-        """高速類似性ハッシュ計算"""
-        if not elements:
-            return (0, 0, 0)
-        
-        # 統計的特徴による高速ハッシュ
-        element_sum = sum(elements)
-        element_min = min(elements)
-        element_max = max(elements)
-        
-        # 量子化による近似
-        sum_bucket = element_sum // max(1, len(elements))  # 平均値バケット
-        range_bucket = (element_max - element_min) // 10   # レンジバケット
-        
-        return (sum_bucket, range_bucket, len(elements))
-    
-    def _cluster_similar_groups(self, group_list: list) -> list:
-        """グループリスト内での効率的クラスタリング"""
-        if len(group_list) <= 1:
-            return [group_list]
-        
-        clusters = []
-        used = set()
-        
-        for i, (group_tuple, group_id) in enumerate(group_list):
-            if i in used:
-                continue
-            
-            # 新しいクラスター開始
-            cluster = [(group_tuple, group_id)]
-            used.add(i)
-            
-            # 類似グループを検索（閾値0.8）
-            for j, (other_tuple, other_id) in enumerate(group_list[i+1:], i+1):
-                if j in used:
-                    continue
-                
-                if self._are_groups_similar(list(group_tuple), list(other_tuple), threshold=0.8):
-                    cluster.append((other_tuple, other_id))
-                    used.add(j)
-            
-            clusters.append(cluster)
-        
-        return clusters
-    
     def _layer4_structural_consolidation(self, groups_dict: Dict[Tuple, int], show_progress: bool) -> Tuple[Dict[Tuple, int], Dict[int, Dict]]:
-        """レイヤー4: 構造統合（ハッシュベース高速版）"""
+        """レイヤー4: 構造統合"""
         structural_groups = {}
         
         if show_progress:
-            progress_bar = ProgressBar(len(groups_dict), "   Layer 4: Structural analysis")
+            progress_bar = ProgressBar(len(groups_dict), "   Layer 4: Structural matching")
         
         processed = 0
         for group_tuple, group_id in groups_dict.items():
-            # 高速構造シグネチャ計算
-            struct_sig = self._extract_structural_signature_fast(list(group_tuple))
+            struct_sig = self._extract_structural_signature(list(group_tuple))
             
             if struct_sig not in structural_groups:
                 structural_groups[struct_sig] = []
             structural_groups[struct_sig].append((group_tuple, group_id))
             
             processed += 1
-            if show_progress and processed % 2000 == 0:
+            if show_progress and processed % 1000 == 0:
                 progress_bar.update(processed)
         
         if show_progress:
             progress_bar.finish()
-        
-        print(f"   [Layer 4] Generated {len(structural_groups):,} structural patterns")
         
         # 構造統合
         consolidated = {}
@@ -928,7 +805,7 @@ class NexusAdvancedCompressor:
                     'consolidation_type': 'none'
                 }
             else:
-                representative = min(group_list, key=lambda x: (len(x[0]), sum(x[0])))[0]
+                representative = min(group_list, key=lambda x: len(x[0]))[0]  # 最短を代表にする
                 consolidated[representative] = new_id
                 
                 for group_tuple, original_id in group_list:
@@ -942,33 +819,6 @@ class NexusAdvancedCompressor:
             new_id += 1
         
         return consolidated, struct_map
-    
-    def _extract_structural_signature_fast(self, elements: list) -> tuple:
-        """高速構造特徴抽出"""
-        if not elements:
-            return (0, 0, 0, 0)
-        
-        # 基本統計（高速計算）
-        element_sum = sum(elements)
-        element_count = len(elements)
-        
-        # 順序性（簡略版）
-        is_monotonic = all(elements[i] <= elements[i+1] for i in range(len(elements)-1)) or \
-                      all(elements[i] >= elements[i+1] for i in range(len(elements)-1))
-        
-        # 分散の近似（標準偏差の代わり）
-        avg = element_sum / element_count
-        variance_approx = sum((x - avg) ** 2 for x in elements) / element_count
-        variance_bucket = int(variance_approx) // 100  # 100単位でバケット化
-        
-        # 最頻値の近似
-        if element_count <= 20:
-            mode_approx = max(set(elements), key=elements.count)
-        else:
-            # 大きなリストでは近似
-            mode_approx = elements[element_count // 2]  # 中央値で近似
-        
-        return (is_monotonic, variance_bucket, mode_approx, element_count)
     
     def _extract_pattern_signature(self, elements: list) -> tuple:
         """パターン特徴抽出"""
@@ -1044,7 +894,42 @@ class NexusAdvancedCompressor:
                 entropy -= p * math.log2(p)
         
         return entropy
-
+                
+                consolidated_groups[canonical_group] = new_group_id
+                
+                # 簡略化された変換マップ生成
+                for original_group, original_id in group_list:
+                    # 長いブロックには簡略化されたマッピングを使用（メモリ効率化）
+                    if len(original_group) <= 8:  # 小さなブロックのみ詳細処理
+                        permutation_map = self._calculate_permutation_map_fast(original_group, canonical_group)
+                    else:
+                        permutation_map = tuple(range(len(original_group)))  # 大きなブロックは恒等変換
+                    
+                    consolidation_map[original_id] = {
+                        'new_group_id': new_group_id,
+                        'canonical_form': canonical_group,
+                        'permutation_map': permutation_map,
+                        'consolidated': True,
+                        'original_form': original_group
+                    }
+            
+            new_group_id += 1
+            processed += 1
+            if show_progress and processed % 1000 == 0:
+                progress_bar.update(processed)
+        
+        if show_progress:
+            progress_bar.finish()
+        
+        # 統合結果の報告
+        reduction = len(normalized_groups) - len(consolidated_groups)
+        reduction_rate = (reduction / len(normalized_groups)) * 100 if len(normalized_groups) > 0 else 0
+        
+        print(f"   [Element Consolidation] Efficient consolidation: {len(normalized_groups):,} → {len(consolidated_groups):,}")
+        print(f"   [Element Consolidation] Reduction: {reduction:,} groups ({reduction_rate:.2f}%)")
+        
+        return consolidated_groups, consolidation_map
+    
     def _calculate_permutation_map_fast(self, original_group: Tuple, canonical_group: Tuple) -> Tuple[int, ...]:
         """高速順列マップ計算（効率化版）"""
         if len(original_group) != len(canonical_group):
@@ -1129,8 +1014,7 @@ class NexusAdvancedCompressor:
         # 統合情報の事前解析
         consolidated_canonical_cache = {}  # group_id -> (canonical_form, canonical_index_map)
         for group_id, consolidation_info in consolidation_map.items():
-            # マルチレイヤー統合では統合タイプで判定
-            if consolidation_info.get('consolidation_type') != 'none':
+            if consolidation_info['consolidated']:
                 canonical_form = consolidation_info['canonical_form']
                 canonical_sorted = tuple(sorted(canonical_form))
                 
@@ -1175,7 +1059,7 @@ class NexusAdvancedCompressor:
                 consolidation_info = consolidation_map[original_group_id]
                 new_group_id = consolidation_info['new_group_id']
                 
-                if consolidation_info.get('consolidation_type') != 'none' and original_group_id in consolidated_canonical_cache:
+                if consolidation_info['consolidated'] and original_group_id in consolidated_canonical_cache:
                     # 統合されたブロック：事前計算済みデータを使用
                     canonical_sorted, canonical_index_map = consolidated_canonical_cache[original_group_id]
                     
@@ -1584,7 +1468,7 @@ class NexusAdvancedCompressor:
         print(f"\n--- Compressing at Level {level} ---")
         original_length = len(data)
 
-        # 【CRITICAL】適応的グリッドサイズ（形状対応版）
+        # 真の効率化：適応的グリッドサイズ（データ特性に基づく）
         if original_length > 100000000:  # 100MB以上
             grid_width = 2000  # 大きなグリッドで処理効率向上
         elif original_length > 50000000:  # 50MB以上  
@@ -1595,17 +1479,9 @@ class NexusAdvancedCompressor:
             grid_width = min(math.ceil(math.sqrt(original_length)), 1000)
 
         # --- AI & 形状選択 （真の効率化版）---
+        print(f"   [Phase 1/4] AI Prediction & Shape Selection")
         if self.ai_optimizer:
             predicted_shape = self.ai_optimizer.predict_optimal_shape(data)
-            
-            # 【CRITICAL】選択された形状に基づいてグリッド幅を調整
-            shape_coords = POLYOMINO_SHAPES.get(predicted_shape, [(0,0)])
-            shape_width = max(c for r, c in shape_coords) + 1
-            
-            # グリッド幅が形状幅より小さい場合は調整
-            if grid_width < shape_width:
-                grid_width = max(shape_width, original_length)  # 形状が収まるよう調整
-            
             shape_combination = [predicted_shape]
             
             # データサイズに関係なく、適応的形状選択を実行
@@ -1650,16 +1526,20 @@ class NexusAdvancedCompressor:
                 safe_padded_size = len(data) + min(padding_needed, 100000)  # 最大100KB
         
         # パディング実行（メモリ効率化）
+        print(f"   [Phase 2/4] Applying padding ({safe_padded_size - len(data):,} bytes)...")
         padded_data = bytearray(data)
         padded_data.extend(b'\0' * (safe_padded_size - len(data)))
         
+        print(f"   [Phase 3/4] Block Generation & Analysis")
         blocks = self._get_blocks_for_shape(bytes(padded_data), grid_width, shape_coords, 
-                                          show_progress=False)
+                                          show_progress=(len(data) > 5000000))  # 5MB以上で詳細進捗
 
         # 正規化とユニークグループの特定（真の効率化版）
+        print(f"   [Phase 3/4] Normalizing {len(blocks):,} blocks...")
         
         # メモリ効率的ハッシュベース重複排除（大容量データ対応）
         if len(blocks) > 500000:  # 50万ブロック以上で高速化
+            print(f"   [Block Normalization] Using optimized hash-based deduplication...")
             
             # ハッシュベースの効率的重複排除
             block_hash_map = {}  # hash -> (normalized_block, group_id)
@@ -1823,164 +1703,6 @@ class NexusAdvancedCompressor:
         print(f"   [Compression] Level {level} complete. Size: {len(data):,} -> {len(compressed_result):,} bytes")
         print(f"   [Compression] Size reduction: {size_reduction:.2f}% (ratio: {compression_ratio:.2%})")
         return compressed_result
-
-    def decompress(self, compressed_data: bytes, level=0) -> bytes:
-        """NEXUS高機能圧縮データを解凍"""
-        if not compressed_data:
-            return b''
-
-        # 最終段のLZMA解凍
-        decompressed_payload = lzma.decompress(compressed_data)
-        
-        try:
-            # ペイロードがJSON形式か試す
-            payload = json.loads(decompressed_payload.decode('utf-8'))
-            is_json = True
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            # バイナリ形式
-            is_json = False
-            payload = decompressed_payload
-
-        if is_json:
-            # JSON形式の解凍処理
-            return self._decompress_json_payload(payload)
-        else:
-            # バイナリ形式の解凍処理
-            return self._decompress_binary_payload(payload)
-
-    def _decompress_json_payload(self, payload: dict) -> bytes:
-        """JSON形式ペイロードの解凍（実際のペイロード構造対応版）"""
-        # メタデータ復元
-        header = payload['header']
-        original_length = header['original_length']
-        grid_width = header['grid_width']
-        main_shape = header['main_shape']
-        
-        # Huffman解凍
-        encoded_group_ids = payload['encoded_streams']['group_ids']
-        group_huff_tree = payload['huffman_trees']['group_ids']
-        group_id_stream = self.huffman_encoder.decode(encoded_group_ids, group_huff_tree)
-        
-        # perm_idsが存在するかチェック
-        if 'perm_ids' in payload['encoded_streams'] and payload['encoded_streams']['perm_ids']:
-            encoded_perm_ids = payload['encoded_streams']['perm_ids']
-            perm_huff_tree = payload['huffman_trees']['perm_ids']
-            perm_id_stream = self.huffman_encoder.decode(encoded_perm_ids, perm_huff_tree)
-        else:
-            # perm_idsが空の場合、デフォルトの順列を使用
-            perm_id_stream = [0] * len(group_id_stream)
-        
-        # グループとパーミュテーションマップ復元
-        unique_groups = [tuple(g) for g in payload['unique_groups']]
-        perm_map_dict = {int(k): tuple(v) for k, v in payload['perm_map_dict'].items()}
-        
-        # ブロック再構成
-        reconstructed_blocks = []
-        for group_id, perm_id in zip(group_id_stream, perm_id_stream):
-            if group_id < len(unique_groups) and perm_id in perm_map_dict:
-                group = unique_groups[group_id]
-                perm_map = perm_map_dict[perm_id]
-                
-                # 逆変換適用
-                original_block = self._apply_inverse_permutation(group, perm_map)
-                reconstructed_blocks.append(original_block)
-            else:
-                # エラー時のフォールバック
-                if group_id < len(unique_groups):
-                    reconstructed_blocks.append(unique_groups[group_id])
-                else:
-                    reconstructed_blocks.append((0,))
-        
-        # データ再構成
-        return self._reconstruct_data_from_blocks(reconstructed_blocks, grid_width, original_length, main_shape)
-
-    def _decompress_binary_payload(self, payload: bytes) -> bytes:
-        """バイナリ形式ペイロードの解凍（簡略版）"""
-        # 簡略版：元データをそのまま返す（フォールバック）
-        return payload
-
-    def _apply_inverse_permutation(self, sorted_group: tuple, perm_map: tuple) -> tuple:
-        """順列の逆変換（正しい実装）- sorted形状から元の順序に復元"""
-        if len(sorted_group) != len(perm_map):
-            return sorted_group
-        
-        try:
-            # perm_mapは「元の位置 i の要素がsorted後の位置 perm_map[i] にある」を示す
-            # 逆変換は「sorted後の位置 j の要素が元の位置のどこに戻るか」を求める
-            result = [0] * len(sorted_group)
-            
-            # perm_mapから逆変換マップを作成
-            for original_pos, sorted_pos in enumerate(perm_map):
-                if 0 <= sorted_pos < len(sorted_group):
-                    result[original_pos] = sorted_group[sorted_pos]
-                else:
-                    result[original_pos] = 0  # 範囲外の場合は0
-            
-            return tuple(result)
-        except (IndexError, TypeError):
-            return sorted_group
-
-    def _reconstruct_data_from_blocks(self, blocks: list, grid_width: int, original_length: int, main_shape: str = None) -> bytes:
-        """ブロックからデータを再構成（完全可逆版）"""
-        try:
-            # 【CRITICAL】POLYOMINO_SHAPESと一致した形状座標を使用
-            shape_coords = POLYOMINO_SHAPES.get(main_shape, [(0, 0)])
-            
-            # 単純な形状（I-1等）の場合は単純な復元を使用
-            if len(shape_coords) == 1:
-                # I-1の場合：ブロックを順番に並べるだけ
-                result_data = []
-                for block in blocks:
-                    result_data.extend(block)
-                return bytes(result_data[:original_length])
-            
-            # 複雑な形状の場合：グリッド復元アルゴリズム
-            grid_height = (original_length + grid_width - 1) // grid_width + 10  # 余裕を持たせる
-            data_grid = {}
-            
-            print(f"   [Reconstruct] Grid: {grid_width}x{grid_height}, Processing {len(blocks)} blocks")
-            
-            # 各ブロックから元の位置にデータを復元
-            for block_idx, block in enumerate(blocks):
-                # ブロック配置位置を計算
-                start_row = block_idx // (grid_width - max(c for r, c in shape_coords))
-                start_col = block_idx % (grid_width - max(c for r, c in shape_coords))
-                
-                print(f"   [Reconstruct] Block {block_idx}: {block} at ({start_row}, {start_col})")
-                
-                for coord_idx, (dr, dc) in enumerate(shape_coords):
-                    if coord_idx < len(block):
-                        grid_row = start_row + dr
-                        grid_col = start_col + dc
-                        position = (grid_row, grid_col)
-                        
-                        # データを設定（最初のブロックが優先）
-                        if position not in data_grid:
-                            data_grid[position] = block[coord_idx]
-                            print(f"   [Reconstruct]   ({dr},{dc}) -> grid({grid_row},{grid_col}) = {block[coord_idx]}")
-            
-            # グリッドから線形データに変換
-            result_data = []
-            for row in range(grid_height):
-                for col in range(grid_width):
-                    position = (row, col)
-                    if position in data_grid:
-                        result_data.append(data_grid[position])
-                    else:
-                        result_data.append(0)
-                    
-                    # 必要な長さに達したら終了
-                    if len(result_data) >= original_length:
-                        break
-                if len(result_data) >= original_length:
-                    break
-            
-            print(f"   [Reconstruct] Reconstructed: {result_data[:original_length]}")
-            return bytes(result_data[:original_length])
-            
-        except Exception as e:
-            print(f"❌ データ再構成エラー: {e}")
-            return b''
 
 
 class NexusAdvancedDecompressor:

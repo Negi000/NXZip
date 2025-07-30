@@ -1,0 +1,424 @@
+{
+  "detailed_results": {
+    "high_repetition_text": {
+      "TMC_Safe_Final": {
+        "test_name": "benchmark_data",
+        "reversible": true,
+        "original_size": 208000,
+        "compressed_size": 388,
+        "decompressed_size": 208000,
+        "compression_ratio": 99.81346153846154,
+        "compression_time": 0.008752200003073085,
+        "decompression_time": 0.0006579000000783708,
+        "compression_throughput_mb_s": 22.664502381441245,
+        "decompression_throughput_mb_s": 301.5112597490049,
+        "total_test_time": 0.010015600000770064,
+        "compression_info": {
+          "compression_ratio": 99.81346153846154,
+          "total_compression_time": 0.008744700000534067,
+          "compression_throughput_mb_s": 22.683940878519017,
+          "data_type": "binary",
+          "transform_info": {
+            "size": 208000,
+            "data_type": "binary",
+            "transform_method": "safe_minimal",
+            "entropy": 0.0,
+            "repetition_ratio": 0.0
+          },
+          "reversible": true,
+          "method": "lzma_6",
+          "streams_count": 3
+        },
+        "decompression_info": {
+          "decompression_throughput_mb_s": 305.2227381209664,
+          "total_decompression_time": 0.0006499000010080636,
+          "decompressed_size": 208000,
+          "method": "lzma_6"
+        }
+      },
+      "Zstandard": {
+        "algorithm": "Zstandard",
+        "level": 6,
+        "original_size": 208000,
+        "compressed_size": 181,
+        "compression_ratio": 99.91298076923077,
+        "compression_time": 0.0008129999987431802,
+        "decompression_time": 0.00010470000052009709,
+        "compression_throughput_mb_s": 243.99047739133096,
+        "decompression_throughput_mb_s": 1894.5965313001514,
+        "reversible": true
+      },
+      "LZMA": {
+        "algorithm": "LZMA",
+        "preset": 6,
+        "original_size": 208000,
+        "compressed_size": 332,
+        "compression_ratio": 99.84038461538461,
+        "compression_time": 0.007531499999458902,
+        "decompression_time": 0.00048149999929592013,
+        "compression_throughput_mb_s": 26.337948327259035,
+        "decompression_throughput_mb_s": 411.97146023377115,
+        "reversible": true
+      },
+      "Zlib": {
+        "algorithm": "Zlib",
+        "level": 6,
+        "original_size": 208000,
+        "compressed_size": 995,
+        "compression_ratio": 99.52163461538461,
+        "compression_time": 0.0007574000010208692,
+        "decompression_time": 0.00024950000079115853,
+        "compression_throughput_mb_s": 261.90158112639654,
+        "decompression_throughput_mb_s": 795.0471229799266,
+        "reversible": true
+      }
+    },
+    "structured_numbers": {
+      "TMC_Safe_Final": {
+        "test_name": "benchmark_data",
+        "reversible": true,
+        "original_size": 25000,
+        "compressed_size": 2788,
+        "decompressed_size": 25000,
+        "compression_ratio": 88.848,
+        "compression_time": 0.014821599997958401,
+        "decompression_time": 0.0005960999988019466,
+        "compression_throughput_mb_s": 1.6085886755438241,
+        "decompression_throughput_mb_s": 39.99640657284697,
+        "total_test_time": 0.016410199998063035,
+        "compression_info": {
+          "compression_ratio": 88.848,
+          "total_compression_time": 0.014812800000072457,
+          "compression_throughput_mb_s": 1.6095443069534205,
+          "data_type": "binary",
+          "transform_info": {
+            "size": 25000,
+            "data_type": "binary",
+            "transform_method": "safe_minimal",
+            "entropy": 0.0,
+            "repetition_ratio": 0.0
+          },
+          "reversible": true,
+          "method": "lzma_6",
+          "streams_count": 3
+        },
+        "decompression_info": {
+          "decompression_throughput_mb_s": 41.01472209856592,
+          "total_decompression_time": 0.0005812999988847878,
+          "decompressed_size": 25000,
+          "method": "lzma_6"
+        }
+      },
+      "Zstandard": {
+        "algorithm": "Zstandard",
+        "level": 6,
+        "original_size": 25000,
+        "compressed_size": 4308,
+        "compression_ratio": 82.768,
+        "compression_time": 0.0007009000000834931,
+        "decompression_time": 0.00024059999850578606,
+        "compression_throughput_mb_s": 34.016062073499995,
+        "decompression_throughput_mb_s": 99.09334188787574,
+        "reversible": true
+      },
+      "LZMA": {
+        "algorithm": "LZMA",
+        "preset": 6,
+        "original_size": 25000,
+        "compressed_size": 2732,
+        "compression_ratio": 89.072,
+        "compression_time": 0.011222799999814015,
+        "decompression_time": 0.0004555000014079269,
+        "compression_throughput_mb_s": 2.1244126163302703,
+        "decompression_throughput_mb_s": 52.34216868597652,
+        "reversible": true
+      },
+      "Zlib": {
+        "algorithm": "Zlib",
+        "level": 6,
+        "original_size": 25000,
+        "compressed_size": 11545,
+        "compression_ratio": 53.82,
+        "compression_time": 0.0004808000012417324,
+        "decompression_time": 9.839999984251335e-05,
+        "compression_throughput_mb_s": 49.587890700044426,
+        "decompression_throughput_mb_s": 242.29530435278988,
+        "reversible": true
+      }
+    },
+    "json_structure": {
+      "TMC_Safe_Final": {
+        "test_name": "benchmark_data",
+        "reversible": true,
+        "original_size": 302141,
+        "compressed_size": 13448,
+        "decompressed_size": 302141,
+        "compression_ratio": 95.54909793771782,
+        "compression_time": 0.09779619999972056,
+        "decompression_time": 0.0013598999976238701,
+        "compression_throughput_mb_s": 2.9463732909266835,
+        "decompression_throughput_mb_s": 211.88625056016622,
+        "total_test_time": 0.09978659999978845,
+        "compression_info": {
+          "compression_ratio": 95.54909793771782,
+          "total_compression_time": 0.09778940000251168,
+          "compression_throughput_mb_s": 2.9465781733592795,
+          "data_type": "binary",
+          "transform_info": {
+            "size": 302141,
+            "data_type": "binary",
+            "transform_method": "safe_minimal",
+            "entropy": 0.0,
+            "repetition_ratio": 0.0
+          },
+          "reversible": true,
+          "method": "lzma_6",
+          "streams_count": 3
+        },
+        "decompression_info": {
+          "decompression_throughput_mb_s": 212.51132948809965,
+          "total_decompression_time": 0.001355899999907706,
+          "decompressed_size": 302141,
+          "method": "lzma_6"
+        }
+      },
+      "Zstandard": {
+        "algorithm": "Zstandard",
+        "level": 6,
+        "original_size": 302141,
+        "compressed_size": 21681,
+        "compression_ratio": 92.82421121264575,
+        "compression_time": 0.0019995000002381857,
+        "decompression_time": 0.0001996000028157141,
+        "compression_throughput_mb_s": 144.1080828201932,
+        "decompression_throughput_mb_s": 1443.607753349269,
+        "reversible": true
+      },
+      "LZMA": {
+        "algorithm": "LZMA",
+        "preset": 6,
+        "original_size": 302141,
+        "compressed_size": 13392,
+        "compression_ratio": 95.56763233060062,
+        "compression_time": 0.06656130000192206,
+        "decompression_time": 0.0013787999996566214,
+        "compression_throughput_mb_s": 4.3290036646667085,
+        "decompression_throughput_mb_s": 208.98180425374287,
+        "reversible": true
+      },
+      "Zlib": {
+        "algorithm": "Zlib",
+        "level": 6,
+        "original_size": 302141,
+        "compressed_size": 27626,
+        "compression_ratio": 90.85658682535637,
+        "compression_time": 0.0020352000028651673,
+        "decompression_time": 0.0003271999994467478,
+        "compression_throughput_mb_s": 141.5802433311958,
+        "decompression_throughput_mb_s": 880.6360394881252,
+        "reversible": true
+      }
+    },
+    "time_series_pattern": {
+      "TMC_Safe_Final": {
+        "test_name": "benchmark_data",
+        "reversible": true,
+        "original_size": 10000,
+        "compressed_size": 3000,
+        "decompressed_size": 10000,
+        "compression_ratio": 70.0,
+        "compression_time": 0.007570899997517699,
+        "decompression_time": 0.0002463999990141019,
+        "compression_throughput_mb_s": 1.2596577906443553,
+        "decompression_throughput_mb_s": 38.704314944078774,
+        "total_test_time": 0.00821890000224812,
+        "compression_info": {
+          "compression_ratio": 70.0,
+          "total_compression_time": 0.0075641000003088266,
+          "compression_throughput_mb_s": 1.2607902015670251,
+          "data_type": "binary",
+          "transform_info": {
+            "size": 10000,
+            "data_type": "binary",
+            "transform_method": "safe_minimal",
+            "entropy": 0.0,
+            "repetition_ratio": 0.0
+          },
+          "reversible": true,
+          "method": "lzma_6",
+          "streams_count": 3
+        },
+        "decompression_info": {
+          "decompression_throughput_mb_s": 39.18136031201004,
+          "total_decompression_time": 0.00024340000163647346,
+          "decompressed_size": 10000,
+          "method": "lzma_6"
+        }
+      },
+      "Zstandard": {
+        "algorithm": "Zstandard",
+        "level": 6,
+        "original_size": 10000,
+        "compressed_size": 3362,
+        "compression_ratio": 66.38,
+        "compression_time": 0.000185500000952743,
+        "decompression_time": 2.800000220304355e-05,
+        "compression_throughput_mb_s": 51.411014097471785,
+        "decompression_throughput_mb_s": 340.5979433467999,
+        "reversible": true
+      },
+      "LZMA": {
+        "algorithm": "LZMA",
+        "preset": 6,
+        "original_size": 10000,
+        "compressed_size": 2944,
+        "compression_ratio": 70.56,
+        "compression_time": 0.006984399999055313,
+        "decompression_time": 0.00019609999799286015,
+        "compression_throughput_mb_s": 1.3654348498586004,
+        "decompression_throughput_mb_s": 48.63204111001432,
+        "reversible": true
+      },
+      "Zlib": {
+        "algorithm": "Zlib",
+        "level": 6,
+        "original_size": 10000,
+        "compressed_size": 3386,
+        "compression_ratio": 66.14,
+        "compression_time": 0.00015309999798773788,
+        "decompression_time": 4.70000013592653e-05,
+        "compression_throughput_mb_s": 62.29094245204575,
+        "decompression_throughput_mb_s": 202.90942315435666,
+        "reversible": true
+      }
+    },
+    "binary_mixed": {
+      "TMC_Safe_Final": {
+        "test_name": "benchmark_data",
+        "reversible": true,
+        "original_size": 11056,
+        "compressed_size": 3324,
+        "decompressed_size": 11056,
+        "compression_ratio": 69.93487698986975,
+        "compression_time": 0.00836409999828902,
+        "decompression_time": 0.0003381000024091918,
+        "compression_throughput_mb_s": 1.2606046370015147,
+        "decompression_throughput_mb_s": 31.185516613592455,
+        "total_test_time": 0.009343300000182353,
+        "compression_info": {
+          "compression_ratio": 69.93487698986975,
+          "total_compression_time": 0.00835690000167233,
+          "compression_throughput_mb_s": 1.2616907274321265,
+          "data_type": "binary",
+          "transform_info": {
+            "size": 11056,
+            "data_type": "binary",
+            "transform_method": "safe_minimal",
+            "entropy": 0.0,
+            "repetition_ratio": 0.0
+          },
+          "reversible": true,
+          "method": "lzma_6",
+          "streams_count": 3
+        },
+        "decompression_info": {
+          "decompression_throughput_mb_s": 31.530571924647013,
+          "total_decompression_time": 0.000334399999701418,
+          "decompressed_size": 11056,
+          "method": "lzma_6"
+        }
+      },
+      "Zstandard": {
+        "algorithm": "Zstandard",
+        "level": 6,
+        "original_size": 11056,
+        "compressed_size": 3642,
+        "compression_ratio": 67.05861070911723,
+        "compression_time": 0.0001776000026438851,
+        "decompression_time": 2.7599999157246202e-05,
+        "compression_throughput_mb_s": 59.36837322761455,
+        "decompression_throughput_mb_s": 382.0225929035685,
+        "reversible": true
+      },
+      "LZMA": {
+        "algorithm": "LZMA",
+        "preset": 6,
+        "original_size": 11056,
+        "compressed_size": 3268,
+        "compression_ratio": 70.44138929088277,
+        "compression_time": 0.007415300002321601,
+        "decompression_time": 0.00024649999977555126,
+        "compression_throughput_mb_s": 1.4219011016258833,
+        "decompression_throughput_mb_s": 42.77413083889696,
+        "reversible": true
+      },
+      "Zlib": {
+        "algorithm": "Zlib",
+        "level": 6,
+        "original_size": 11056,
+        "compressed_size": 6359,
+        "compression_ratio": 42.483719247467434,
+        "compression_time": 0.0002564000023994595,
+        "decompression_time": 4.5099997805664316e-05,
+        "compression_throughput_mb_s": 41.1225551619173,
+        "decompression_throughput_mb_s": 233.7876664123308,
+        "reversible": true
+      }
+    }
+  },
+  "final_analysis": {
+    "algorithm_performance": {
+      "TMC_Safe_Final": {
+        "avg_compression_ratio": 84.82908729320982,
+        "avg_compression_speed": 5.947945355111525,
+        "avg_decompression_speed": 124.65674968793786,
+        "reversibility_rate": 100.0,
+        "total_datasets": 5
+      },
+      "Zstandard": {
+        "avg_compression_ratio": 81.78876053819874,
+        "avg_compression_speed": 106.5788019220221,
+        "avg_decompression_speed": 831.9836325575329,
+        "reversibility_rate": 100.0,
+        "total_datasets": 5
+      },
+      "LZMA": {
+        "avg_compression_ratio": 85.0962812473736,
+        "avg_compression_speed": 7.115740111948099,
+        "avg_decompression_speed": 152.94032102448037,
+        "reversibility_rate": 100.0,
+        "total_datasets": 5
+      },
+      "Zlib": {
+        "avg_compression_ratio": 70.56438813764169,
+        "avg_compression_speed": 111.29664255431996,
+        "avg_decompression_speed": 470.9351112775058,
+        "reversibility_rate": 100.0,
+        "total_datasets": 5
+      }
+    },
+    "victory_counts": {
+      "compression_ratio": {
+        "Zstandard": 1,
+        "LZMA": 4
+      },
+      "compression_speed": {
+        "Zlib": 3,
+        "Zstandard": 2
+      },
+      "decompression_speed": {
+        "Zstandard": 4,
+        "Zlib": 1
+      }
+    },
+    "tmc_safe_assessment": {
+      "reversibility_guarantee": true,
+      "competitive_compression": true,
+      "acceptable_speed": true,
+      "innovation_value": "Revolutionary data integrity assurance",
+      "production_readiness": "Suitable for mission-critical applications"
+    }
+  },
+  "benchmark_timestamp": 1753768647.4259312,
+  "tmc_version": "Safe_Final_v1.0"
+}

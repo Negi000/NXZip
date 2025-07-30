@@ -1,0 +1,1617 @@
+{
+  "detailed_results": {
+    "text": {
+      "Fast": {
+        "暗号化なし": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 179500,
+            "compressed_size": 748,
+            "compression_ratio": 99.583286908078,
+            "processing_time": 0.014248999999836087,
+            "throughput_mb_s": 12.01379323439477,
+            "encrypted": false,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 179500,
+              "compressed_size": 424,
+              "encrypted_size": 424,
+              "final_nxz_size": 748,
+              "header_size": 324,
+              "total_compression_ratio": 99.583286908078,
+              "processing_time": 0.014235700000426732,
+              "throughput_mb_s": 12.025017371101555,
+              "tmc_used": true,
+              "encrypted": false,
+              "compression_info": {
+                "compression_ratio": 99.76378830083566,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 179500,
+                "compressed_size": 424,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "none"
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 179500,
+            "compressed_size": 273,
+            "compression_ratio": 99.84791086350975,
+            "processing_time": 0.0008228000006056391,
+            "throughput_mb_s": 208.0512149597933,
+            "level": 1,
+            "encrypted": false,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 179500,
+            "compressed_size": 432,
+            "compression_ratio": 99.75933147632313,
+            "processing_time": 0.002742900000157533,
+            "throughput_mb_s": 62.410054972871855,
+            "level": 1,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        },
+        "暗号化あり": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 179500,
+            "compressed_size": 1052,
+            "compression_ratio": 99.41392757660167,
+            "processing_time": 0.017588599999726284,
+            "throughput_mb_s": 9.732698440898416,
+            "encrypted": true,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 179500,
+              "compressed_size": 424,
+              "encrypted_size": 472,
+              "final_nxz_size": 1052,
+              "header_size": 580,
+              "total_compression_ratio": 99.41392757660167,
+              "processing_time": 0.01756999999997788,
+              "throughput_mb_s": 9.743001695796094,
+              "tmc_used": true,
+              "encrypted": true,
+              "compression_info": {
+                "compression_ratio": 99.76378830083566,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 179500,
+                "compressed_size": 424,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "generic_spe",
+                "structure_preserved": true,
+                "iv_size": 16,
+                "encrypted_size": 424,
+                "structure_info": {
+                  "type": "generic",
+                  "ascii_ratio": 0.3443396226415094,
+                  "patterns": [],
+                  "entropy": 7.350413594196695
+                },
+                "salt_size": 32,
+                "encrypted_with_salt_size": 472
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 179500,
+            "compressed_size": 273,
+            "compression_ratio": 99.84791086350975,
+            "processing_time": 0.00016659999891999178,
+            "throughput_mb_s": 1027.518252728992,
+            "level": 1,
+            "encrypted": true,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 179500,
+            "compressed_size": 432,
+            "compression_ratio": 99.75933147632313,
+            "processing_time": 0.0016861999974935316,
+            "throughput_mb_s": 101.52089909226711,
+            "level": 1,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        }
+      },
+      "Balanced": {
+        "暗号化なし": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 179500,
+            "compressed_size": 748,
+            "compression_ratio": 99.583286908078,
+            "processing_time": 0.014490800000203308,
+            "throughput_mb_s": 11.813325681985821,
+            "encrypted": false,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 179500,
+              "compressed_size": 424,
+              "encrypted_size": 424,
+              "final_nxz_size": 748,
+              "header_size": 324,
+              "total_compression_ratio": 99.583286908078,
+              "processing_time": 0.014479000001301756,
+              "throughput_mb_s": 11.822953227400461,
+              "tmc_used": true,
+              "encrypted": false,
+              "compression_info": {
+                "compression_ratio": 99.76378830083566,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 179500,
+                "compressed_size": 424,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "none"
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 179500,
+            "compressed_size": 272,
+            "compression_ratio": 99.84846796657382,
+            "processing_time": 0.0006811999992351048,
+            "throughput_mb_s": 251.2985026235157,
+            "level": 6,
+            "encrypted": false,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 179500,
+            "compressed_size": 424,
+            "compression_ratio": 99.76378830083566,
+            "processing_time": 0.006748499999957858,
+            "throughput_mb_s": 25.366309520040137,
+            "level": 6,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        },
+        "暗号化あり": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 179500,
+            "compressed_size": 1052,
+            "compression_ratio": 99.41392757660167,
+            "processing_time": 0.015589800001180265,
+            "throughput_mb_s": 10.980547523506518,
+            "encrypted": true,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 179500,
+              "compressed_size": 424,
+              "encrypted_size": 472,
+              "final_nxz_size": 1052,
+              "header_size": 580,
+              "total_compression_ratio": 99.41392757660167,
+              "processing_time": 0.015578400001686532,
+              "throughput_mb_s": 10.988582895315904,
+              "tmc_used": true,
+              "encrypted": true,
+              "compression_info": {
+                "compression_ratio": 99.76378830083566,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 179500,
+                "compressed_size": 424,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "generic_spe",
+                "structure_preserved": true,
+                "iv_size": 16,
+                "encrypted_size": 424,
+                "structure_info": {
+                  "type": "generic",
+                  "ascii_ratio": 0.3443396226415094,
+                  "patterns": [],
+                  "entropy": 7.350413594196695
+                },
+                "salt_size": 32,
+                "encrypted_with_salt_size": 472
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 179500,
+            "compressed_size": 272,
+            "compression_ratio": 99.84846796657382,
+            "processing_time": 0.0006812999999965541,
+            "throughput_mb_s": 251.26161719622442,
+            "level": 6,
+            "encrypted": true,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 179500,
+            "compressed_size": 424,
+            "compression_ratio": 99.76378830083566,
+            "processing_time": 0.006816500001150416,
+            "throughput_mb_s": 25.113260436592263,
+            "level": 6,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        }
+      },
+      "Maximum": {
+        "暗号化なし": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 179500,
+            "compressed_size": 748,
+            "compression_ratio": 99.583286908078,
+            "processing_time": 0.01500800000212621,
+            "throughput_mb_s": 11.406219334399644,
+            "encrypted": false,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 179500,
+              "compressed_size": 424,
+              "encrypted_size": 424,
+              "final_nxz_size": 748,
+              "header_size": 324,
+              "total_compression_ratio": 99.583286908078,
+              "processing_time": 0.0149983000010252,
+              "throughput_mb_s": 11.413596193116597,
+              "tmc_used": true,
+              "encrypted": false,
+              "compression_info": {
+                "compression_ratio": 99.76378830083566,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 179500,
+                "compressed_size": 424,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "none"
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 179500,
+            "compressed_size": 275,
+            "compression_ratio": 99.84679665738162,
+            "processing_time": 0.0006733000009262469,
+            "throughput_mb_s": 254.2470511798995,
+            "level": 9,
+            "encrypted": false,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 179500,
+            "compressed_size": 424,
+            "compression_ratio": 99.76378830083566,
+            "processing_time": 0.018091900001309114,
+            "throughput_mb_s": 9.461943730759904,
+            "level": 9,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        },
+        "暗号化あり": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 179500,
+            "compressed_size": 1052,
+            "compression_ratio": 99.41392757660167,
+            "processing_time": 0.015376100000139559,
+            "throughput_mb_s": 11.133157289128462,
+            "encrypted": true,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 179500,
+              "compressed_size": 424,
+              "encrypted_size": 472,
+              "final_nxz_size": 1052,
+              "header_size": 580,
+              "total_compression_ratio": 99.41392757660167,
+              "processing_time": 0.01536610000039218,
+              "throughput_mb_s": 11.140402560867939,
+              "tmc_used": true,
+              "encrypted": true,
+              "compression_info": {
+                "compression_ratio": 99.76378830083566,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 179500,
+                "compressed_size": 424,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "generic_spe",
+                "structure_preserved": true,
+                "iv_size": 16,
+                "encrypted_size": 424,
+                "structure_info": {
+                  "type": "generic",
+                  "ascii_ratio": 0.3443396226415094,
+                  "patterns": [],
+                  "entropy": 7.350413594196695
+                },
+                "salt_size": 32,
+                "encrypted_with_salt_size": 472
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 179500,
+            "compressed_size": 275,
+            "compression_ratio": 99.84679665738162,
+            "processing_time": 0.0006949999988137279,
+            "throughput_mb_s": 246.3086907728216,
+            "level": 9,
+            "encrypted": true,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 179500,
+            "compressed_size": 424,
+            "compression_ratio": 99.76378830083566,
+            "processing_time": 0.018589900002552895,
+            "throughput_mb_s": 9.208470178506266,
+            "level": 9,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        }
+      }
+    },
+    "repetitive": {
+      "Fast": {
+        "暗号化なし": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 8000,
+            "compressed_size": 421,
+            "compression_ratio": 94.7375,
+            "processing_time": 0.0047811999975237995,
+            "throughput_mb_s": 1.5957070474360602,
+            "encrypted": false,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 8000,
+              "compressed_size": 112,
+              "encrypted_size": 112,
+              "final_nxz_size": 421,
+              "header_size": 309,
+              "total_compression_ratio": 94.7375,
+              "processing_time": 0.0047712000014144,
+              "throughput_mb_s": 1.5990515025545569,
+              "tmc_used": true,
+              "encrypted": false,
+              "compression_info": {
+                "compression_ratio": 98.6,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 8000,
+                "compressed_size": 112,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "none"
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 8000,
+            "compressed_size": 26,
+            "compression_ratio": 99.675,
+            "processing_time": 3.400000059627928e-05,
+            "throughput_mb_s": 224.3939528661334,
+            "level": 1,
+            "encrypted": false,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 8000,
+            "compressed_size": 112,
+            "compression_ratio": 98.6,
+            "processing_time": 0.0006952000003366265,
+            "throughput_mb_s": 10.97438798555197,
+            "level": 1,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        },
+        "暗号化あり": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 8000,
+            "compressed_size": 725,
+            "compression_ratio": 90.9375,
+            "processing_time": 0.005454800000734394,
+            "throughput_mb_s": 1.3986570598780586,
+            "encrypted": true,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 8000,
+              "compressed_size": 112,
+              "encrypted_size": 160,
+              "final_nxz_size": 725,
+              "header_size": 565,
+              "total_compression_ratio": 90.9375,
+              "processing_time": 0.005445099999633385,
+              "throughput_mb_s": 1.4011486532412045,
+              "tmc_used": true,
+              "encrypted": true,
+              "compression_info": {
+                "compression_ratio": 98.6,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 8000,
+                "compressed_size": 112,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "generic_spe",
+                "structure_preserved": true,
+                "iv_size": 16,
+                "encrypted_size": 112,
+                "structure_info": {
+                  "type": "generic",
+                  "ascii_ratio": 0.3392857142857143,
+                  "patterns": [],
+                  "entropy": 5.898305479842202
+                },
+                "salt_size": 32,
+                "encrypted_with_salt_size": 160
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 8000,
+            "compressed_size": 26,
+            "compression_ratio": 99.675,
+            "processing_time": 5.239999882178381e-05,
+            "throughput_mb_s": 145.599135549566,
+            "level": 1,
+            "encrypted": true,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 8000,
+            "compressed_size": 112,
+            "compression_ratio": 98.6,
+            "processing_time": 0.0007283000013558194,
+            "throughput_mb_s": 10.475620646775985,
+            "level": 1,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        }
+      },
+      "Balanced": {
+        "暗号化なし": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 8000,
+            "compressed_size": 421,
+            "compression_ratio": 94.7375,
+            "processing_time": 0.004983300001185853,
+            "throughput_mb_s": 1.5309924205716028,
+            "encrypted": false,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 8000,
+              "compressed_size": 112,
+              "encrypted_size": 112,
+              "final_nxz_size": 421,
+              "header_size": 309,
+              "total_compression_ratio": 94.7375,
+              "processing_time": 0.004972400001861388,
+              "throughput_mb_s": 1.534348509450966,
+              "tmc_used": true,
+              "encrypted": false,
+              "compression_info": {
+                "compression_ratio": 98.6,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 8000,
+                "compressed_size": 112,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "none"
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 8000,
+            "compressed_size": 26,
+            "compression_ratio": 99.675,
+            "processing_time": 7.380000170087442e-05,
+            "throughput_mb_s": 103.37932730914291,
+            "level": 6,
+            "encrypted": false,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 8000,
+            "compressed_size": 112,
+            "compression_ratio": 98.6,
+            "processing_time": 0.004162400000495836,
+            "throughput_mb_s": 1.8329316092497516,
+            "level": 6,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        },
+        "暗号化あり": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 8000,
+            "compressed_size": 725,
+            "compression_ratio": 90.9375,
+            "processing_time": 0.005513099997187965,
+            "throughput_mb_s": 1.3838665243041994,
+            "encrypted": true,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 8000,
+              "compressed_size": 112,
+              "encrypted_size": 160,
+              "final_nxz_size": 725,
+              "header_size": 565,
+              "total_compression_ratio": 90.9375,
+              "processing_time": 0.005503700002009282,
+              "throughput_mb_s": 1.3862300867533974,
+              "tmc_used": true,
+              "encrypted": true,
+              "compression_info": {
+                "compression_ratio": 98.6,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 8000,
+                "compressed_size": 112,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "generic_spe",
+                "structure_preserved": true,
+                "iv_size": 16,
+                "encrypted_size": 112,
+                "structure_info": {
+                  "type": "generic",
+                  "ascii_ratio": 0.3392857142857143,
+                  "patterns": [],
+                  "entropy": 5.898305479842202
+                },
+                "salt_size": 32,
+                "encrypted_with_salt_size": 160
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 8000,
+            "compressed_size": 26,
+            "compression_ratio": 99.675,
+            "processing_time": 9.28999979805667e-05,
+            "throughput_mb_s": 82.12480836486085,
+            "level": 6,
+            "encrypted": true,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 8000,
+            "compressed_size": 112,
+            "compression_ratio": 98.6,
+            "processing_time": 0.004699299999629147,
+            "throughput_mb_s": 1.6235172327478742,
+            "level": 6,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        }
+      },
+      "Maximum": {
+        "暗号化なし": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 8000,
+            "compressed_size": 421,
+            "compression_ratio": 94.7375,
+            "processing_time": 0.004618300001311582,
+            "throughput_mb_s": 1.6519919730384076,
+            "encrypted": false,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 8000,
+              "compressed_size": 112,
+              "encrypted_size": 112,
+              "final_nxz_size": 421,
+              "header_size": 309,
+              "total_compression_ratio": 94.7375,
+              "processing_time": 0.004608100000041304,
+              "throughput_mb_s": 1.6556486472041871,
+              "tmc_used": true,
+              "encrypted": false,
+              "compression_info": {
+                "compression_ratio": 98.6,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 8000,
+                "compressed_size": 112,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "none"
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 8000,
+            "compressed_size": 26,
+            "compression_ratio": 99.675,
+            "processing_time": 7.530000220867805e-05,
+            "throughput_mb_s": 101.31997752279933,
+            "level": 9,
+            "encrypted": false,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 8000,
+            "compressed_size": 112,
+            "compression_ratio": 98.6,
+            "processing_time": 0.016443499996967148,
+            "throughput_mb_s": 0.46397631481480045,
+            "level": 9,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        },
+        "暗号化あり": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 8000,
+            "compressed_size": 725,
+            "compression_ratio": 90.9375,
+            "processing_time": 0.005423399998107925,
+            "throughput_mb_s": 1.406754901705883,
+            "encrypted": true,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 8000,
+              "compressed_size": 112,
+              "encrypted_size": 160,
+              "final_nxz_size": 725,
+              "header_size": 565,
+              "total_compression_ratio": 90.9375,
+              "processing_time": 0.005412099999375641,
+              "throughput_mb_s": 1.4096920847970573,
+              "tmc_used": true,
+              "encrypted": true,
+              "compression_info": {
+                "compression_ratio": 98.6,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 8000,
+                "compressed_size": 112,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "generic_spe",
+                "structure_preserved": true,
+                "iv_size": 16,
+                "encrypted_size": 112,
+                "structure_info": {
+                  "type": "generic",
+                  "ascii_ratio": 0.3392857142857143,
+                  "patterns": [],
+                  "entropy": 5.898305479842202
+                },
+                "salt_size": 32,
+                "encrypted_with_salt_size": 160
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 8000,
+            "compressed_size": 26,
+            "compression_ratio": 99.675,
+            "processing_time": 6.260000009206124e-05,
+            "throughput_mb_s": 121.87531182156563,
+            "level": 9,
+            "encrypted": true,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 8000,
+            "compressed_size": 112,
+            "compression_ratio": 98.6,
+            "processing_time": 0.016032200001063757,
+            "throughput_mb_s": 0.47587945077679794,
+            "level": 9,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        }
+      }
+    },
+    "binary": {
+      "Fast": {
+        "暗号化なし": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 8000,
+            "compressed_size": 8342,
+            "compression_ratio": -4.275000000000007,
+            "processing_time": 0.00591099999655853,
+            "throughput_mb_s": 1.2907113070025282,
+            "encrypted": false,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 8000,
+              "compressed_size": 8011,
+              "encrypted_size": 8011,
+              "final_nxz_size": 8342,
+              "header_size": 331,
+              "total_compression_ratio": -4.275000000000007,
+              "processing_time": 0.005900399999518413,
+              "throughput_mb_s": 1.2930300542120376,
+              "tmc_used": true,
+              "encrypted": false,
+              "compression_info": {
+                "compression_ratio": -0.1374999999999904,
+                "method": "TMC_Simplified",
+                "data_type": "repetitive",
+                "original_size": 8000,
+                "compressed_size": 8011,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "none"
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 8000,
+            "compressed_size": 8010,
+            "compression_ratio": -0.12499999999999734,
+            "processing_time": 5.289999899105169e-05,
+            "throughput_mb_s": 144.2229617535636,
+            "level": 1,
+            "encrypted": false,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 8000,
+            "compressed_size": 8060,
+            "compression_ratio": -0.7500000000000062,
+            "processing_time": 0.0014812000008532777,
+            "throughput_mb_s": 5.1508199614197405,
+            "level": 1,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        },
+        "暗号化あり": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 8000,
+            "compressed_size": 8649,
+            "compression_ratio": -8.11249999999999,
+            "processing_time": 0.007234199998492841,
+            "throughput_mb_s": 1.0546286435043948,
+            "encrypted": true,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 8000,
+              "compressed_size": 8011,
+              "encrypted_size": 8059,
+              "final_nxz_size": 8649,
+              "header_size": 590,
+              "total_compression_ratio": -8.11249999999999,
+              "processing_time": 0.007223000000522006,
+              "throughput_mb_s": 1.056263952747975,
+              "tmc_used": true,
+              "encrypted": true,
+              "compression_info": {
+                "compression_ratio": -0.1374999999999904,
+                "method": "TMC_Simplified",
+                "data_type": "repetitive",
+                "original_size": 8000,
+                "compressed_size": 8011,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "generic_spe",
+                "structure_preserved": true,
+                "iv_size": 16,
+                "encrypted_size": 8011,
+                "structure_info": {
+                  "type": "generic",
+                  "ascii_ratio": 0.3727374859568094,
+                  "patterns": [],
+                  "entropy": 7.9793778014913315
+                },
+                "salt_size": 32,
+                "encrypted_with_salt_size": 8059
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 8000,
+            "compressed_size": 8010,
+            "compression_ratio": -0.12499999999999734,
+            "processing_time": 3.680000008898787e-05,
+            "throughput_mb_s": 207.32050306524428,
+            "level": 1,
+            "encrypted": true,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 8000,
+            "compressed_size": 8060,
+            "compression_ratio": -0.7500000000000062,
+            "processing_time": 0.001475699998991331,
+            "throughput_mb_s": 5.170017304645142,
+            "level": 1,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        }
+      },
+      "Balanced": {
+        "暗号化なし": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 8000,
+            "compressed_size": 8342,
+            "compression_ratio": -4.275000000000007,
+            "processing_time": 0.006072299998777453,
+            "throughput_mb_s": 1.256425824281745,
+            "encrypted": false,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 8000,
+              "compressed_size": 8011,
+              "encrypted_size": 8011,
+              "final_nxz_size": 8342,
+              "header_size": 331,
+              "total_compression_ratio": -4.275000000000007,
+              "processing_time": 0.006062500000552973,
+              "throughput_mb_s": 1.2584568297821208,
+              "tmc_used": true,
+              "encrypted": false,
+              "compression_info": {
+                "compression_ratio": -0.1374999999999904,
+                "method": "TMC_Simplified",
+                "data_type": "repetitive",
+                "original_size": 8000,
+                "compressed_size": 8011,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "none"
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 8000,
+            "compressed_size": 8010,
+            "compression_ratio": -0.12499999999999734,
+            "processing_time": 8.690000322530977e-05,
+            "throughput_mb_s": 87.7951006683959,
+            "level": 6,
+            "encrypted": false,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 8000,
+            "compressed_size": 8060,
+            "compression_ratio": -0.7500000000000062,
+            "processing_time": 0.005821700000524288,
+            "throughput_mb_s": 1.3105097360844624,
+            "level": 6,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        },
+        "暗号化あり": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 8000,
+            "compressed_size": 8649,
+            "compression_ratio": -8.11249999999999,
+            "processing_time": 0.007104200001776917,
+            "throughput_mb_s": 1.073927328811368,
+            "encrypted": true,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 8000,
+              "compressed_size": 8011,
+              "encrypted_size": 8059,
+              "final_nxz_size": 8649,
+              "header_size": 590,
+              "total_compression_ratio": -8.11249999999999,
+              "processing_time": 0.00709370000186027,
+              "throughput_mb_s": 1.0755169416875887,
+              "tmc_used": true,
+              "encrypted": true,
+              "compression_info": {
+                "compression_ratio": -0.1374999999999904,
+                "method": "TMC_Simplified",
+                "data_type": "repetitive",
+                "original_size": 8000,
+                "compressed_size": 8011,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "generic_spe",
+                "structure_preserved": true,
+                "iv_size": 16,
+                "encrypted_size": 8011,
+                "structure_info": {
+                  "type": "generic",
+                  "ascii_ratio": 0.3727374859568094,
+                  "patterns": [],
+                  "entropy": 7.9793778014913315
+                },
+                "salt_size": 32,
+                "encrypted_with_salt_size": 8059
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 8000,
+            "compressed_size": 8010,
+            "compression_ratio": -0.12499999999999734,
+            "processing_time": 5.4699998145224527e-05,
+            "throughput_mb_s": 139.47705283269866,
+            "level": 6,
+            "encrypted": true,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 8000,
+            "compressed_size": 8060,
+            "compression_ratio": -0.7500000000000062,
+            "processing_time": 0.005659300000843359,
+            "throughput_mb_s": 1.3481162917875098,
+            "level": 6,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        }
+      },
+      "Maximum": {
+        "暗号化なし": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 8000,
+            "compressed_size": 8342,
+            "compression_ratio": -4.275000000000007,
+            "processing_time": 0.00607529999979306,
+            "throughput_mb_s": 1.2558053975128596,
+            "encrypted": false,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 8000,
+              "compressed_size": 8011,
+              "encrypted_size": 8011,
+              "final_nxz_size": 8342,
+              "header_size": 331,
+              "total_compression_ratio": -4.275000000000007,
+              "processing_time": 0.006065300000045681,
+              "throughput_mb_s": 1.2578758727832982,
+              "tmc_used": true,
+              "encrypted": false,
+              "compression_info": {
+                "compression_ratio": -0.1374999999999904,
+                "method": "TMC_Simplified",
+                "data_type": "repetitive",
+                "original_size": 8000,
+                "compressed_size": 8011,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "none"
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 8000,
+            "compressed_size": 8010,
+            "compression_ratio": -0.12499999999999734,
+            "processing_time": 7.220000043162145e-05,
+            "throughput_mb_s": 105.67028373463212,
+            "level": 9,
+            "encrypted": false,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 8000,
+            "compressed_size": 8060,
+            "compression_ratio": -0.7500000000000062,
+            "processing_time": 0.01741749999928288,
+            "throughput_mb_s": 0.4380304022715154,
+            "level": 9,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        },
+        "暗号化あり": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 8000,
+            "compressed_size": 8649,
+            "compression_ratio": -8.11249999999999,
+            "processing_time": 0.0072342000021308195,
+            "throughput_mb_s": 1.0546286429740368,
+            "encrypted": true,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 8000,
+              "compressed_size": 8011,
+              "encrypted_size": 8059,
+              "final_nxz_size": 8649,
+              "header_size": 590,
+              "total_compression_ratio": -8.11249999999999,
+              "processing_time": 0.007223199998406926,
+              "throughput_mb_s": 1.0562347066303936,
+              "tmc_used": true,
+              "encrypted": true,
+              "compression_info": {
+                "compression_ratio": -0.1374999999999904,
+                "method": "TMC_Simplified",
+                "data_type": "repetitive",
+                "original_size": 8000,
+                "compressed_size": 8011,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "generic_spe",
+                "structure_preserved": true,
+                "iv_size": 16,
+                "encrypted_size": 8011,
+                "structure_info": {
+                  "type": "generic",
+                  "ascii_ratio": 0.3727374859568094,
+                  "patterns": [],
+                  "entropy": 7.9793778014913315
+                },
+                "salt_size": 32,
+                "encrypted_with_salt_size": 8059
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 8000,
+            "compressed_size": 8010,
+            "compression_ratio": -0.12499999999999734,
+            "processing_time": 0.0001298000024689827,
+            "throughput_mb_s": 58.778076934729924,
+            "level": 9,
+            "encrypted": true,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 8000,
+            "compressed_size": 8060,
+            "compression_ratio": -0.7500000000000062,
+            "processing_time": 0.018144699999538716,
+            "throughput_mb_s": 0.42047509914432085,
+            "level": 9,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        }
+      }
+    },
+    "structured": {
+      "Fast": {
+        "暗号化なし": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 12400,
+            "compressed_size": 491,
+            "compression_ratio": 96.04032258064517,
+            "processing_time": 0.004991699999663979,
+            "throughput_mb_s": 2.3690449194129353,
+            "encrypted": false,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 12400,
+              "compressed_size": 168,
+              "encrypted_size": 168,
+              "final_nxz_size": 491,
+              "header_size": 323,
+              "total_compression_ratio": 96.04032258064517,
+              "processing_time": 0.004981099998985883,
+              "throughput_mb_s": 2.374086351577985,
+              "tmc_used": true,
+              "encrypted": false,
+              "compression_info": {
+                "compression_ratio": 98.64516129032258,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 12400,
+                "compressed_size": 168,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "none"
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 12400,
+            "compressed_size": 82,
+            "compression_ratio": 99.33870967741936,
+            "processing_time": 6.360000043059699e-05,
+            "throughput_mb_s": 185.93650068197803,
+            "level": 1,
+            "encrypted": false,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 12400,
+            "compressed_size": 168,
+            "compression_ratio": 98.64516129032258,
+            "processing_time": 0.000983900001301663,
+            "throughput_mb_s": 12.019068510816876,
+            "level": 1,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        },
+        "暗号化あり": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 12400,
+            "compressed_size": 795,
+            "compression_ratio": 93.58870967741936,
+            "processing_time": 0.006068899998354027,
+            "throughput_mb_s": 1.9485510597710891,
+            "encrypted": true,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 12400,
+              "compressed_size": 168,
+              "encrypted_size": 216,
+              "final_nxz_size": 795,
+              "header_size": 579,
+              "total_compression_ratio": 93.58870967741936,
+              "processing_time": 0.0060594999995373655,
+              "throughput_mb_s": 1.9515738137371672,
+              "tmc_used": true,
+              "encrypted": true,
+              "compression_info": {
+                "compression_ratio": 98.64516129032258,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 12400,
+                "compressed_size": 168,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "generic_spe",
+                "structure_preserved": true,
+                "iv_size": 16,
+                "encrypted_size": 168,
+                "structure_info": {
+                  "type": "generic",
+                  "ascii_ratio": 0.35119047619047616,
+                  "patterns": [],
+                  "entropy": 6.50640618744079
+                },
+                "salt_size": 32,
+                "encrypted_with_salt_size": 216
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 12400,
+            "compressed_size": 82,
+            "compression_ratio": 99.33870967741936,
+            "processing_time": 6.120000034570694e-05,
+            "throughput_mb_s": 193.22812837642476,
+            "level": 1,
+            "encrypted": true,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 12400,
+            "compressed_size": 168,
+            "compression_ratio": 98.64516129032258,
+            "processing_time": 0.000941999998758547,
+            "throughput_mb_s": 12.55367466987505,
+            "level": 1,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        }
+      },
+      "Balanced": {
+        "暗号化なし": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 12400,
+            "compressed_size": 491,
+            "compression_ratio": 96.04032258064517,
+            "processing_time": 0.004999500000849366,
+            "throughput_mb_s": 2.3653488391696076,
+            "encrypted": false,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 12400,
+              "compressed_size": 168,
+              "encrypted_size": 168,
+              "final_nxz_size": 491,
+              "header_size": 323,
+              "total_compression_ratio": 96.04032258064517,
+              "processing_time": 0.004989900000509806,
+              "throughput_mb_s": 2.3698995014387685,
+              "tmc_used": true,
+              "encrypted": false,
+              "compression_info": {
+                "compression_ratio": 98.64516129032258,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 12400,
+                "compressed_size": 168,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "none"
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 12400,
+            "compressed_size": 78,
+            "compression_ratio": 99.37096774193547,
+            "processing_time": 3.550000110408291e-05,
+            "throughput_mb_s": 333.1143987507489,
+            "level": 6,
+            "encrypted": false,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 12400,
+            "compressed_size": 168,
+            "compression_ratio": 98.64516129032258,
+            "processing_time": 0.004466600003070198,
+            "throughput_mb_s": 2.647553287804815,
+            "level": 6,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        },
+        "暗号化あり": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 12400,
+            "compressed_size": 795,
+            "compression_ratio": 93.58870967741936,
+            "processing_time": 0.0061932999997225124,
+            "throughput_mb_s": 1.909412029768837,
+            "encrypted": true,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 12400,
+              "compressed_size": 168,
+              "encrypted_size": 216,
+              "final_nxz_size": 795,
+              "header_size": 579,
+              "total_compression_ratio": 93.58870967741936,
+              "processing_time": 0.006182600001920946,
+              "throughput_mb_s": 1.9127165787473352,
+              "tmc_used": true,
+              "encrypted": true,
+              "compression_info": {
+                "compression_ratio": 98.64516129032258,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 12400,
+                "compressed_size": 168,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "generic_spe",
+                "structure_preserved": true,
+                "iv_size": 16,
+                "encrypted_size": 168,
+                "structure_info": {
+                  "type": "generic",
+                  "ascii_ratio": 0.35119047619047616,
+                  "patterns": [],
+                  "entropy": 6.50640618744079
+                },
+                "salt_size": 32,
+                "encrypted_with_salt_size": 216
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 12400,
+            "compressed_size": 78,
+            "compression_ratio": 99.37096774193547,
+            "processing_time": 3.4599997889017686e-05,
+            "throughput_mb_s": 341.77925563374174,
+            "level": 6,
+            "encrypted": true,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 12400,
+            "compressed_size": 168,
+            "compression_ratio": 98.64516129032258,
+            "processing_time": 0.004515100001299288,
+            "throughput_mb_s": 2.61911397754967,
+            "level": 6,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        }
+      },
+      "Maximum": {
+        "暗号化なし": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 12400,
+            "compressed_size": 491,
+            "compression_ratio": 96.04032258064517,
+            "processing_time": 0.005046299997047754,
+            "throughput_mb_s": 2.343412308098177,
+            "encrypted": false,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 12400,
+              "compressed_size": 168,
+              "encrypted_size": 168,
+              "final_nxz_size": 491,
+              "header_size": 323,
+              "total_compression_ratio": 96.04032258064517,
+              "processing_time": 0.005036700000346173,
+              "throughput_mb_s": 2.3478788735927747,
+              "tmc_used": true,
+              "encrypted": false,
+              "compression_info": {
+                "compression_ratio": 98.64516129032258,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 12400,
+                "compressed_size": 168,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "none"
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 12400,
+            "compressed_size": 78,
+            "compression_ratio": 99.37096774193547,
+            "processing_time": 7.720000212430023e-05,
+            "throughput_mb_s": 153.18084453413726,
+            "level": 9,
+            "encrypted": false,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 12400,
+            "compressed_size": 168,
+            "compression_ratio": 98.64516129032258,
+            "processing_time": 0.01635040000110166,
+            "throughput_mb_s": 0.72325823971528,
+            "level": 9,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        },
+        "暗号化あり": {
+          "NEXUS-SPE-NXZ": {
+            "original_size": 12400,
+            "compressed_size": 795,
+            "compression_ratio": 93.58870967741936,
+            "processing_time": 0.006661900002654875,
+            "throughput_mb_s": 1.775103426758856,
+            "encrypted": true,
+            "format": "nxz",
+            "nexus_info": {
+              "original_size": 12400,
+              "compressed_size": 168,
+              "encrypted_size": 216,
+              "final_nxz_size": 795,
+              "header_size": 579,
+              "total_compression_ratio": 93.58870967741936,
+              "processing_time": 0.006649299997661728,
+              "throughput_mb_s": 1.7784671360287607,
+              "tmc_used": true,
+              "encrypted": true,
+              "compression_info": {
+                "compression_ratio": 98.64516129032258,
+                "method": "TMC_Simplified",
+                "data_type": "text",
+                "original_size": 12400,
+                "compressed_size": 168,
+                "tmc_version": "simplified_v1"
+              },
+              "encryption_info": {
+                "encryption_method": "generic_spe",
+                "structure_preserved": true,
+                "iv_size": 16,
+                "encrypted_size": 168,
+                "structure_info": {
+                  "type": "generic",
+                  "ascii_ratio": 0.35119047619047616,
+                  "patterns": [],
+                  "entropy": 6.50640618744079
+                },
+                "salt_size": 32,
+                "encrypted_with_salt_size": 216
+              },
+              "nxz_version": 2,
+              "format": "nxz"
+            }
+          },
+          "Zstandard": {
+            "original_size": 12400,
+            "compressed_size": 78,
+            "compression_ratio": 99.37096774193547,
+            "processing_time": 3.7900001188972965e-05,
+            "throughput_mb_s": 312.0200831782073,
+            "level": 9,
+            "encrypted": true,
+            "format": "zstd"
+          },
+          "7-Zip": {
+            "error": "not_available"
+          },
+          "LZMA": {
+            "original_size": 12400,
+            "compressed_size": 168,
+            "compression_ratio": 98.64516129032258,
+            "processing_time": 0.01658750000206055,
+            "throughput_mb_s": 0.7129200616107606,
+            "level": 9,
+            "encrypted": false,
+            "format": "lzma"
+          }
+        }
+      }
+    }
+  },
+  "summary": {
+    "best_compression": {
+      "winner": "Zstandard",
+      "ratio": 74.68948505406296
+    },
+    "best_speed": {
+      "winner": "Zstandard",
+      "speed": 219.99587637665906
+    },
+    "best_overall": {
+      "winner": "Zstandard",
+      "score": 118.2814024508418
+    },
+    "nexus_performance": {
+      "NEXUS-SPE-NXZ": {
+        "average_compression_ratio": 70.23921834284302,
+        "average_speed_mb_s": 3.9893629649297617,
+        "test_count": 24
+      },
+      "Zstandard": {
+        "average_compression_ratio": 74.68948505406296,
+        "average_speed_mb_s": 219.99587637665906,
+        "test_count": 24
+      },
+      "LZMA": {
+        "average_compression_ratio": 74.06436599574684,
+        "average_speed_mb_s": 12.668367029736661,
+        "test_count": 24
+      }
+    }
+  },
+  "test_timestamp": 1753767137.4134953,
+  "nexus_version": "SPE_Integrated_NXZ_v2"
+}

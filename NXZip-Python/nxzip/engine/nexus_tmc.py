@@ -49,6 +49,15 @@ PIPELINE_QUEUE_SIZE = 8  # パイプラインキューサイズ
 MAX_WORKERS = 4  # 最大ワーカー数（CPU効率考慮）
 ASYNC_BATCH_SIZE = 4  # 非同期バッチサイズ
 
+# データタイプ列挙
+class DataType(Enum):
+    """データタイプ分類"""
+    TEXT_REPETITIVE = "text_repetitive"
+    TEXT_NATURAL = "text_natural"
+    SEQUENTIAL_INT = "sequential_int"
+    FLOAT_ARRAY = "float_array"
+    GENERIC_BINARY = "generic_binary"
+
 
 class MemoryManager:
     """
@@ -289,7 +298,7 @@ class MetaAnalyzer:
     
     def _predict_residual_entropy(self, sample: bytes, data_type, full_data_size: int) -> Tuple[float, int]:
         """データタイプ別残差エントロピー予測"""
-        from .nexus_tmc_v4_unified import DataType  # 循環インポート回避
+        # DataTypeの代わりに文字列で判定
         original_entropy = self._calculate_entropy(sample)
         
         # データタイプに応じた予測

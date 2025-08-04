@@ -1,0 +1,134 @@
+{
+    "app_title": "NXZip v1.0 - 次世代アーカイブシステム",
+    "subtitle": "次世代アーカイブシステム • 業界最高レベルの圧縮技術",
+    "features": {
+        "compression": "🏆 98%+ 圧縮率",
+        "integrity": "🔒 100% データ整合性",
+        "speed": "⚡ 超高速処理", 
+        "support": "🌐 汎用対応"
+    },
+    "sections": {
+        "file_selection": "📁 ファイル選択",
+        "compression_options": "⚙️ 圧縮オプション",
+        "operation_log": "📋 操作ログ"
+    },
+    "labels": {
+        "input_file": "入力ファイル:",
+        "output_file": "出力ファイル:",
+        "mode": "モード:",
+        "progress": "進行状況:"
+    },
+    "buttons": {
+        "browse": "📁 参照",
+        "save_as": "💾 名前を付けて保存",
+        "compress": "🗜️ ファイルを圧縮",
+        "extract": "📂 ファイルを展開",
+        "file_info": "📊 ファイル情報",
+        "clear": "🗑️ クリア",
+        "language": "🌐 Language"
+    },
+    "modes": {
+        "high_speed": "🚀 高速モード（推奨）",
+        "maximum": "🎯 最大圧縮モード"
+    },
+    "options": {
+        "verify": "🔍 データ整合性を検証",
+        "keep_original": "💾 元ファイルを保持"
+    },
+    "status": {
+        "ready": "準備完了",
+        "reading": "ファイルを読み込み中...",
+        "initializing": "エンジンを初期化中...", 
+        "compressing": "圧縮中...",
+        "verifying": "整合性を検証中...",
+        "creating_container": "NXZipコンテナを作成中...",
+        "saving": "圧縮ファイルを保存中...",
+        "compression_completed": "圧縮完了！",
+        "parsing_container": "NXZipコンテナを解析中...",
+        "extracting": "データを展開中...",
+        "saving_extracted": "展開ファイルを保存中...",
+        "extraction_completed": "展開完了！"
+    },
+    "messages": {
+        "welcome": "🎉 NXZip v1.0 - 次世代アーカイブシステムへようこそ！\n\n🏆 業界最高レベルの圧縮技術:\n   • 最適な圧縮方法選択のための高度なエントロピー分析\n   • ZLIB + LZMA によるマルチアルゴリズム・インテリジェント切り替え\n   • テキスト・構造化データで98%+の圧縮率を実現\n   • SHA256チェックサムによる100%データ整合性検証\n\n🚀 クイックスタート:\n   1. \"📁 参照\" をクリックしてファイルを選択\n   2. 圧縮モードを選択（ほとんどのファイルには高速モードを推奨）\n   3. \"🗜️ ファイルを圧縮\" をクリックして.nxzアーカイブを作成\n   4. \"📂 ファイルを展開\" で元のファイルを復元\n\n✨ 機能:\n   • 汎用ファイル形式対応（テキスト、画像、文書、アーカイブ）\n   • データ特性に基づく自動方式選択\n   • 詳細統計付きリアルタイム進行状況追跡\n   • 安心の内蔵整合性検証\n\n次世代圧縮を体験する準備完了！ 🚀\n\n",
+        "compression_started": "🗜️ 圧縮開始",
+        "extraction_started": "📂 展開開始", 
+        "compression_completed_success": "🎉 圧縮が正常に完了しました！",
+        "extraction_completed_success": "🎉 展開が正常に完了しました！",
+        "final_statistics": "📊 最終統計:",
+        "statistics": "📊 統計:",
+        "engine_initialized": "🚀 NXZip エンジンが初期化されました",
+        "valid_container": "✅ 有効なNXZipコンテナが検出されました",
+        "integrity_verified": "✅ 整合性が検証されました"
+    },
+    "dialog_titles": {
+        "select_file": "圧縮または展開するファイルを選択",
+        "save_compressed": "圧縮アーカイブに名前を付けて保存",
+        "save_extracted": "展開ファイルに名前を付けて保存",
+        "file_info": "ファイル情報",
+        "success": "成功",
+        "error": "エラー",
+        "warning": "警告",
+        "large_file": "大きなファイル",
+        "file_exists": "ファイルが存在します"
+    },
+    "errors": {
+        "input_error": "入力エラー",
+        "file_error": "ファイルエラー", 
+        "output_error": "出力エラー",
+        "directory_error": "ディレクトリエラー",
+        "select_input": "入力ファイルを選択してください",
+        "file_not_exist": "入力ファイルが存在しません",
+        "specify_output": "出力ファイルを指定してください",
+        "cannot_read": "入力ファイルを読み込めません",
+        "cannot_create_dir": "出力ディレクトリを作成できません",
+        "compression_failed": "圧縮に失敗しました",
+        "extraction_failed": "展開に失敗しました",
+        "busy": "忙しい",
+        "operation_in_progress": "別の操作が進行中です",
+        "cannot_clear": "操作中はクリアできません",
+        "no_file": "ファイルなし",
+        "select_file_first": "最初にファイルを選択してください",
+        "file_not_exist_selected": "選択されたファイルが存在しません",
+        "cannot_read_info": "ファイル情報を読み込めません"
+    },
+    "info": {
+        "original": "元のサイズ",
+        "compressed": "圧縮サイズ",
+        "final": "最終サイズ",
+        "container": "コンテナ",
+        "extracted": "展開サイズ",
+        "ratio": "圧縮率",
+        "expansion": "展開率",
+        "speed": "速度",
+        "time": "時間",
+        "integrity": "整合性",
+        "verified": "✅ 検証済み",
+        "skipped": "⚠️ スキップ",
+        "saved": "保存先",
+        "name": "📄 名前",
+        "path": "📁 パス",
+        "size": "📊 サイズ", 
+        "modified": "📅 更新日時",
+        "version": "バージョン",
+        "engine": "エンジン",
+        "original_filename": "元ファイル名",
+        "method": "方式",
+        "nxzip_info": "🗜️ NXZip情報:",
+        "could_not_read_header": "⚠️ NXZipヘッダーを読み込めませんでした"
+    },
+    "questions": {
+        "large_file_continue": "ファイルサイズが {size:.1f} MB です。時間がかかる可能性があります。続行しますか？",
+        "file_exists_overwrite": "出力ファイルが既に存在します:\n{file}\n\n上書きしますか？",
+        "not_nxz_try_anyway": "入力ファイルの拡張子が.nxzではありません。それでも試しますか？"
+    },
+    "filetypes": {
+        "all_supported": "サポートされているファイル",
+        "nxzip_archives": "NXZipアーカイブ",
+        "text_files": "テキストファイル",
+        "documents": "文書ファイル",
+        "images": "画像ファイル",
+        "archives": "アーカイブファイル",
+        "all_files": "すべてのファイル"
+    }
+}

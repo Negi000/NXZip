@@ -1,0 +1,134 @@
+{
+    "app_title": "NXZip v1.0 - Next Generation Archive System",
+    "subtitle": "Next Generation Archive System • Industry-Leading Compression",
+    "features": {
+        "compression": "🏆 98%+ Compression",
+        "integrity": "🔒 100% Data Integrity",
+        "speed": "⚡ Lightning Fast",
+        "support": "🌐 Universal Support"
+    },
+    "sections": {
+        "file_selection": "📁 File Selection",
+        "compression_options": "⚙️ Compression Options",
+        "operation_log": "📋 Operation Log"
+    },
+    "labels": {
+        "input_file": "Input File:",
+        "output_file": "Output File:",
+        "mode": "Mode:",
+        "progress": "Progress:"
+    },
+    "buttons": {
+        "browse": "📁 Browse",
+        "save_as": "💾 Save As",
+        "compress": "🗜️ Compress File",
+        "extract": "📂 Extract File",
+        "file_info": "📊 File Info",
+        "clear": "🗑️ Clear",
+        "language": "🌐 言語"
+    },
+    "modes": {
+        "high_speed": "🚀 High Speed (Recommended)",
+        "maximum": "🎯 Maximum Compression"
+    },
+    "options": {
+        "verify": "🔍 Verify data integrity",
+        "keep_original": "💾 Keep original file"
+    },
+    "status": {
+        "ready": "Ready",
+        "reading": "Reading input file...",
+        "initializing": "Initializing engine...",
+        "compressing": "Compressing data...",
+        "verifying": "Verifying integrity...",
+        "creating_container": "Creating NXZip container...",
+        "saving": "Saving compressed file...",
+        "compression_completed": "Compression completed!",
+        "parsing_container": "Parsing NXZip container...",
+        "extracting": "Extracting data...",
+        "saving_extracted": "Saving extracted file...",
+        "extraction_completed": "Extraction completed!"
+    },
+    "messages": {
+        "welcome": "🎉 Welcome to NXZip v1.0 - Next Generation Archive System!\n\n🏆 Industry-Leading Compression Technology:\n   • Advanced entropy analysis for optimal compression method selection\n   • Multi-algorithm approach: ZLIB + LZMA with intelligent switching\n   • 98%+ compression ratios for text and structured data\n   • 100% data integrity with SHA256 checksum verification\n\n🚀 Quick Start:\n   1. Click \"📁 Browse\" to select your file\n   2. Choose compression mode (High Speed recommended for most files)\n   3. Click \"🗜️ Compress File\" to create a .nxz archive\n   4. Use \"📂 Extract File\" to restore original files\n\n✨ Features:\n   • Universal file format support (text, images, documents, archives)\n   • Automatic method selection based on data characteristics\n   • Real-time progress tracking with detailed statistics\n   • Built-in integrity verification for peace of mind\n\nReady to experience next-generation compression! 🚀\n\n",
+        "compression_started": "🗜️ COMPRESSION STARTED",
+        "extraction_started": "📂 EXTRACTION STARTED",
+        "compression_completed_success": "🎉 COMPRESSION COMPLETED SUCCESSFULLY!",
+        "extraction_completed_success": "🎉 EXTRACTION COMPLETED SUCCESSFULLY!",
+        "final_statistics": "📊 Final Statistics:",
+        "statistics": "📊 Statistics:",
+        "engine_initialized": "🚀 NXZip Engine initialized",
+        "valid_container": "✅ Valid NXZip container detected",
+        "integrity_verified": "✅ Integrity verified"
+    },
+    "dialog_titles": {
+        "select_file": "Select file to compress or extract",
+        "save_compressed": "Save compressed archive as",
+        "save_extracted": "Save extracted file as",
+        "file_info": "File Information",
+        "success": "Success",
+        "error": "Error",
+        "warning": "Warning",
+        "large_file": "Large File",
+        "file_exists": "File Exists"
+    },
+    "errors": {
+        "input_error": "Input Error",
+        "file_error": "File Error",
+        "output_error": "Output Error",
+        "directory_error": "Directory Error",
+        "select_input": "Please select an input file",
+        "file_not_exist": "Input file does not exist",
+        "specify_output": "Please specify an output file",
+        "cannot_read": "Cannot read input file",
+        "cannot_create_dir": "Cannot create output directory",
+        "compression_failed": "Compression failed",
+        "extraction_failed": "Extraction failed",
+        "busy": "Busy",
+        "operation_in_progress": "Another operation is in progress",
+        "cannot_clear": "Cannot clear while operation is in progress",
+        "no_file": "No File",
+        "select_file_first": "Please select a file first",
+        "file_not_exist_selected": "Selected file does not exist",
+        "cannot_read_info": "Could not read file information"
+    },
+    "info": {
+        "original": "Original",
+        "compressed": "Compressed",
+        "final": "Final",
+        "container": "Container",
+        "extracted": "Extracted",
+        "ratio": "Ratio",
+        "expansion": "Expansion",
+        "speed": "Speed",
+        "time": "Time",
+        "integrity": "Integrity",
+        "verified": "✅ Verified",
+        "skipped": "⚠️ Skipped",
+        "saved": "Saved",
+        "name": "📄 Name",
+        "path": "📁 Path",
+        "size": "📊 Size",
+        "modified": "📅 Modified",
+        "version": "Version",
+        "engine": "Engine",
+        "original_filename": "Original",
+        "method": "Method",
+        "nxzip_info": "🗜️ NXZip Information:",
+        "could_not_read_header": "⚠️ Could not read NXZip header"
+    },
+    "questions": {
+        "large_file_continue": "File is {size:.1f} MB. This may take a while. Continue?",
+        "file_exists_overwrite": "Output file already exists:\n{file}\n\nOverwrite?",
+        "not_nxz_try_anyway": "Input file doesn't have .nxz extension. Try anyway?"
+    },
+    "filetypes": {
+        "all_supported": "All supported",
+        "nxzip_archives": "NXZip archives",
+        "text_files": "Text files",
+        "documents": "Documents",
+        "images": "Images",
+        "archives": "Archives",
+        "all_files": "All files"
+    }
+}

@@ -17,6 +17,14 @@ class TDTTransformer:
     統計的クラスタリングに基づく適応的ストリーム分解
     """
     
+    def __init__(self, lightweight_mode: bool = False):
+        self.lightweight_mode = lightweight_mode
+        
+        if lightweight_mode:
+            print("⚡ TDT軽量モード: 簡易分解")
+        else:
+            print("📊 TDT通常モード: 統計的クラスタリング")
+    
     def transform(self, data: bytes) -> Tuple[List[bytes], Dict[str, Any]]:
         """統計的クラスタリングによる適応的ストリーム分解"""
         print("  [TDT] 高度変換を実行中...")

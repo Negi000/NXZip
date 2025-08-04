@@ -1,24 +1,69 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 """
-NEXUS TMC 総合比較テスト & 戦略分析
-通常モード vs 軽量モード vs Zstandard vs 7Z
+NXZip vs 7-Zip vs Zstandard 包括的ベンチマーク評価
+SPE統合NXZipの通常モード・軽量モード性能比較
 """
 
-import time
-import sys
 import os
+import sys
+import time
 import hashlib
+import subprocess
 import tempfile
-import io
 from pathlib import Path
+from typing import Dict, List, Tuple, Any
 
-# 必要なライブラリのインポート
-import zstandard as zstd
-import py7zr
+# NXZipコンポーネントをインポート
+sys.path.append(os.path.dirname(__file__))
+from nxzip.formats.enhanced_nxz import SuperNXZipFile
 
-# NEXUS TMC エンジンをインポート
-sys.path.append('.')
-from lightweight_mode import NEXUSTMCLightweight
+class ComprehensiveBenchmark:
+    """包括的圧縮ベンチマーク評価システム"""
+    
+    def __init__(self):
+        self.results = []
+        self.test_data = self._generate_test_datasets()
+        
+    def _generate_test_datasets(self) -> List[Tuple[str, bytes]]:
+        """多様なテストデータセットを生成"""
+        datasets = []
+        
+        # 1. 小サイズテキスト
+        small_text = "Hello, World! こんにちは世界！\n" * 100
+        datasets.append(("小テキスト (2.6KB)", small_text.encode('utf-8')))
+        
+        # 2. 中サイズ繰り返しデータ
+        repetitive = "ABCDEFGHIJ" * 5000
+        datasets.append(("繰り返し (49KB)", repetitive.encode('utf-8')))
+        
+        # 3. ランダムバイナリ
+        import random
+        random.seed(42)
+        random_data = bytes([random.randint(0, 255) for _ in range(100000)])
+        datasets.append(("ランダム (97KB)", random_data))
+        
+        # 4. 日本語テキスト
+        japanese_text = ("日本語のテキストデータです。" + 
+                        "圧縮アルゴリズムのテストを行っています。" + 
+                        "UTF-8エンコーディングでの効率を評価します。\n") * 1000
+        datasets.append(("日本語 (81KB)", japanese_text.encode('utf-8')))
+        
+        # 5. ゼロ埋めデータ
+        zero_data = b'\x00' * 50000
+        datasets.append(("ゼロ埋め (48KB)", zero_data))
+        
+        # 6. 混合データ
+        mixed_data = b"".join([
+            b"TEXT" * 1000,
+            bytes(range(256)) * 100,
+            b"\x00" * 5000,
+            "日本語テスト".encode('utf-8') * 500
+        ])
+        datasets.append(("混合 (75KB)", mixed_data))
+        
+        return datasets
 
 # 通常モードのクラス（nexus_tmc.pyから必要部分を抽出）
 class NEXUSTMCFullMode:

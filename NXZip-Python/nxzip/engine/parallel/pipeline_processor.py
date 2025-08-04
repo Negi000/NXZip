@@ -30,9 +30,23 @@ class ParallelPipelineProcessor:
     真の並列処理 (ProcessPoolExecutor) + 非同期I/O + インテリジェントスケジューリング
     """
     
-    def __init__(self, max_workers: int = MAX_WORKERS):
+    def __init__(self, max_workers: int = MAX_WORKERS, lightweight_mode: bool = False):
         self.max_workers = max_workers
-        self.pipeline_queue = queue.Queue(maxsize=PIPELINE_QUEUE_SIZE)
+        self.lightweight_mode = lightweight_mode
+        
+        # 軽量モード最適化
+        if lightweight_mode:
+            # メモリとCPU使用量を削減
+            self.max_workers = min(max_workers, 2)  # ワーカー数制限
+            queue_size = 100  # キューサイズ削減
+            self.enable_process_pool = False  # プロセスプール無効化
+            print("⚡ 並列処理軽量モード: スレッド専用、低リソース")
+        else:
+            queue_size = PIPELINE_QUEUE_SIZE
+            self.enable_process_pool = True
+            print("🚀 並列処理通常モード: 最大並列化")
+        
+        self.pipeline_queue = queue.Queue(maxsize=queue_size)
         self.result_queue = queue.Queue()
         self.active_tasks = {}
         self.performance_stats = {
@@ -41,23 +55,37 @@ class ParallelPipelineProcessor:
             'pipeline_efficiency': 0.0
         }
         
-        # 真の並列処理プール初期化（CPUバウンドタスク用）
-        self.process_pool = ProcessPoolExecutor(max_workers=max_workers)
+        # 並列処理プール初期化
+        if self.enable_process_pool:
+            # 真の並列処理プール初期化（CPUバウンドタスク用）
+            self.process_pool = ProcessPoolExecutor(max_workers=self.max_workers)
+        else:
+            self.process_pool = None
+        
         # I/Oバウンドタスク用（軽量ワーカー）
-        self.thread_pool = ThreadPoolExecutor(max_workers=max_workers)
+        self.thread_pool = ThreadPoolExecutor(max_workers=self.max_workers)
         
         # パイプライン制御
         self.pipeline_active = True
         self.pipeline_thread = None
         
-        print(f"🚀 並列パイプライン初期化完了: {max_workers}ワーカー (Process+Thread Hybrid)")
+        print(f"🚀 並列パイプライン初期化完了: {self.max_workers}ワーカー (軽量={lightweight_mode})")
     
     async def process_data_async(self, data_chunks: List[bytes], transform_type: str) -> List[Tuple[bytes, Dict]]:
         """
         CPUの全コアを活用した真の並列データ処理パイプライン
         ProcessPoolExecutorによりGIL制約を突破
         """
-        print(f"  [並列パイプライン] 真の並列処理開始: {len(data_chunks)}チャンク")
+        print(f"  [並列パイプライン] {'軽量' if self.lightweight_mode else '並列'}処理開始: {len(data_chunks)}チャンク")
+        
+        # 軽量モード - 順次処理で極限速度
+        if self.lightweight_mode:
+            print("  [軽量並列] 順次高速処理モード")
+            results = []
+            for i, chunk in enumerate(data_chunks):
+                result = await self._process_single_chunk_fast(chunk, transform_type, i)
+                results.append(result)
+            return results
         
         try:
             # タスクバッチ生成（プロセス間通信の最適化）
@@ -466,6 +494,37 @@ class ParallelPipelineProcessor:
     def get_performance_stats(self) -> Dict[str, Any]:
         """パフォーマンス統計取得"""
         return self.performance_stats.copy()
+    
+    async def _process_single_chunk_fast(self, chunk: bytes, transform_type: str, chunk_id: int) -> Tuple[bytes, Dict]:
+        """軽量モード用高速チャンク処理"""
+        try:
+            # 最小限の処理で極限速度
+            import zlib
+            compressed = zlib.compress(chunk, level=1)  # 最高速圧縮
+            
+            info = {
+                'chunk_id': chunk_id,
+                'transform_type': 'fast_lightweight',
+                'original_size': len(chunk),
+                'compressed_size': len(compressed),
+                'compression_ratio': (1 - len(compressed) / len(chunk)) * 100 if len(chunk) > 0 else 0,
+                'processing_mode': 'lightweight_fast'
+            }
+            
+            return compressed, info
+            
+        except Exception as e:
+            # エラー時は無圧縮で返す
+            info = {
+                'chunk_id': chunk_id,
+                'transform_type': 'fast_store',
+                'original_size': len(chunk),
+                'compressed_size': len(chunk),
+                'compression_ratio': 0,
+                'processing_mode': 'lightweight_fallback',
+                'error': str(e)
+            }
+            return chunk, info
     
     def __del__(self):
         """デストラクタ（リソース解放）"""

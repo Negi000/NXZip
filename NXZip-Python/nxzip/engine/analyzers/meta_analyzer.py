@@ -26,23 +26,31 @@ class MetaAnalyzer:
     残差エントロピー予測による高速・正確な変換効果判定
     """
     
-    def __init__(self, core_compressor):
+    def __init__(self, core_compressor, lightweight_mode: bool = False):
         self.core_compressor = core_compressor
-        # 改良キャッシュシステム
+        self.lightweight_mode = lightweight_mode
+        
+        # 改良キャッシュシステム（モード別最適化）
         self.cache = {}  # 分析結果キャッシュ
-        self.cache_max_size = 1000  # キャッシュ最大サイズ
+        if lightweight_mode:
+            # 軽量モード: 高速処理優先
+            self.cache_max_size = 100  # 小さなキャッシュ
+            self.sample_size = 256  # 高速サンプリング
+            self.entropy_threshold = 0.95  # 厳しい閾値（変換を減らして高速化）
+            print("🔍 予測型MetaAnalyzer初期化完了（軽量モード: 高速処理優先）")
+        else:
+            # 通常モード: 精度・圧縮率優先
+            self.cache_max_size = 1000  # 大きなキャッシュ
+            self.sample_size = 1024  # 詳細サンプリング
+            self.entropy_threshold = 0.85  # 標準閾値
+            print("🔍 予測型MetaAnalyzer初期化完了（通常モード: 高精度分析）")
+        
         self.cache_hit_count = 0
         self.cache_miss_count = 0
         
-        # 分析パラメータ
-        self.sample_size = 1024  # 予測分析用サンプルサイズ（高速化）
-        self.entropy_threshold = 0.85  # 残差エントロピー改善閾値
-        
-        print("🔍 予測型MetaAnalyzer初期化完了（改良キャッシュシステム搭載）")
-        
     def should_apply_transform(self, data: bytes, transformer, data_type) -> Tuple[bool, Dict[str, Any]]:
         """
-        残差エントロピー予測による高速変換効果分析
+        残差エントロピー予測による高速変換効果分析（モード別最適化）
         Returns: (should_transform, analysis_info)
         """
         print(f"  [予測メタ分析] {data_type if isinstance(data_type, str) else data_type.value} の変換効果を理論予測中...")
@@ -50,8 +58,27 @@ class MetaAnalyzer:
         if not transformer or len(data) < 512:
             return False, {'reason': 'no_transformer_or_tiny_data'}
         
+        # 軽量モード: 超高速判定（分析をスキップ）
+        if self.lightweight_mode:
+            # 軽量モードでは変換を原則スキップして高速化
+            if len(data) < 4096:  # 4KB未満は変換しない
+                return False, {'reason': 'lightweight_mode_skip_small', 'entropy_improvement': 0.0}
+            
+            # 最低限のエントロピーチェックのみ
+            basic_entropy = calculate_entropy(data[:256])  # 最初の256バイトのみ
+            if basic_entropy > 7.5:  # 高エントロピーなら変換スキップ
+                return False, {'reason': 'lightweight_mode_high_entropy', 'entropy_improvement': 0.0}
+            
+            # 簡易的な判定（詳細分析なし）
+            simple_improvement = (8.0 - basic_entropy) / 8.0
+            return simple_improvement > 0.2, {
+                'entropy_improvement': simple_improvement,
+                'theoretical_compression_gain': simple_improvement * 50,  # 簡易推定
+                'reason': 'lightweight_mode_simple_check'
+            }
+        
         try:
-            # 高速サンプル抽出（先頭部分のみで十分）
+            # 通常モード: 詳細分析
             sample = data[:min(self.sample_size, len(data))]
             sample_key = hash(sample) + hash(str(data_type))
             

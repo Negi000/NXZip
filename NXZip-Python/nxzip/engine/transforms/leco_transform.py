@@ -18,6 +18,14 @@ class LeCoTransformer:
     動的モデル選択による予測圧縮の最適化
     """
     
+    def __init__(self, lightweight_mode: bool = False):
+        self.lightweight_mode = lightweight_mode
+        
+        if lightweight_mode:
+            print("⚡ LeCo軽量モード: 簡易処理")
+        else:
+            print("🧠 LeCo通常モード: 高精度予測")
+    
     def transform(self, data: bytes) -> Tuple[List[bytes], Dict[str, Any]]:
         """LeCo v6.0変換：複数モデルの動的選択"""
         print("  [LeCo] TMC v6.0 マルチモデル変換を実行中...")

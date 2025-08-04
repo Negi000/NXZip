@@ -77,7 +77,9 @@ class BWTTransformer:
     テキストデータ最適化の極限実装 + 可逆性問題の根本的解決
     """
     
-    def __init__(self):
+    def __init__(self, lightweight_mode: bool = False):
+        self.lightweight_mode = lightweight_mode
+        
         try:
             # pydivsufsortのインポートと逆変換関数の存在確認
             import pydivsufsort
@@ -88,19 +90,34 @@ class BWTTransformer:
             self.pydivsufsort_available = False
             print("⚠️ pydivsufsort未利用 - フォールバック実装")
         
-        self.post_bwt_pipeline = PostBWTPipeline()
+        self.post_bwt_pipeline = PostBWTPipeline(lightweight_mode=lightweight_mode)
     
     def transform(self, data: bytes) -> Tuple[List[bytes], Dict[str, Any]]:
         """TMC v8.1 完全堅牢化BWT変換（pydivsufsort完全準拠）"""
         print("  [強化BWT] TMC v8.1 専門変換を実行中...")
         info = {'method': 'enhanced_bwt_mtf_rle', 'original_size': len(data)}
         
+        # 軽量モード - 極限速度最適化
+        if self.lightweight_mode:
+            # サイズ制限を厳格化
+            MAX_LIGHTWEIGHT_SIZE = 512 * 1024  # 512KB制限
+            if len(data) > MAX_LIGHTWEIGHT_SIZE:
+                print(f"    [軽量BWT] データサイズ({len(data)})が軽量制限({MAX_LIGHTWEIGHT_SIZE})を超過 - BWTスキップ")
+                info['method'] = 'bwt_skipped_lightweight'
+                return [data], info
+            
+            # 軽量モードでは高速MTFのみ使用
+            if len(data) < 16384:  # 16KB未満は簡易処理
+                print(f"    [軽量BWT] 高速簡易処理: {len(data)} bytes")
+                info['method'] = 'simple_fast'
+                return [data], info
+        
         try:
             if not data:
                 return [data], info
             
             # 動的サイズ制限（並列処理前提で拡張）
-            MAX_BWT_SIZE = 2 * 1024 * 1024  # 2MB制限
+            MAX_BWT_SIZE = 2 * 1024 * 1024 if not self.lightweight_mode else 512 * 1024
             if len(data) > MAX_BWT_SIZE:
                 print(f"    [強化BWT] データサイズ({len(data)})が制限({MAX_BWT_SIZE})を超過 - BWTスキップ")
                 info['method'] = 'bwt_skipped_large'

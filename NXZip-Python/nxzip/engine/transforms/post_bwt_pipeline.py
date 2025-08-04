@@ -17,9 +17,18 @@ class PostBWTPipeline:
     BWT+MTF後の特殊なデータ構造に特化した専門符号化
     """
     
+    def __init__(self, lightweight_mode: bool = False):
+        self.lightweight_mode = lightweight_mode
+    
     def encode(self, mtf_stream: bytes) -> List[bytes]:
         """BWT+MTF後のストリームを専門符号化"""
         print("    [ポストBWT] RLE + 分割エントロピー符号化を実行中...")
+        
+        # 軽量モード - 高速処理
+        if self.lightweight_mode:
+            if len(mtf_stream) < 1024:  # 1KB未満は直接返す
+                print("    [軽量ポストBWT] 小さなデータ - RLEスキップ")
+                return [mtf_stream]
         
         try:
             # 1. ランレングス符号化 (RLE)

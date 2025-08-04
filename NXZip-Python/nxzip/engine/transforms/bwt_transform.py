@@ -97,20 +97,21 @@ class BWTTransformer:
         print("  [強化BWT] TMC v8.1 専門変換を実行中...")
         info = {'method': 'enhanced_bwt_mtf_rle', 'original_size': len(data)}
         
-        # 軽量モード - 極限速度最適化
+        # 軽量モード - 速度最適化（可逆性確保）
         if self.lightweight_mode:
-            # サイズ制限を厳格化
-            MAX_LIGHTWEIGHT_SIZE = 512 * 1024  # 512KB制限
+            # サイズ制限を緩和して確実性を優先
+            MAX_LIGHTWEIGHT_SIZE = 1024 * 1024  # 1MB制限に拡張
             if len(data) > MAX_LIGHTWEIGHT_SIZE:
                 print(f"    [軽量BWT] データサイズ({len(data)})が軽量制限({MAX_LIGHTWEIGHT_SIZE})を超過 - BWTスキップ")
                 info['method'] = 'bwt_skipped_lightweight'
                 return [data], info
             
-            # 軽量モードでは高速MTFのみ使用
-            if len(data) < 16384:  # 16KB未満は簡易処理
-                print(f"    [軽量BWT] 高速簡易処理: {len(data)} bytes")
-                info['method'] = 'simple_fast'
-                return [data], info
+            # 軽量モードでも必要最小限のBWT処理は実行（可逆性確保）
+            if len(data) < 1024:  # 1KB未満のみ簡易処理
+                print(f"    [軽量BWT] 小さなデータ - 通常BWT実行: {len(data)} bytes")
+                # 小さなデータでも通常BWTを実行して可逆性を確保
+            else:
+                print(f"    [軽量BWT] 軽量BWT実行: {len(data)} bytes")
         
         try:
             if not data:
@@ -250,8 +251,14 @@ class BWTTransformer:
         print("  [強化BWT] TMC v8.1 専門逆変換を実行中...")
         try:
             # BWTがスキップされた場合の処理
-            if info.get('method') in ['bwt_skipped_large', 'bwt_error_skip']:
-                print(f"    [強化BWT] {info.get('method')}データ - 元データ返却")
+            method = info.get('method', '')
+            if method in ['bwt_skipped_large', 'bwt_error_skip', 'bwt_skipped_lightweight']:
+                print(f"    [強化BWT] {method}データ - 元データ返却")
+                return streams[0] if streams else b''
+            
+            # 簡易処理データの処理（軽量モード）
+            if method in ['simple_fast']:
+                print(f"    [強化BWT] 簡易処理データ - 元データ返却")
                 return streams[0] if streams else b''
             
             if len(streams) < 1:

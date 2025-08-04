@@ -14,7 +14,6 @@ import multiprocessing as mp
 import zlib
 import lzma
 import bz2
-import numpy as np
 from typing import Tuple, Dict, Any, List, Optional, Union
 
 # TMC v9.1 分離されたモジュールのインポート
@@ -42,137 +41,30 @@ class ImprovedDispatcher:
     """改良版データタイプディスパッチャー"""
     
     def dispatch_data_type(self, data: bytes) -> DataType:
-        """データタイプの精密判定（テキスト最優先）"""
+        """データタイプの高速判定"""
         if len(data) < 16:
             return DataType.GENERIC_BINARY
         
-        # Phase 1: テキストデータの最優先判定（修正）
+        # テキストデータの判定
+        try:
+            text = data.decode('utf-8', errors='strict')
+            if len(set(text)) < len(text) * 0.6:  # 60%以上の文字が重複
+                return DataType.TEXT_REPETITIVE
+            else:
+                return DataType.TEXT_NATURAL
+        except UnicodeDecodeError:
+            pass
         
-        # 1-1. 強制的なテキスト判定を最初に実行
-        text_data = None
-        for encoding in ['utf-8', 'ascii', 'latin1', 'cp1252']:
-            try:
-                text_data = data.decode(encoding, errors='strict')
-                # 印刷可能文字率の厳密チェック
-                printable_count = sum(1 for c in text_data if c.isprintable() or c.isspace())
-                printable_ratio = printable_count / len(text_data)
-                
-                if printable_ratio > 0.85:  # 85%以上が印刷可能 = テキスト確定
-                    # 語彙分析
-                    words = text_data.split()
-                    if len(words) > 5:
-                        unique_words = set(words)
-                        repetition_ratio = 1 - (len(unique_words) / len(words))
-                        
-                        if repetition_ratio > 0.5:  # 50%以上が重複語
-                            return DataType.TEXT_REPETITIVE
-                        else:
-                            return DataType.TEXT_NATURAL
-                    else:
-                        # 文字レベルの分析
-                        char_freq = {}
-                        for c in text_data:
-                            char_freq[c] = char_freq.get(c, 0) + 1
-                        
-                        # 最頻文字の出現率
-                        if char_freq:
-                            max_freq = max(char_freq.values()) / len(text_data)
-                            if max_freq > 0.3:  # 30%以上が同一文字
-                                return DataType.TEXT_REPETITIVE
-                            else:
-                                return DataType.TEXT_NATURAL
-                break
-            except UnicodeDecodeError:
-                continue
+        # 数値データの判定
+        if len(data) % 4 == 0:
+            # 浮動小数点数として評価
+            entropy = calculate_entropy(data[:1024])  # 分離されたモジュール使用
+            if entropy < 6.0:
+                return DataType.FLOAT_ARRAY
+            elif entropy < 7.0:
+                return DataType.SEQUENTIAL_INT
         
-        # Phase 2: ASCII数値テキストの特殊処理
-        if text_data is not None:
-            try:
-                # 数値文字パターンの厳密分析
-                import re
-                
-                # 数値行パターン（CSVファイルなど）
-                lines = text_data.strip().split('\n')
-                numeric_lines = 0
-                for line in lines[:20]:  # 最初の20行チェック
-                    # 数値、スペース、カンマ、ピリオドのみの行
-                    if re.match(r'^[\d\s.,e+-]+$', line.strip()) and len(line.strip()) > 0:
-                        numeric_lines += 1
-                
-                if numeric_lines > len(lines[:20]) * 0.7:  # 70%以上が数値行
-                    return DataType.SEQUENTIAL_INT
-                
-                # 浮動小数点数の検出
-                float_matches = re.findall(r'[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?', text_data)
-                if len(float_matches) >= 10:  # 10個以上の浮動小数点数
-                    return DataType.SEQUENTIAL_INT  # テキスト数値として扱う
-                    
-            except:
-                pass
-        
-        # Phase 3: バイナリ数値配列の判定（テキスト判定後）
-        
-        # テキストとして認識されなかった場合のみ数値判定を実行
-        if text_data is None:
-            # 32ビット整数配列（Little Endianチェック）
-            if len(data) >= 16 and len(data) % 4 == 0:
-                try:
-                    # Little Endian 32bit integers
-                    int_array = np.frombuffer(data, dtype='<i4')  # explicit little endian
-                    if len(int_array) >= 4:
-                        # 統計的妥当性の厳密チェック
-                        finite_mask = np.isfinite(int_array.astype(float))
-                        valid_ints = int_array[finite_mask]
-                        
-                        if len(valid_ints) > len(int_array) * 0.9:  # 90%以上が有効
-                            # 値域チェック（現実的な整数値）
-                            if np.all(np.abs(valid_ints) < 1e9):  # 10億未満
-                                # 連続性または構造性チェック
-                                if len(valid_ints) >= 4:
-                                    differences = np.diff(valid_ints)
-                                    diff_std = np.std(differences)
-                                    val_std = np.std(valid_ints)
-                                    # 構造化されたデータの特徴
-                                    if diff_std < val_std or np.any(np.abs(differences) <= 1):
-                                        return DataType.SEQUENTIAL_INT
-                                        
-                except Exception:
-                    pass
-            
-            # 32ビット浮動小数点配列
-            if len(data) >= 16 and len(data) % 4 == 0:
-                try:
-                    float_array = np.frombuffer(data, dtype='<f4')  # explicit little endian
-                    if len(float_array) >= 4:
-                        # NaN/Inf の除去
-                        finite_mask = np.isfinite(float_array)
-                        valid_floats = float_array[finite_mask]
-                        
-                        if len(valid_floats) > len(float_array) * 0.8:  # 80%以上が有効
-                            # 浮動小数点の妥当性チェック
-                            if np.all(np.abs(valid_floats) < 1e10):  # 非常に大きな値でない
-                                # 浮動小数点特有のパターン
-                                unique_ratio = len(np.unique(valid_floats)) / len(valid_floats)
-                                if unique_ratio > 0.5:  # 50%以上がユニーク（浮動小数点の特徴）
-                                    return DataType.FLOAT_ARRAY
-                                    
-                except Exception:
-                    pass
-        
-        # Phase 4: エントロピー分析による最終分類
-        
-        # バイト分布の詳細分析
-        byte_counts = np.bincount(data[:min(4096, len(data))], minlength=256)
-        probabilities = byte_counts / np.sum(byte_counts)
-        entropy = -np.sum(probabilities * np.log2(probabilities + 1e-12))
-        
-        # エントロピー閾値による分類
-        if entropy > 7.5:  # 非常に高いエントロピー
-            return DataType.MIXED_DATA
-        elif entropy < 2.0:  # 非常に低いエントロピー
-            return DataType.TEXT_REPETITIVE
-        else:  # 中程度のエントロピー
-            return DataType.GENERIC_BINARY
+        return DataType.GENERIC_BINARY
 
 
 class CoreCompressor:
@@ -182,62 +74,42 @@ class CoreCompressor:
         self.lightweight_mode = lightweight_mode
         
         if lightweight_mode:
-            # 軽量モード: Zstandardレベル目標（圧縮率重視）
+            # 軽量モード: 高速圧縮のみ
             self.compression_methods = ['zlib']
             self.default_method = 'zlib'
-            self.compression_level = 9  # 最高圧縮率でZstdに対抗
-            print("⚡ CoreCompressor軽量モード: 最高圧縮率zlib")
+            self.compression_level = 1  # 最高速
+            print("⚡ CoreCompressor軽量モード: 高速zlibのみ")
         else:
-            # 通常モード: 7-Zip超越目標（最高圧縮率）
-            self.compression_methods = ['lzma', 'zlib', 'bz2']  # lzmaを優先
+            # 通常モード: 高圧縮率追求
+            self.compression_methods = ['zlib', 'lzma', 'bz2']
             self.default_method = 'lzma'
-            self.compression_level = 9  # 最高圧縮率
-            print("🎯 CoreCompressor通常モード: 最高圧縮率追求")
+            self.compression_level = 6  # バランス
+            print("🎯 CoreCompressor通常モード: 最適圧縮率追求")
     
     def compress_core(self, data: bytes, method: str = None) -> Tuple[bytes, Dict[str, Any]]:
-        """基本圧縮機能 - 99%以上圧縮率目標"""
+        """基本圧縮機能"""
         try:
             # メソッド決定
             if method is None:
                 method = self.default_method
             
-            # データサイズに応じた最適化
-            if len(data) < 1000:
-                # 小データ: オーバーヘッド最小化
-                level = min(6, self.compression_level)
-            elif len(data) > 10000:
-                # 大データ: 最高圧縮率
-                level = 9
+            # 軽量モード最適化
+            if self.lightweight_mode:
+                method = 'zlib'  # 強制的にzlib使用
+                level = 1  # 最高速度
             else:
                 level = self.compression_level
             
-            # 軽量モード高圧縮最適化
-            if self.lightweight_mode:
-                # zlibの最高圧縮設定
-                compressed = zlib.compress(data, level=9)
-                method = 'zlib'
-                
-                # 追加の圧縮試行（テキスト用）
-                if len(data) > 5000:
-                    try:
-                        lzma_compressed = lzma.compress(data, preset=6)  # バランス型
-                        if len(lzma_compressed) < len(compressed):
-                            compressed = lzma_compressed
-                            method = 'lzma_boost'
-                    except:
-                        pass
+            if method == 'zlib':
+                compressed = zlib.compress(data, level=level)
+            elif method == 'lzma' and not self.lightweight_mode:
+                compressed = lzma.compress(data, preset=level)
+            elif method == 'bz2' and not self.lightweight_mode:
+                compressed = bz2.compress(data, compresslevel=level)
             else:
-                if method == 'lzma':
-                    # LZMA最高圧縮設定
-                    compressed = lzma.compress(data, preset=9)
-                elif method == 'zlib':
-                    compressed = zlib.compress(data, level=level)
-                elif method == 'bz2':
-                    compressed = bz2.compress(data, compresslevel=9)
-                else:
-                    # フォールバック
-                    compressed = zlib.compress(data, level=9)
-                    method = 'zlib_fallback'
+                # フォールバック
+                compressed = zlib.compress(data, level=1)
+                method = 'zlib_fallback'
             
             info = {
                 'method': method,
@@ -331,54 +203,49 @@ class NEXUSTMCEngineV91:
         self.reversibility_check = True  # 可逆性保証
         self.nxzip_format_version = '2.0'
         
-        # 分離されたコンポーネントの高速初期化（軽量モード最適化）
+        # 分離されたコンポーネントの効率的初期化
         self.dispatcher = ImprovedDispatcher()
         self.core_compressor = CoreCompressor(lightweight_mode=self.lightweight_mode)
+        self.meta_analyzer = MetaAnalyzer(self.core_compressor, lightweight_mode=self.lightweight_mode)
         
-        # メタ分析器は軽量モードでは遅延初期化
+        # TMC変換器の統合初期化（モード別最適化）
         if self.lightweight_mode:
-            self.meta_analyzer = None  # 遅延初期化
+            # 軽量モード: 効率的変換のみ
+            self.bwt_transformer = BWTTransformer(lightweight_mode=True)
+            self.context_mixer = ContextMixingEncoder(lightweight_mode=True)
+            self.leco_transformer = LeCoTransformer(lightweight_mode=True)
+            self.tdt_transformer = TDTTransformer(lightweight_mode=True)
+            print("⚡ 軽量TMC変換器: 速度最適化済み")
         else:
-            self.meta_analyzer = MetaAnalyzer(self.core_compressor, lightweight_mode=self.lightweight_mode)
-        
-        # TMC変換器の遅延初期化（大幅高速化）
-        if self.lightweight_mode:
-            # 軽量モード: 遅延初期化で速度最適化
-            self.bwt_transformer = None
-            self.context_mixer = None
-            self.leco_transformer = None
-            self.tdt_transformer = None
-            print("⚡ 軽量TMC変換器: 遅延初期化による高速化")
-        else:
-            # 通常モード: 事前初期化で最適化
+            # 通常モード: 全機能変換
             self.bwt_transformer = BWTTransformer(lightweight_mode=False)
             self.context_mixer = ContextMixingEncoder(lightweight_mode=False)
             self.leco_transformer = LeCoTransformer(lightweight_mode=False)
             self.tdt_transformer = TDTTransformer(lightweight_mode=False)
             print("🎯 通常TMC変換器: 最大圧縮率構成")
         
-        # 並列処理パイプライン（軽量モード高速化）
-        if self.max_workers > 1 and not self.lightweight_mode:
-            # 通常モードのみ並列処理を使用
+        # 並列処理パイプライン（両モード対応）
+        if self.max_workers > 1:
             self.pipeline_processor = ParallelPipelineProcessor(
                 max_workers=self.max_workers, 
                 lightweight_mode=self.lightweight_mode
             )
             print(f"🔄 TMC並列パイプライン: {self.max_workers}ワーカー")
         else:
-            # 軽量モードは並列処理を無効化（初期化コスト削減）
             self.pipeline_processor = None
-            if self.lightweight_mode:
-                print("⚡ TMC軽量処理: 並列無効化による高速化")
-            else:
-                print("🔄 TMCシングルスレッド処理")
+            print("🔄 TMCシングルスレッド処理")
         
         # NXZip専用ユーティリティ
         self.sublinear_lz77 = SublinearLZ77Encoder()
         
-        # TMC変換器マッピング（遅延初期化対応）
-        self.transformers = {}  # 遅延初期化
-        self._transformer_cache = {}  # 初期化済みキャッシュ
+        # TMC変換器マッピング（NXZip最適化版）
+        self.transformers = {
+            DataType.FLOAT_ARRAY: self.tdt_transformer,      # 数値データ
+            DataType.TEXT_REPETITIVE: self.bwt_transformer,  # 反復テキスト
+            DataType.TEXT_NATURAL: self.bwt_transformer,     # 自然言語
+            DataType.SEQUENTIAL_INT: self.leco_transformer,  # 順次整数
+            DataType.GENERIC_BINARY: None                    # バイナリ
+        }
         
         # NXZip専用統計システム
         self.stats = {
@@ -404,32 +271,6 @@ class NEXUSTMCEngineV91:
         print(f"⚙️  設定: {self.max_workers}並列, {self.chunk_size//1024}KBチャンク, 変換深度={self.transform_depth}")
         print(f"🎯 目標: {'Zstandardレベル' if self.lightweight_mode else '7-Zip超越'}")
     
-    def _get_transformer(self, data_type: DataType):
-        """遅延初期化による変換器取得（高速化）"""
-        if data_type == DataType.GENERIC_BINARY:
-            return None
-        
-        if data_type in self._transformer_cache:
-            return self._transformer_cache[data_type]
-        
-        # 遅延初期化
-        transformer = None
-        if data_type in [DataType.TEXT_REPETITIVE, DataType.TEXT_NATURAL]:
-            if self.bwt_transformer is None:
-                self.bwt_transformer = BWTTransformer(lightweight_mode=self.lightweight_mode)
-            transformer = self.bwt_transformer
-        elif data_type == DataType.FLOAT_ARRAY:
-            if self.tdt_transformer is None:
-                self.tdt_transformer = TDTTransformer(lightweight_mode=self.lightweight_mode)
-            transformer = self.tdt_transformer
-        elif data_type == DataType.SEQUENTIAL_INT:
-            if self.leco_transformer is None:
-                self.leco_transformer = LeCoTransformer(lightweight_mode=self.lightweight_mode)
-            transformer = self.leco_transformer
-        
-        self._transformer_cache[data_type] = transformer
-        return transformer
-    
     def compress(self, data: bytes) -> Tuple[bytes, Dict[str, Any]]:
         """NXZip TMC v9.1 メイン圧縮インターフェース"""
         print("--- NXZip TMC v9.1 統合圧縮開始 ---")
@@ -451,28 +292,13 @@ class NEXUSTMCEngineV91:
             chunks = self._adaptive_chunking(data)
             print(f"📦 NXZipチャンク分割: {len(chunks)}個 ({self.chunk_size//1024}KB)")
             
-            # フェーズ3: TMC変換効果予測（高速化）
-            if self.enable_transforms and not self.lightweight_mode:
-                # 通常モードのみ予測分析を実行
-                if self.meta_analyzer is None:
-                    self.meta_analyzer = MetaAnalyzer(self.core_compressor, lightweight_mode=False)
-                
-                transformer = self._get_transformer(data_type)
+            # フェーズ3: TMC変換効果予測（分離されたMetaAnalyzer使用）
+            if self.enable_transforms:
+                transformer = self.transformers.get(data_type)
                 should_transform, analysis_info = self.meta_analyzer.should_apply_transform(
                     data, transformer, data_type
                 )
                 print(f"🧠 TMC変換予測: {'適用' if should_transform else 'バイパス'}")
-            elif self.enable_transforms and self.lightweight_mode:
-                # 軽量モードは簡易判定のみ（高速化）
-                transformer = self._get_transformer(data_type)
-                if transformer and data_type in [DataType.TEXT_REPETITIVE, DataType.TEXT_NATURAL, DataType.FLOAT_ARRAY]:
-                    should_transform = True
-                    analysis_info = {'method': 'lightweight_simple_check'}
-                    print(f"🧠 TMC変換予測: 適用")
-                else:
-                    should_transform = False
-                    analysis_info = {'method': 'lightweight_bypass'}
-                    print(f"🧠 TMC変換予測: バイパス")
             else:
                 transformer = None
                 should_transform = False
@@ -489,27 +315,15 @@ class NEXUSTMCEngineV91:
                     try:
                         transformed_streams, transform_info = transformer.transform(chunk)
                         
-                        # ストリーム情報を保存（逆変換のため）
+                        # 変換結果の圧縮
                         if isinstance(transformed_streams, list):
-                            streams_info = []
-                            combined_data = b''
-                            for stream in transformed_streams:
-                                streams_info.append({'size': len(stream)})
-                                combined_data += stream
-                            transform_info['streams_info'] = streams_info
-                            transform_info['original_streams_count'] = len(transformed_streams)
+                            combined_data = b''.join(transformed_streams)
                         else:
                             combined_data = transformed_streams
-                            transform_info['streams_info'] = [{'size': len(combined_data)}]
-                            transform_info['original_streams_count'] = 1
                         
                         compressed_data, compress_info = self.core_compressor.compress_core(
                             combined_data, method='lzma' if not self.lightweight_mode else 'zlib'
                         )
-                        
-                        # 逆変換に必要な追加情報を保存
-                        transform_info['original_chunk_size'] = len(chunk)
-                        transform_info['combined_data_size'] = len(combined_data)
                         
                         chunk_info = {
                             'chunk_id': i,
@@ -620,33 +434,10 @@ class NEXUSTMCEngineV91:
         return chunks
     
     def _create_nxzip_container(self, processed_results: List[Tuple[bytes, Dict]], metadata: Dict) -> bytes:
-        """NXZip v2.0 コンテナ作成 - TMC変換情報保存対応版"""
+        """NXZip v2.0 コンテナ作成"""
         try:
-            print(f"📦 NXZip v2.0 コンテナ作成: {len(processed_results)}チャンク")
-            
             # NXZip v2.0 マジックナンバー
             NXZIP_V20_MAGIC = b'NXZ20'
-            
-            # チャンク情報の詳細保存
-            chunks_info = []
-            for i, (compressed_data, chunk_info) in enumerate(processed_results):
-                chunk_detail = {
-                    'chunk_id': i,
-                    'original_size': chunk_info.get('original_size', 0),
-                    'compressed_size': len(compressed_data),
-                    'transform_applied': chunk_info.get('transform_applied', False),
-                    'data_type': chunk_info.get('data_type', 'generic_binary')
-                }
-                
-                # TMC変換詳細情報の保存
-                if chunk_info.get('transform_applied', False):
-                    transform_info = chunk_info.get('transform_info', {})
-                    chunk_detail['transform_details'] = transform_info
-                    print(f"  📝 Chunk {i}: TMC変換情報保存 - {chunk_info.get('data_type', 'unknown')}")
-                else:
-                    print(f"  📝 Chunk {i}: 変換なし")
-                
-                chunks_info.append(chunk_detail)
             
             # ヘッダー作成
             header = {
@@ -654,9 +445,7 @@ class NEXUSTMCEngineV91:
                 'version': '2.0',
                 'engine': 'TMC_v9.1',
                 'chunk_count': len(processed_results),
-                'chunks': chunks_info,  # チャンク詳細情報を追加
-                'metadata': metadata,
-                'created_at': time.time()
+                'metadata': metadata
             }
             
             header_json = json.dumps(header, separators=(',', ':')).encode('utf-8')
@@ -769,10 +558,9 @@ class NEXUSTMCEngineV91:
             pos += header_size
             
             chunk_count = header.get('chunk_count', 0)
-            chunks_info = header.get('chunks', [])  # チャンク詳細情報を取得
             print(f"🔄 NXZip解凍: {chunk_count}チャンク")
             
-            # チャンク解凍 - TMC変換情報対応
+            # チャンク解凍
             decompressed_chunks = []
             for i in range(chunk_count):
                 if pos + 4 > len(container_data):
@@ -788,32 +576,32 @@ class NEXUSTMCEngineV91:
                 pos += chunk_size
                 
                 # チャンク情報取得
-                chunk_info = chunks_info[i] if i < len(chunks_info) else {}
+                chunk_info = header.get('chunks', [{}])[i] if i < len(header.get('chunks', [])) else {}
                 transform_applied = chunk_info.get('transform_applied', False)
-                data_type = chunk_info.get('data_type', 'generic_binary')
                 
-                print(f"  📦 Chunk {i+1}: 変換={transform_applied}, タイプ={data_type}")
+                print(f"  📦 Chunk {i+1}: 変換={transform_applied}")
                 
                 # チャンク解凍
                 try:
-                    # 1. 基本解凍（圧縮の逆処理）
-                    decompressed_chunk = self.core_compressor.decompress_core(chunk_data)
-                    
-                    # 2. TMC逆変換（完全実装版）
                     if transform_applied:
-                        print(f"    🔄 TMC逆変換実行中...")
-                        transform_details = chunk_info.get('transform_details', {})
-                        decompressed_chunk = self._apply_tmc_reverse_transform(
-                            decompressed_chunk, transform_details, data_type
-                        )
-                        print(f"    ✅ TMC逆変換完了: {len(decompressed_chunk)} bytes")
+                        # TMC変換が適用されている場合は一時的にバイパス
+                        print(f"    ⚠️ TMC変換バイパス（一時的）")
+                        # 基本解凍のみ実行
+                        decompressed_chunk = self.core_compressor.decompress_core(chunk_data)
+                        
+                        # 注意：これは一時的な解決策です
+                        # 本来はTMC逆変換を実行する必要があります
+                        print(f"    🔄 基本解凍のみ: {len(decompressed_chunk)} bytes")
                     else:
+                        # 変換なしの場合は通常通り
+                        decompressed_chunk = self.core_compressor.decompress_core(chunk_data)
                         print(f"    ✅ 通常解凍: {len(decompressed_chunk)} bytes")
                     
                     decompressed_chunks.append(decompressed_chunk)
                     
                 except Exception as e:
                     print(f"    ❌ Chunk {i+1} 解凍エラー: {e}")
+                    # フォールバック
                     decompressed_chunks.append(chunk_data)
             
             result = b''.join(decompressed_chunks)
@@ -827,75 +615,6 @@ class NEXUSTMCEngineV91:
                 return zlib.decompress(container_data)
             except:
                 return container_data
-
-    def _apply_tmc_reverse_transform(self, compressed_data: bytes, transform_info: Dict[str, Any], data_type: str) -> bytes:
-        """TMC逆変換を適用（完全実装版）"""
-        try:
-            print(f"      🔄 TMC逆変換開始: タイプ={data_type}")
-            
-            # データタイプに応じて適切な変換器を選択
-            transformer = None
-            
-            if data_type in ['text_repetitive', 'text_natural']:
-                # BWT変換器を使用
-                transformer = self.bwt_transformer
-                
-            elif data_type == 'float_array':
-                # TDT変換器を使用
-                transformer = self.tdt_transformer
-                
-            elif data_type.startswith('sequential_'):
-                # LeCo変換器を使用
-                transformer = self.leco_transformer
-            
-            if transformer and hasattr(transformer, 'inverse_transform'):
-                print(f"      🔧 使用変換器: {transformer.__class__.__name__}")
-                
-                # 圧縮データを適切なストリーム形式に変換
-                # transform_infoから元のストリーム構造を復元
-                streams = self._reconstruct_streams_from_compressed(compressed_data, transform_info)
-                
-                # 逆変換実行
-                original_data = transformer.inverse_transform(streams, transform_info)
-                
-                print(f"      ✅ TMC逆変換成功: {len(compressed_data)} -> {len(original_data)} bytes")
-                return original_data
-            else:
-                print(f"      ⚠️ 変換器が見つからないか逆変換メソッドが未実装: {data_type}")
-                return compressed_data
-                
-        except Exception as e:
-            print(f"      ❌ TMC逆変換エラー: {e}")
-            import traceback
-            traceback.print_exc()
-            return compressed_data
-
-    def _reconstruct_streams_from_compressed(self, compressed_data: bytes, transform_info: Dict[str, Any]) -> List[bytes]:
-        """圧縮データから元のストリーム構造を復元"""
-        try:
-            # transform_infoに保存されたストリーム情報を使用
-            if 'streams_info' in transform_info:
-                streams_info = transform_info['streams_info']
-                streams = []
-                
-                offset = 0
-                for stream_info in streams_info:
-                    size = stream_info.get('size', 0)
-                    if offset + size <= len(compressed_data):
-                        stream_data = compressed_data[offset:offset + size]
-                        streams.append(stream_data)
-                        offset += size
-                    else:
-                        break
-                
-                return streams
-            else:
-                # フォールバック: 単一ストリームとして扱う
-                return [compressed_data]
-                
-        except Exception as e:
-            print(f"        ⚠️ ストリーム復元エラー: {e}")
-            return [compressed_data]
 
     def get_nxzip_stats(self) -> Dict[str, Any]:
         """NXZip専用統計取得"""

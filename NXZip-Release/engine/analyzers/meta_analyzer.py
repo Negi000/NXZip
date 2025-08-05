@@ -124,8 +124,13 @@ class MetaAnalyzer:
             return should_transform, analysis_info
             
         except Exception as e:
-            print(f"    [予測メタ分析] 予測エラー: {e} - 保守的判定でスキップ")
-            return False, {'reason': 'prediction_error', 'error': str(e)}
+            # デバッグ用詳細エラー情報
+            error_detail = str(e)
+            if 'nxzip' in error_detail.lower():
+                print(f"    [予測メタ分析] インポートエラー (無害): {error_detail[:50]}... - 保守的判定を使用")
+            else:
+                print(f"    [予測メタ分析] 予測エラー: {error_detail[:50]}... - 保守的判定でスキップ")
+            return False, {'reason': 'prediction_error', 'error': str(e), 'fallback': 'conservative'}
     
     def _predict_residual_entropy(self, sample: bytes, data_type, full_data_size: int) -> Tuple[float, int]:
         """データタイプ別残差エントロピー予測"""

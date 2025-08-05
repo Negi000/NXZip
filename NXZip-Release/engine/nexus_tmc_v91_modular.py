@@ -295,14 +295,11 @@ class NEXUSTMCEngineV91:
         print(f"🎯 目標: {'Zstandardレベル' if self.lightweight_mode else '7-Zip超越'}")
     
     def _get_transformer(self, data_type: DataType):
-        """遅延初期化による変換器取得（高速化）"""
-        if data_type == DataType.GENERIC_BINARY:
-            return None
-        
+        """遅延初期化による変換器取得（7-Zip超越のため全データ対応）"""
         if data_type in self._transformer_cache:
             return self._transformer_cache[data_type]
         
-        # 遅延初期化
+        # 遅延初期化 - 全データタイプに対応
         transformer = None
         if data_type in [DataType.TEXT_REPETITIVE, DataType.TEXT_NATURAL]:
             if self.bwt_transformer is None:
@@ -316,6 +313,12 @@ class NEXUSTMCEngineV91:
             if self.leco_transformer is None:
                 self.leco_transformer = LeCoTransformer(lightweight_mode=self.lightweight_mode)
             transformer = self.leco_transformer
+        else:
+            # GENERIC_BINARYやその他のデータタイプにもBWT変換を適用（7-Zip超越のため）
+            if self.bwt_transformer is None:
+                self.bwt_transformer = BWTTransformer(lightweight_mode=self.lightweight_mode)
+            transformer = self.bwt_transformer
+            print(f"🔥 汎用バイナリにもBWT変換を適用: {data_type.value if hasattr(data_type, 'value') else str(data_type)}")
         
         self._transformer_cache[data_type] = transformer
         return transformer
@@ -352,41 +355,34 @@ class NEXUSTMCEngineV91:
             chunks = self._adaptive_chunking(data)
             print(f"📦 NXZipチャンク分割: {len(chunks)}個 ({self.chunk_size//1024}KB)")
             
-            # フェーズ3: TMC変換効果予測（安全版）
+            # フェーズ3: TMC変換強制適用（7-Zip + Zstandard超越モード）
             if self.progress_callback:
-                self.progress_callback(20, "🧠 TMC変換予測中...")
+                self.progress_callback(20, "🧠 TMC変換強制適用中...")
             
-            if self.enable_transforms and not self.lightweight_mode:
-                # 通常モードのみ予測分析を実行（エラー処理強化）
-                try:
-                    if self.meta_analyzer is None:
-                        self.meta_analyzer = MetaAnalyzer(self.core_compressor, lightweight_mode=False)
-                    
-                    transformer = self._get_transformer(data_type)
-                    should_transform, analysis_info = self.meta_analyzer.should_apply_transform(
-                        data, transformer, data_type
-                    )
-                    print(f"🧠 TMC変換予測: {'適用' if should_transform else 'バイパス'}")
-                except Exception as analysis_error:
-                    print(f"🧠 TMC変換予測エラー: {analysis_error} - 安全にバイパス")
-                    should_transform = False
-                    analysis_info = {'method': 'error_bypass', 'error': str(analysis_error)}
-            elif self.enable_transforms and self.lightweight_mode:
-                # 軽量モードは簡易判定のみ（高速化）
+            if self.enable_transforms:
+                # NEXUS TMC v9.1は常に変換を適用（7-Zip超越のため）
                 transformer = self._get_transformer(data_type)
-                if transformer and data_type in [DataType.TEXT_REPETITIVE, DataType.TEXT_NATURAL, DataType.FLOAT_ARRAY]:
+                if transformer:
                     should_transform = True
-                    analysis_info = {'method': 'lightweight_simple_check'}
-                    print(f"🧠 TMC変換予測: 適用")
+                    analysis_info = {
+                        'method': 'nexus_tmc_forced_transform',
+                        'reason': '7zip_zstd_surpass_mode',
+                        'data_type': data_type.value if hasattr(data_type, 'value') else str(data_type)
+                    }
+                    print(f"🔥 NEXUS TMC v9.1 変換強制適用: {data_type.value if hasattr(data_type, 'value') else str(data_type)}")
                 else:
-                    should_transform = False
-                    analysis_info = {'method': 'lightweight_bypass'}
-                    print(f"🧠 TMC変換予測: バイパス")
+                    # 変換器が無い場合でも基本変換を適用
+                    should_transform = True
+                    analysis_info = {
+                        'method': 'nexus_tmc_basic_transform',
+                        'reason': 'no_specific_transformer_available'
+                    }
+                    print(f"🔥 NEXUS TMC v9.1 基本変換適用")
             else:
-                transformer = None
+                # 変換無効でも警告表示
                 should_transform = False
-                analysis_info = {'method': 'disabled'}
-                print(f"🧠 TMC変換予測: 無効")
+                analysis_info = {'method': 'transforms_disabled_warning'}
+                print(f"⚠️ TMC変換が無効化されています - 7-Zip超越効果が得られません")
             
             # 進捗更新: 予測完了
             if self.progress_callback:

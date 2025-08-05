@@ -352,32 +352,6 @@ def generate_sample_key(data: bytes, offset: int = 0, size: int = None) -> str:
     return hasher.hexdigest()
 
 
-def estimate_context_predictability(sample: bytes) -> float:
-    """
-    コンテキスト予測可能性推定（0.0-1.0）
-    
-    Args:
-        sample: 分析対象のサンプルデータ
-        
-    Returns:
-        float: コンテキスト予測可能性スコア (0.0-1.0)
-    """
-    if len(sample) < 3:
-        return 0.0
-    
-    # 2-gram予測精度で推定
-    bigram_counts = {}
-    for i in range(len(sample) - 1):
-        bigram = sample[i:i+2]
-        bigram_counts[bigram] = bigram_counts.get(bigram, 0) + 1
-    
-    # 高頻度bigramの割合
-    total_bigrams = len(sample) - 1
-    high_freq_count = sum(1 for count in bigram_counts.values() if count > 1)
-    
-    return high_freq_count / total_bigrams if total_bigrams > 0 else 0.0
-
-
 def calculate_theoretical_compression_gain(original_entropy: float, residual_entropy: float, 
                                          header_cost: int, data_size: int) -> float:
     """

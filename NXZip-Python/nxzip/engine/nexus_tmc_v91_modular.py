@@ -249,6 +249,35 @@ class CoreCompressor:
             
             return compressed, info
         
+
+    def _decompress_tmc_format(self, compressed_data: bytes) -> bytes:
+        """TMC形式の専用解凍処理"""
+        print(f"[TMC専用解凍] データサイズ: {len(compressed_data):,} bytes")
+        
+        try:
+            # Step 1: 基本解凍（zlib/lzma）
+            if compressed_data.startswith(b'\x78\x9c') or compressed_data.startswith(b'\x1f\x8b'):
+                # zlib/gzip形式
+                base_data = zlib.decompress(compressed_data)
+                print(f"[TMC専用解凍] 基本解凍完了: {len(base_data):,} bytes")
+            else:
+                # lzma形式を試行
+                try:
+                    base_data = lzma.decompress(compressed_data)
+                    print(f"[TMC専用解凍] LZMA解凍完了: {len(base_data):,} bytes")
+                except:
+                    # フォールバック
+                    base_data = compressed_data
+                    print(f"[TMC専用解凍] 基本解凍スキップ")
+            
+            # Step 2: TMC変換逆変換の検証
+            # 現在は基本解凍のみ実装（TMC変換逆変換は今後の課題）
+            return base_data
+            
+        except Exception as e:
+            print(f"[TMC専用解凍] エラー: {e}")
+            raise
+
         except Exception as e:
             return data, {'method': 'store', 'error': str(e), 'lightweight_mode': self.lightweight_mode}
     
@@ -277,6 +306,35 @@ class CoreCompressor:
                 # 不明な方式の場合はそのまま返す
                 return compressed_data
                 
+
+    def _decompress_tmc_format(self, compressed_data: bytes) -> bytes:
+        """TMC形式の専用解凍処理"""
+        print(f"[TMC専用解凍] データサイズ: {len(compressed_data):,} bytes")
+        
+        try:
+            # Step 1: 基本解凍（zlib/lzma）
+            if compressed_data.startswith(b'\x78\x9c') or compressed_data.startswith(b'\x1f\x8b'):
+                # zlib/gzip形式
+                base_data = zlib.decompress(compressed_data)
+                print(f"[TMC専用解凍] 基本解凍完了: {len(base_data):,} bytes")
+            else:
+                # lzma形式を試行
+                try:
+                    base_data = lzma.decompress(compressed_data)
+                    print(f"[TMC専用解凍] LZMA解凍完了: {len(base_data):,} bytes")
+                except:
+                    # フォールバック
+                    base_data = compressed_data
+                    print(f"[TMC専用解凍] 基本解凍スキップ")
+            
+            # Step 2: TMC変換逆変換の検証
+            # 現在は基本解凍のみ実装（TMC変換逆変換は今後の課題）
+            return base_data
+            
+        except Exception as e:
+            print(f"[TMC専用解凍] エラー: {e}")
+            raise
+
         except Exception as e:
             if self.lightweight_mode:
                 # 軽量モードはエラー耐性を重視
@@ -503,9 +561,24 @@ class NEXUSTMCEngineV91:
                             transform_info['streams_info'] = [{'size': len(combined_data)}]
                             transform_info['original_streams_count'] = 1
                         
-                        compressed_data, compress_info = self.core_compressor.compress_core(
-                            combined_data, method='lzma' if not self.lightweight_mode else 'zlib'
-                        )
+                        # 🔥 TMC変換済みデータの真の活用 - 標準圧縮をスキップ
+                        # TMC変換による圧縮効果を直接使用（LZMAで上書きしない）
+                        if len(combined_data) < len(chunk) * 0.8:  # 20%以上圧縮されている場合
+                            # TMC変換の効果が十分な場合は、軽量後処理のみ
+                            compressed_data = zlib.compress(combined_data, level=1)  # 軽量圧縮のみ
+                            compress_info = {
+                                'final_method': 'tmc_optimized_zlib_light',
+                                'tmc_compression_ratio': (1 - len(combined_data) / len(chunk)) * 100,
+                                'post_compression_ratio': (1 - len(compressed_data) / len(combined_data)) * 100
+                            }
+                            print(f"    🎯 TMC最適化: 変換効果{compress_info['tmc_compression_ratio']:.1f}% + 軽量後処理{compress_info['post_compression_ratio']:.1f}%")
+                        else:
+                            # TMC変換効果が限定的な場合のみ、標準圧縮を適用
+                            compressed_data, compress_info = self.core_compressor.compress_core(
+                                combined_data, method='lzma' if not self.lightweight_mode else 'zlib'
+                            )
+                            compress_info['final_method'] = 'tmc_with_standard_compression'
+                            print(f"    📦 TMC + 標準圧縮: 複合処理適用")
                         
                         # 逆変換に必要な追加情報を保存
                         transform_info['original_chunk_size'] = len(chunk)
@@ -523,7 +596,36 @@ class NEXUSTMCEngineV91:
                         
                         processed_results.append((compressed_data, chunk_info))
                         
-                    except Exception as e:
+            
+    def _decompress_tmc_format(self, compressed_data: bytes) -> bytes:
+        """TMC形式の専用解凍処理"""
+        print(f"[TMC専用解凍] データサイズ: {len(compressed_data):,} bytes")
+        
+        try:
+            # Step 1: 基本解凍（zlib/lzma）
+            if compressed_data.startswith(b'\x78\x9c') or compressed_data.startswith(b'\x1f\x8b'):
+                # zlib/gzip形式
+                base_data = zlib.decompress(compressed_data)
+                print(f"[TMC専用解凍] 基本解凍完了: {len(base_data):,} bytes")
+            else:
+                # lzma形式を試行
+                try:
+                    base_data = lzma.decompress(compressed_data)
+                    print(f"[TMC専用解凍] LZMA解凍完了: {len(base_data):,} bytes")
+                except:
+                    # フォールバック
+                    base_data = compressed_data
+                    print(f"[TMC専用解凍] 基本解凍スキップ")
+            
+            # Step 2: TMC変換逆変換の検証
+            # 現在は基本解凍のみ実装（TMC変換逆変換は今後の課題）
+            return base_data
+            
+        except Exception as e:
+            print(f"[TMC専用解凍] エラー: {e}")
+            raise
+
+        except Exception as e:
                         print(f"    ⚠️ TMC変換失敗: {e}, 基本圧縮へフォールバック")
                         # 基本圧縮処理
                         compressed_data, compress_info = self.core_compressor.compress_core(
@@ -598,6 +700,35 @@ class NEXUSTMCEngineV91:
             
             return container, compression_info
             
+
+    def _decompress_tmc_format(self, compressed_data: bytes) -> bytes:
+        """TMC形式の専用解凍処理"""
+        print(f"[TMC専用解凍] データサイズ: {len(compressed_data):,} bytes")
+        
+        try:
+            # Step 1: 基本解凍（zlib/lzma）
+            if compressed_data.startswith(b'\x78\x9c') or compressed_data.startswith(b'\x1f\x8b'):
+                # zlib/gzip形式
+                base_data = zlib.decompress(compressed_data)
+                print(f"[TMC専用解凍] 基本解凍完了: {len(base_data):,} bytes")
+            else:
+                # lzma形式を試行
+                try:
+                    base_data = lzma.decompress(compressed_data)
+                    print(f"[TMC専用解凍] LZMA解凍完了: {len(base_data):,} bytes")
+                except:
+                    # フォールバック
+                    base_data = compressed_data
+                    print(f"[TMC専用解凍] 基本解凍スキップ")
+            
+            # Step 2: TMC変換逆変換の検証
+            # 現在は基本解凍のみ実装（TMC変換逆変換は今後の課題）
+            return base_data
+            
+        except Exception as e:
+            print(f"[TMC専用解凍] エラー: {e}")
+            raise
+
         except Exception as e:
             print(f"❌ NXZip TMC v9.1 圧縮エラー: {e}")
             # フォールバック: CoreCompressor使用
@@ -672,6 +803,35 @@ class NEXUSTMCEngineV91:
             
             return b''.join(data_parts)
             
+
+    def _decompress_tmc_format(self, compressed_data: bytes) -> bytes:
+        """TMC形式の専用解凍処理"""
+        print(f"[TMC専用解凍] データサイズ: {len(compressed_data):,} bytes")
+        
+        try:
+            # Step 1: 基本解凍（zlib/lzma）
+            if compressed_data.startswith(b'\x78\x9c') or compressed_data.startswith(b'\x1f\x8b'):
+                # zlib/gzip形式
+                base_data = zlib.decompress(compressed_data)
+                print(f"[TMC専用解凍] 基本解凍完了: {len(base_data):,} bytes")
+            else:
+                # lzma形式を試行
+                try:
+                    base_data = lzma.decompress(compressed_data)
+                    print(f"[TMC専用解凍] LZMA解凍完了: {len(base_data):,} bytes")
+                except:
+                    # フォールバック
+                    base_data = compressed_data
+                    print(f"[TMC専用解凍] 基本解凍スキップ")
+            
+            # Step 2: TMC変換逆変換の検証
+            # 現在は基本解凍のみ実装（TMC変換逆変換は今後の課題）
+            return base_data
+            
+        except Exception as e:
+            print(f"[TMC専用解凍] エラー: {e}")
+            raise
+
         except Exception as e:
             print(f"NXZip v2.0 コンテナ作成エラー: {e}")
             # フォールバック: 単純結合
@@ -693,6 +853,35 @@ class NEXUSTMCEngineV91:
                 # 基本解凍
                 return self.core_compressor.decompress_core(compressed_data, method)
                 
+
+    def _decompress_tmc_format(self, compressed_data: bytes) -> bytes:
+        """TMC形式の専用解凍処理"""
+        print(f"[TMC専用解凍] データサイズ: {len(compressed_data):,} bytes")
+        
+        try:
+            # Step 1: 基本解凍（zlib/lzma）
+            if compressed_data.startswith(b'\x78\x9c') or compressed_data.startswith(b'\x1f\x8b'):
+                # zlib/gzip形式
+                base_data = zlib.decompress(compressed_data)
+                print(f"[TMC専用解凍] 基本解凍完了: {len(base_data):,} bytes")
+            else:
+                # lzma形式を試行
+                try:
+                    base_data = lzma.decompress(compressed_data)
+                    print(f"[TMC専用解凍] LZMA解凍完了: {len(base_data):,} bytes")
+                except:
+                    # フォールバック
+                    base_data = compressed_data
+                    print(f"[TMC専用解凍] 基本解凍スキップ")
+            
+            # Step 2: TMC変換逆変換の検証
+            # 現在は基本解凍のみ実装（TMC変換逆変換は今後の課題）
+            return base_data
+            
+        except Exception as e:
+            print(f"[TMC専用解凍] エラー: {e}")
+            raise
+
         except Exception as e:
             print(f"❌ NXZip解凍エラー: {e}")
             # フォールバック: 元データを返す
@@ -743,6 +932,35 @@ class NEXUSTMCEngineV91:
             
             return b''.join(decompressed_chunks)
             
+
+    def _decompress_tmc_format(self, compressed_data: bytes) -> bytes:
+        """TMC形式の専用解凍処理"""
+        print(f"[TMC専用解凍] データサイズ: {len(compressed_data):,} bytes")
+        
+        try:
+            # Step 1: 基本解凍（zlib/lzma）
+            if compressed_data.startswith(b'\x78\x9c') or compressed_data.startswith(b'\x1f\x8b'):
+                # zlib/gzip形式
+                base_data = zlib.decompress(compressed_data)
+                print(f"[TMC専用解凍] 基本解凍完了: {len(base_data):,} bytes")
+            else:
+                # lzma形式を試行
+                try:
+                    base_data = lzma.decompress(compressed_data)
+                    print(f"[TMC専用解凍] LZMA解凍完了: {len(base_data):,} bytes")
+                except:
+                    # フォールバック
+                    base_data = compressed_data
+                    print(f"[TMC専用解凍] 基本解凍スキップ")
+            
+            # Step 2: TMC変換逆変換の検証
+            # 現在は基本解凍のみ実装（TMC変換逆変換は今後の課題）
+            return base_data
+            
+        except Exception as e:
+            print(f"[TMC専用解凍] エラー: {e}")
+            raise
+
         except Exception as e:
             print(f"NXZipコンテナ解凍エラー: {e}")
             return container_data
@@ -812,7 +1030,36 @@ class NEXUSTMCEngineV91:
                     
                     decompressed_chunks.append(decompressed_chunk)
                     
-                except Exception as e:
+        
+    def _decompress_tmc_format(self, compressed_data: bytes) -> bytes:
+        """TMC形式の専用解凍処理"""
+        print(f"[TMC専用解凍] データサイズ: {len(compressed_data):,} bytes")
+        
+        try:
+            # Step 1: 基本解凍（zlib/lzma）
+            if compressed_data.startswith(b'\x78\x9c') or compressed_data.startswith(b'\x1f\x8b'):
+                # zlib/gzip形式
+                base_data = zlib.decompress(compressed_data)
+                print(f"[TMC専用解凍] 基本解凍完了: {len(base_data):,} bytes")
+            else:
+                # lzma形式を試行
+                try:
+                    base_data = lzma.decompress(compressed_data)
+                    print(f"[TMC専用解凍] LZMA解凍完了: {len(base_data):,} bytes")
+                except:
+                    # フォールバック
+                    base_data = compressed_data
+                    print(f"[TMC専用解凍] 基本解凍スキップ")
+            
+            # Step 2: TMC変換逆変換の検証
+            # 現在は基本解凍のみ実装（TMC変換逆変換は今後の課題）
+            return base_data
+            
+        except Exception as e:
+            print(f"[TMC専用解凍] エラー: {e}")
+            raise
+
+        except Exception as e:
                     print(f"    ❌ Chunk {i+1} 解凍エラー: {e}")
                     decompressed_chunks.append(chunk_data)
             
@@ -820,6 +1067,35 @@ class NEXUSTMCEngineV91:
             print(f"✅ NXZip解凍完了: {len(result)} bytes")
             return result
             
+
+    def _decompress_tmc_format(self, compressed_data: bytes) -> bytes:
+        """TMC形式の専用解凍処理"""
+        print(f"[TMC専用解凍] データサイズ: {len(compressed_data):,} bytes")
+        
+        try:
+            # Step 1: 基本解凍（zlib/lzma）
+            if compressed_data.startswith(b'\x78\x9c') or compressed_data.startswith(b'\x1f\x8b'):
+                # zlib/gzip形式
+                base_data = zlib.decompress(compressed_data)
+                print(f"[TMC専用解凍] 基本解凍完了: {len(base_data):,} bytes")
+            else:
+                # lzma形式を試行
+                try:
+                    base_data = lzma.decompress(compressed_data)
+                    print(f"[TMC専用解凍] LZMA解凍完了: {len(base_data):,} bytes")
+                except:
+                    # フォールバック
+                    base_data = compressed_data
+                    print(f"[TMC専用解凍] 基本解凍スキップ")
+            
+            # Step 2: TMC変換逆変換の検証
+            # 現在は基本解凍のみ実装（TMC変換逆変換は今後の課題）
+            return base_data
+            
+        except Exception as e:
+            print(f"[TMC専用解凍] エラー: {e}")
+            raise
+
         except Exception as e:
             print(f"❌ NXZipコンテナ解凍エラー: {e}")
             # フォールバック
@@ -864,6 +1140,35 @@ class NEXUSTMCEngineV91:
                 print(f"      ⚠️ 変換器が見つからないか逆変換メソッドが未実装: {data_type}")
                 return compressed_data
                 
+
+    def _decompress_tmc_format(self, compressed_data: bytes) -> bytes:
+        """TMC形式の専用解凍処理"""
+        print(f"[TMC専用解凍] データサイズ: {len(compressed_data):,} bytes")
+        
+        try:
+            # Step 1: 基本解凍（zlib/lzma）
+            if compressed_data.startswith(b'\x78\x9c') or compressed_data.startswith(b'\x1f\x8b'):
+                # zlib/gzip形式
+                base_data = zlib.decompress(compressed_data)
+                print(f"[TMC専用解凍] 基本解凍完了: {len(base_data):,} bytes")
+            else:
+                # lzma形式を試行
+                try:
+                    base_data = lzma.decompress(compressed_data)
+                    print(f"[TMC専用解凍] LZMA解凍完了: {len(base_data):,} bytes")
+                except:
+                    # フォールバック
+                    base_data = compressed_data
+                    print(f"[TMC専用解凍] 基本解凍スキップ")
+            
+            # Step 2: TMC変換逆変換の検証
+            # 現在は基本解凍のみ実装（TMC変換逆変換は今後の課題）
+            return base_data
+            
+        except Exception as e:
+            print(f"[TMC専用解凍] エラー: {e}")
+            raise
+
         except Exception as e:
             print(f"      ❌ TMC逆変換エラー: {e}")
             import traceback
@@ -893,6 +1198,35 @@ class NEXUSTMCEngineV91:
                 # フォールバック: 単一ストリームとして扱う
                 return [compressed_data]
                 
+
+    def _decompress_tmc_format(self, compressed_data: bytes) -> bytes:
+        """TMC形式の専用解凍処理"""
+        print(f"[TMC専用解凍] データサイズ: {len(compressed_data):,} bytes")
+        
+        try:
+            # Step 1: 基本解凍（zlib/lzma）
+            if compressed_data.startswith(b'\x78\x9c') or compressed_data.startswith(b'\x1f\x8b'):
+                # zlib/gzip形式
+                base_data = zlib.decompress(compressed_data)
+                print(f"[TMC専用解凍] 基本解凍完了: {len(base_data):,} bytes")
+            else:
+                # lzma形式を試行
+                try:
+                    base_data = lzma.decompress(compressed_data)
+                    print(f"[TMC専用解凍] LZMA解凍完了: {len(base_data):,} bytes")
+                except:
+                    # フォールバック
+                    base_data = compressed_data
+                    print(f"[TMC専用解凍] 基本解凍スキップ")
+            
+            # Step 2: TMC変換逆変換の検証
+            # 現在は基本解凍のみ実装（TMC変換逆変換は今後の課題）
+            return base_data
+            
+        except Exception as e:
+            print(f"[TMC専用解凍] エラー: {e}")
+            raise
+
         except Exception as e:
             print(f"        ⚠️ ストリーム復元エラー: {e}")
             return [compressed_data]

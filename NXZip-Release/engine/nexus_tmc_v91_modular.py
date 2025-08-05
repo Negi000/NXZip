@@ -426,9 +426,24 @@ class NEXUSTMCEngineV91:
                             transform_info['streams_info'] = [{'size': len(combined_data)}]
                             transform_info['original_streams_count'] = 1
                         
-                        compressed_data, compress_info = self.core_compressor.compress_core(
-                            combined_data, method='lzma' if not self.lightweight_mode else 'zlib'
-                        )
+                        # 🔥 TMC変換済みデータの真の活用 - 標準圧縮をスキップ
+                        # TMC変換による圧縮効果を直接使用（LZMAで上書きしない）
+                        if len(combined_data) < len(chunk) * 0.8:  # 20%以上圧縮されている場合
+                            # TMC変換の効果が十分な場合は、軽量後処理のみ
+                            compressed_data = zlib.compress(combined_data, level=1)  # 軽量圧縮のみ
+                            compress_info = {
+                                'final_method': 'tmc_optimized_zlib_light',
+                                'tmc_compression_ratio': (1 - len(combined_data) / len(chunk)) * 100,
+                                'post_compression_ratio': (1 - len(compressed_data) / len(combined_data)) * 100
+                            }
+                            print(f"    🎯 TMC最適化: 変換効果{compress_info['tmc_compression_ratio']:.1f}% + 軽量後処理{compress_info['post_compression_ratio']:.1f}%")
+                        else:
+                            # TMC変換効果が限定的な場合のみ、標準圧縮を適用
+                            compressed_data, compress_info = self.core_compressor.compress_core(
+                                combined_data, method='lzma' if not self.lightweight_mode else 'zlib'
+                            )
+                            compress_info['final_method'] = 'tmc_with_standard_compression'
+                            print(f"    📦 TMC + 標準圧縮: 複合処理適用")
                         
                         # 逆変換に必要な追加情報を保存
                         transform_info['original_chunk_size'] = len(chunk)

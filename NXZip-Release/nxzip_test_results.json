@@ -1,0 +1,564 @@
+{
+  "test_suite": "NXZip Core v2.0 Comprehensive Test",
+  "execution_time": 1754371366.5419936,
+  "summary": {
+    "total_tests": 34,
+    "passed": 34,
+    "failed": 0,
+    "total_original_size": 17712676,
+    "total_compressed_size": 3580812,
+    "total_compression_time": 6.440649032592773,
+    "total_decompression_time": 0.1840980052947998
+  },
+  "detailed_results": [
+    {
+      "test_name": "日本語小説テキスト",
+      "timestamp": 1754371358.3749716,
+      "success": true,
+      "compression_ratio": 98.77714285714285,
+      "original_size": 70000,
+      "compressed_size": 856,
+      "compression_time": 0.0,
+      "decompression_time": 0.014059782028198242,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "balanced",
+      "encrypted": false
+    },
+    {
+      "test_name": "英語技術文書",
+      "timestamp": 1754371358.386035,
+      "success": true,
+      "compression_ratio": 96.89632968448166,
+      "original_size": 31060,
+      "compressed_size": 964,
+      "compression_time": 0.005997657775878906,
+      "decompression_time": 0.0020072460174560547,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "balanced",
+      "encrypted": false
+    },
+    {
+      "test_name": "多言語混合文書",
+      "timestamp": 1754371358.3886154,
+      "success": true,
+      "compression_ratio": 97.03445990722332,
+      "original_size": 30180,
+      "compressed_size": 895,
+      "compression_time": 0.000957489013671875,
+      "decompression_time": 0.001622915267944336,
+      "target_achieved": true,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "balanced",
+      "encrypted": false
+    },
+    {
+      "test_name": "Pythonソースコード",
+      "timestamp": 1754371358.3926327,
+      "success": true,
+      "compression_ratio": 94.46090722589469,
+      "original_size": 43870,
+      "compressed_size": 2430,
+      "compression_time": 0.0,
+      "decompression_time": 0.0010101795196533203,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "JSON設定ファイル",
+      "timestamp": 1754371358.4022796,
+      "success": true,
+      "compression_ratio": 97.33446519524618,
+      "original_size": 23560,
+      "compressed_size": 628,
+      "compression_time": 0.006017446517944336,
+      "decompression_time": 0.0010237693786621094,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "balanced",
+      "encrypted": false
+    },
+    {
+      "test_name": "XML設定ファイル",
+      "timestamp": 1754371358.4121053,
+      "success": true,
+      "compression_ratio": 98.24529991047449,
+      "original_size": 33510,
+      "compressed_size": 588,
+      "compression_time": 0.007090091705322266,
+      "decompression_time": 0.0018689632415771484,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "balanced",
+      "encrypted": false
+    },
+    {
+      "test_name": "模擬BMP画像ファイル",
+      "timestamp": 1754371358.6185813,
+      "success": true,
+      "compression_ratio": 76.51740837496371,
+      "original_size": 1440054,
+      "compressed_size": 338162,
+      "compression_time": 0.021035432815551758,
+      "decompression_time": 0.004241943359375,
+      "target_achieved": true,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "balanced",
+      "encrypted": false
+    },
+    {
+      "test_name": "模擬WAV音声ファイル",
+      "timestamp": 1754371359.1429925,
+      "success": true,
+      "compression_ratio": 98.31105286547374,
+      "original_size": 441044,
+      "compressed_size": 7449,
+      "compression_time": 0.0,
+      "decompression_time": 0.0,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "balanced",
+      "encrypted": false
+    },
+    {
+      "test_name": "模擬実行ファイル",
+      "timestamp": 1754371359.1534169,
+      "success": true,
+      "compression_ratio": 97.04301075268818,
+      "original_size": 10788,
+      "compressed_size": 319,
+      "compression_time": 0.008291959762573242,
+      "decompression_time": 0.001069784164428711,
+      "target_achieved": false,
+      "transforms_applied": [
+        "redundancy_reduction",
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "CSV データベースダンプ",
+      "timestamp": 1754371359.42789,
+      "success": true,
+      "compression_ratio": 93.36151692289941,
+      "original_size": 745351,
+      "compressed_size": 49480,
+      "compression_time": 0.24407601356506348,
+      "decompression_time": 0.016689062118530273,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "balanced",
+      "encrypted": false
+    },
+    {
+      "test_name": "アプリケーションログ",
+      "timestamp": 1754371362.9281094,
+      "success": true,
+      "compression_ratio": 97.10074487937234,
+      "original_size": 448529,
+      "compressed_size": 13004,
+      "compression_time": 3.495016574859619,
+      "decompression_time": 0.0,
+      "target_achieved": true,
+      "transforms_applied": [
+        "bwt",
+        "spe"
+      ],
+      "mode": "maximum",
+      "encrypted": false
+    },
+    {
+      "test_name": "SQL データベースダンプ",
+      "timestamp": 1754371363.0078924,
+      "success": true,
+      "compression_ratio": 97.66892143016427,
+      "original_size": 201795,
+      "compressed_size": 4704,
+      "compression_time": 0.07139825820922852,
+      "decompression_time": 0.0,
+      "target_achieved": true,
+      "transforms_applied": [
+        "bwt",
+        "spe"
+      ],
+      "mode": "maximum",
+      "encrypted": false
+    },
+    {
+      "test_name": "時系列センサーデータ",
+      "timestamp": 1754371364.2666106,
+      "success": true,
+      "compression_ratio": 77.55916608415264,
+      "original_size": 2047161,
+      "compressed_size": 459400,
+      "compression_time": 0.8828942775726318,
+      "decompression_time": 0.03829550743103027,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "balanced",
+      "encrypted": false
+    },
+    {
+      "test_name": "科学計算行列データ",
+      "timestamp": 1754371365.6059759,
+      "success": true,
+      "compression_ratio": 71.67715095261688,
+      "original_size": 2369578,
+      "compressed_size": 671132,
+      "compression_time": 1.0842247009277344,
+      "decompression_time": 0.03911900520324707,
+      "target_achieved": true,
+      "transforms_applied": [
+        "bwt",
+        "spe"
+      ],
+      "mode": "maximum",
+      "encrypted": false
+    },
+    {
+      "test_name": "NumPy科学計算配列",
+      "timestamp": 1754371365.791296,
+      "success": true,
+      "compression_ratio": 4.247070468725001,
+      "original_size": 800128,
+      "compressed_size": 766146,
+      "compression_time": 0.038465023040771484,
+      "decompression_time": 0.006731748580932617,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "balanced",
+      "encrypted": false
+    },
+    {
+      "test_name": "暗号化機密文書",
+      "timestamp": 1754371365.8240898,
+      "success": true,
+      "compression_ratio": 96.83596030356101,
+      "original_size": 34260,
+      "compressed_size": 1084,
+      "compression_time": 0.027528762817382812,
+      "decompression_time": 0.0013306140899658203,
+      "target_achieved": true,
+      "transforms_applied": [
+        "bwt"
+      ],
+      "mode": "maximum",
+      "encrypted": true
+    },
+    {
+      "test_name": "証明書・キーファイル",
+      "timestamp": 1754371365.8737092,
+      "success": true,
+      "compression_ratio": 98.76444876153472,
+      "original_size": 102950,
+      "compressed_size": 1272,
+      "compression_time": 0.032943010330200195,
+      "decompression_time": 0.004014492034912109,
+      "target_achieved": true,
+      "transforms_applied": [
+        "bwt"
+      ],
+      "mode": "maximum",
+      "encrypted": true
+    },
+    {
+      "test_name": "パスワードハッシュDB",
+      "timestamp": 1754371366.138211,
+      "success": true,
+      "compression_ratio": 96.56061908856405,
+      "original_size": 648954,
+      "compressed_size": 22320,
+      "compression_time": 0.18281316757202148,
+      "decompression_time": 0.017032861709594727,
+      "target_achieved": true,
+      "transforms_applied": [
+        "bwt"
+      ],
+      "mode": "maximum",
+      "encrypted": true
+    },
+    {
+      "test_name": "大容量テキスト(10MB)",
+      "timestamp": 1754371366.214011,
+      "success": true,
+      "compression_ratio": 99.96877551020408,
+      "original_size": 3920000,
+      "compressed_size": 1224,
+      "compression_time": 0.05154609680175781,
+      "decompression_time": 0.013843536376953125,
+      "target_achieved": true,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "balanced",
+      "encrypted": false
+    },
+    {
+      "test_name": "高エントロピーデータ(1MB)",
+      "timestamp": 1754371366.250844,
+      "success": true,
+      "compression_ratio": -0.03108978271484375,
+      "original_size": 1048576,
+      "compressed_size": 1048902,
+      "compression_time": 0.0276792049407959,
+      "decompression_time": 0.0020072460174560547,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "極低エントロピーデータ(1MB)",
+      "timestamp": 1754371366.2593439,
+      "success": true,
+      "compression_ratio": 99.56121444702148,
+      "original_size": 1048576,
+      "compressed_size": 4601,
+      "compression_time": 0.002538919448852539,
+      "decompression_time": 0.0028548240661621094,
+      "target_achieved": true,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "全モード比較-FAST",
+      "timestamp": 1754371366.279121,
+      "success": true,
+      "compression_ratio": 75.03176937376877,
+      "original_size": 720820,
+      "compressed_size": 179976,
+      "compression_time": 0.013029336929321289,
+      "decompression_time": 0.0030634403228759766,
+      "target_achieved": true,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "全モード比較-BALANCED",
+      "timestamp": 1754371366.3264122,
+      "success": true,
+      "compression_ratio": 99.67093032934713,
+      "original_size": 720820,
+      "compressed_size": 2372,
+      "compression_time": 0.04129743576049805,
+      "decompression_time": 0.0029976367950439453,
+      "target_achieved": true,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "balanced",
+      "encrypted": false
+    },
+    {
+      "test_name": "全モード比較-MAXIMUM",
+      "timestamp": 1754371366.5058267,
+      "success": true,
+      "compression_ratio": 99.67093032934713,
+      "original_size": 720820,
+      "compressed_size": 2372,
+      "compression_time": 0.1794145107269287,
+      "decompression_time": 0.0,
+      "target_achieved": true,
+      "transforms_applied": [
+        "bwt",
+        "spe"
+      ],
+      "mode": "maximum",
+      "encrypted": false
+    },
+    {
+      "test_name": "小ファイル#01",
+      "timestamp": 1754371366.51435,
+      "success": true,
+      "compression_ratio": 94.84936831875608,
+      "original_size": 1029,
+      "compressed_size": 53,
+      "compression_time": 0.006517171859741211,
+      "decompression_time": 0.0010066032409667969,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "小ファイル#02",
+      "timestamp": 1754371366.5165422,
+      "success": true,
+      "compression_ratio": 94.84936831875608,
+      "original_size": 1029,
+      "compressed_size": 53,
+      "compression_time": 0.0,
+      "decompression_time": 0.0,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "小ファイル#03",
+      "timestamp": 1754371366.5181031,
+      "success": true,
+      "compression_ratio": 94.84936831875608,
+      "original_size": 1029,
+      "compressed_size": 53,
+      "compression_time": 0.0005557537078857422,
+      "decompression_time": 0.0010051727294921875,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "小ファイル#04",
+      "timestamp": 1754371366.5222585,
+      "success": true,
+      "compression_ratio": 94.84936831875608,
+      "original_size": 1029,
+      "compressed_size": 53,
+      "compression_time": 0.0011479854583740234,
+      "decompression_time": 0.0009953975677490234,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "小ファイル#05",
+      "timestamp": 1754371366.5272007,
+      "success": true,
+      "compression_ratio": 94.84936831875608,
+      "original_size": 1029,
+      "compressed_size": 53,
+      "compression_time": 0.000997781753540039,
+      "decompression_time": 0.0010008811950683594,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "小ファイル#06",
+      "timestamp": 1754371366.5301983,
+      "success": true,
+      "compression_ratio": 94.84936831875608,
+      "original_size": 1029,
+      "compressed_size": 53,
+      "compression_time": 0.0009908676147460938,
+      "decompression_time": 0.0009996891021728516,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "小ファイル#07",
+      "timestamp": 1754371366.5317013,
+      "success": true,
+      "compression_ratio": 94.84936831875608,
+      "original_size": 1029,
+      "compressed_size": 53,
+      "compression_time": 0.0010004043579101562,
+      "decompression_time": 0.0005025863647460938,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "小ファイル#08",
+      "timestamp": 1754371366.5317013,
+      "success": true,
+      "compression_ratio": 94.84936831875608,
+      "original_size": 1029,
+      "compressed_size": 53,
+      "compression_time": 0.0,
+      "decompression_time": 0.0,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "小ファイル#09",
+      "timestamp": 1754371366.5394335,
+      "success": true,
+      "compression_ratio": 94.84936831875608,
+      "original_size": 1029,
+      "compressed_size": 53,
+      "compression_time": 0.0042476654052734375,
+      "decompression_time": 0.0024764537811279297,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    },
+    {
+      "test_name": "小ファイル#10",
+      "timestamp": 1754371366.5419936,
+      "success": true,
+      "compression_ratio": 94.66537342386033,
+      "original_size": 1031,
+      "compressed_size": 55,
+      "compression_time": 0.0009360313415527344,
+      "decompression_time": 0.001226663589477539,
+      "target_achieved": false,
+      "transforms_applied": [
+        "spe"
+      ],
+      "mode": "fast",
+      "encrypted": false
+    }
+  ]
+}

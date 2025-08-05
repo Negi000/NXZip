@@ -38,9 +38,18 @@ class NEXUSUnified:
         # データ部分を抽出
         data_part = compressed_data[8:]
         
-        # 展開
-        import zlib
-        return zlib.decompress(data_part)
+        # パイプライン逆変換を実行
+        decompressed_data = self._reverse_pipeline_decompress(
+            data_part, 
+            self.last_context
+        )
+        
+        if decompressed_data is not None:
+            return decompressed_data
+        else:
+            # フォールバック: 単純なzlib展開
+            import zlib
+            return zlib.decompress(data_part)
     
     def get_info(self) -> Dict[str, Any]:
         """エンジン情報を取得"""

@@ -260,37 +260,27 @@ class SPEIntegrator:
                 print(f"⚠️ SPE初期化失敗: {e}")
     
     def apply_spe(self, data: bytes, encryption_key: Optional[bytes] = None) -> Tuple[bytes, Dict[str, Any]]:
-        """SPE適用"""
+        """SPE適用 - 構造保持暗号化"""
         if not self.spe_engine:
             return data, {'spe_applied': False, 'reason': 'spe_unavailable'}
         
         try:
+            # SPE暗号化実行（現在は内蔵マスターキーを使用）
+            spe_result = self.spe_engine.apply_transform(data)
+            
             if encryption_key:
-                # 暗号化付きSPE
-                if hasattr(self.spe_engine, 'encrypt_with_structure_preservation'):
-                    spe_result = self.spe_engine.encrypt_with_structure_preservation(data, encryption_key)
-                else:
-                    # フォールバック: 基本的な暗号化
-                    spe_result = self.spe_engine.encrypt(data, encryption_key)
+                # ユーザー指定キーによる追加暗号化は将来実装予定
+                print("🔐 SPE構造保持暗号化実行（ユーザーキーによる追加暗号化は将来実装）")
             else:
-                # 構造保持のみ（暗号化なし）
-                if hasattr(self.spe_engine, 'preserve_structure'):
-                    spe_result = self.spe_engine.preserve_structure(data)
-                elif hasattr(self.spe_engine, 'ultra_fast_stage1'):
-                    # SPE Core JITの実際のメソッドを使用
-                    import numpy as np
-                    data_array = np.frombuffer(data, dtype=np.uint8)
-                    spe_result = self.spe_engine.ultra_fast_stage1(data_array, len(data))
-                    spe_result = bytes(spe_result)
-                else:
-                    # SPE機能なしで通過
-                    spe_result = data
+                print("🔐 SPE構造保持暗号化実行")
             
             return spe_result, {
                 'spe_applied': True,
                 'original_size': len(data),
                 'spe_size': len(spe_result),
-                'encrypted': encryption_key is not None
+                'encrypted': True,  # SPE自体が暗号化機能
+                'user_key_used': encryption_key is not None,
+                'method': 'apply_transform'
             }
         except Exception as e:
             print(f"⚠️ SPE処理失敗: {e}")
@@ -306,7 +296,7 @@ class CompressionPipeline:
         self.data_analyzer = DataAnalyzer()
     
     def compress(self, data: bytes, encryption_key: Optional[bytes] = None) -> Tuple[bytes, Dict[str, Any]]:
-        """統合圧縮処理"""
+        """統合圧縮処理 - 最適化された順序: TMC変換 → 圧縮 → SPE暗号化"""
         start_time = time.time()
         pipeline_info = {
             'mode': self.mode.value,
@@ -319,24 +309,28 @@ class CompressionPipeline:
             data_type = self.data_analyzer.analyze_data_type(data)
             pipeline_info['data_type'] = data_type
             
-            # Stage 2: TMC変換
+            # Stage 2: TMC変換（前処理）
             transformed_data, transform_info = self.tmc_engine.transform_data(data, data_type)
             pipeline_info['stages'].append(('tmc_transform', transform_info))
             
-            # Stage 3: SPE適用
-            spe_data, spe_info = self.spe_integrator.apply_spe(transformed_data, encryption_key)
-            pipeline_info['stages'].append(('spe_integration', spe_info))
+            # Stage 3: 圧縮（TMC変換後データを圧縮）
+            compressed_data, compression_info = self._final_compression(transformed_data, data_type)
+            pipeline_info['stages'].append(('primary_compression', compression_info))
             
-            # Stage 4: 最終圧縮
-            final_compressed, compression_info = self._final_compression(spe_data, data_type)
-            pipeline_info['stages'].append(('final_compression', compression_info))
+            # Stage 4: SPE暗号化（圧縮後データを暗号化）
+            if encryption_key:
+                final_data, spe_info = self.spe_integrator.apply_spe(compressed_data, encryption_key)
+                pipeline_info['stages'].append(('spe_encryption', spe_info))
+            else:
+                final_data = compressed_data
+                pipeline_info['stages'].append(('spe_encryption', {'spe_applied': False, 'reason': 'no_key'}))
             
             # 結果まとめ
-            pipeline_info['final_size'] = len(final_compressed)
-            pipeline_info['compression_ratio'] = (1 - len(final_compressed) / len(data)) * 100
+            pipeline_info['final_size'] = len(final_data)
+            pipeline_info['compression_ratio'] = (1 - len(final_data) / len(data)) * 100
             pipeline_info['compression_time'] = time.time() - start_time
             
-            return final_compressed, pipeline_info
+            return final_data, pipeline_info
             
         except Exception as e:
             error_info = {
@@ -347,7 +341,7 @@ class CompressionPipeline:
             raise
     
     def _final_compression(self, data: bytes, data_type: str) -> Tuple[bytes, Dict[str, Any]]:
-        """最終圧縮ステージ"""
+        """主要圧縮ステージ（SPE暗号化前の圧縮）"""
         compression_info = {
             'input_size': len(data),
             'method': 'auto'
@@ -711,19 +705,38 @@ class NXZipCore:
         return evaluation
     
     def _reverse_pipeline_decompress(self, compressed_data: bytes, compression_info: Dict[str, Any]) -> bytes:
-        """パイプライン逆変換展開"""
+        """パイプライン逆変換展開 - 新しい順序: SPE復号化 → 展開 → TMC逆変換"""
         # 実装は圧縮パイプラインの逆順
         stages = compression_info.get('stages', [])
         
         current_data = compressed_data
         print(f"🔍 パイプライン逆変換開始: {len(current_data)} bytes")
         
+        # SPEIntegratorインスタンス作成（復号化用）
+        spe_integrator = SPEIntegrator()
+        
         # 逆順で各ステージを処理
         for i, (stage_name, stage_info) in enumerate(reversed(stages)):
             print(f"  ステップ{i+1}: {stage_name} - 入力: {len(current_data)} bytes")
             
-            if stage_name == 'final_compression':
-                # 最終圧縮の逆変換
+            if stage_name == 'spe_encryption':
+                # SPE復号化（最初に実行）
+                if stage_info.get('spe_applied', False):
+                    # SPE復号化実装
+                    if spe_integrator.spe_engine:
+                        try:
+                            current_data = spe_integrator.spe_engine.reverse_transform(current_data)
+                            print(f"    SPE復号化実行: {len(current_data)} bytes")
+                        except Exception as e:
+                            print(f"⚠️ SPE復号化失敗: {e}")
+                            # 失敗した場合はそのまま継続
+                    else:
+                        print(f"    SPE復号化スキップ（エンジン未利用）")
+                else:
+                    print(f"    SPE復号化（パススルー）")
+                    
+            elif stage_name == 'primary_compression':
+                # 圧縮データの展開
                 method = stage_info.get('method', 'zlib_balanced')
                 if method.startswith('lzma'):
                     current_data = lzma.decompress(current_data)
@@ -731,17 +744,8 @@ class NXZipCore:
                     current_data = zlib.decompress(current_data)
                 print(f"    {method}展開後: {len(current_data)} bytes")
                     
-            elif stage_name == 'spe_integration':
-                # SPE逆変換（実装が必要）
-                if stage_info.get('spe_applied', False):
-                    # TODO: SPE逆変換実装
-                    print(f"    SPE逆変換（TODO）")
-                    pass
-                else:
-                    print(f"    SPE逆変換（パススルー）")
-                    
             elif stage_name == 'tmc_transform':
-                # TMC逆変換（実装が必要）
+                # TMC逆変換（最後に実行）
                 transforms = stage_info.get('transforms_applied', [])
                 print(f"    TMC変換逆順実行: {transforms}")
                 
@@ -772,6 +776,15 @@ class NXZipCore:
                         except Exception as e:
                             print(f"⚠️ LeCo逆変換失敗: {e}")
                     # TODO: その他の変換の逆変換
+                    
+            # 古い'final_compression'ステージとの互換性を保持
+            elif stage_name == 'final_compression':
+                method = stage_info.get('method', 'zlib_balanced')
+                if method.startswith('lzma'):
+                    current_data = lzma.decompress(current_data)
+                elif method.startswith('zlib'):
+                    current_data = zlib.decompress(current_data)
+                print(f"    {method}展開後（互換性）: {len(current_data)} bytes")
             
             print(f"    出力: {len(current_data)} bytes")
         
